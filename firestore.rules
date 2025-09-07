@@ -1,0 +1,37 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Search History Collection Rules
+    match /searchHistory/{document} {
+      // Allow users to read, write, and delete their own search history
+      allow read, write, delete: if request.auth != null && 
+        request.auth.uid == request.data.userId;
+      
+      // Allow users to read their own existing search history documents
+      allow read, delete: if request.auth != null && 
+        request.auth.uid == resource.data.userId;
+      
+      // Allow users to create new search history documents with their own userId
+      allow create: if request.auth != null && 
+        request.auth.uid == request.data.userId &&
+        request.data.keys().hasAll(['userId', 'query', 'timestamp']) &&
+        request.data.keys().hasOnly(['userId', 'query', 'timestamp']) &&
+        request.data.query is string &&
+        request.data.query.size() > 0 &&
+        request.data.query.size() <= 500 &&
+        request.data.userId is string &&
+        request.data.timestamp is timestamp;
+      
+      // Allow users to update their own search history (though this shouldn't be needed)
+      allow update: if request.auth != null && 
+        request.auth.uid == resource.data.userId &&
+        request.auth.uid == request.data.userId;
+    }
+    
+    // Deny all other access
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
