@@ -20,7 +20,711 @@
 }
 
 body {
-  background: var(--background);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-attachment: fixed;
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  min-height: 100vh;
+}
+
+/* Glassmorphism Utilities - Enhanced Performance & Cross-browser */
+.glass {
+  background: rgba(255, 255, 255, 0.25);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  /* Performance optimizations */
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+.glass-dark {
+  background: rgba(0, 0, 0, 0.25);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  contain: layout style paint;
+  transform: translateZ(0);
+}
+
+.glass-navbar {
+  background: rgba(255, 255, 255, 0.15);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.2);
+  /* Enhanced stability for navbar */
+  contain: layout style;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  /* Cross-browser support */
+  -moz-backdrop-filter: blur(20px);
+  -ms-backdrop-filter: blur(20px);
+}
+
+/* Fallback for browsers without backdrop-filter support */
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .glass-navbar {
+    background: rgba(255, 255, 255, 0.85);
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.9);
+  }
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.85);
+  }
+}
+
+.glass-footer {
+  background: rgba(0, 0, 0, 0.1);
+  -webkit-backdrop-filter: blur(15px);
+  backdrop-filter: blur(15px);
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Dynamic Gradient Animations */
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.gradient-dynamic {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c, #4facfe, #00f2fe);
+  background-size: 400% 400%;
+  animation: gradientShift 15s ease infinite;
+}
+
+.gradient-hover {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  transition: all 0.3s ease;
+}
+
+.gradient-hover:hover {
+  background: linear-gradient(-45deg, #f093fb, #f5576c, #4facfe, #00f2fe);
+  background-size: 400% 400%;
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px 0 rgba(31, 38, 135, 0.4);
+}
+
+/* Glow Effects */
+.glow {
+  position: relative;
+  overflow: hidden;
+}
+
+.glow::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+  transition: left 0.5s;
+}
+
+.glow:hover::before {
+  left: 100%;
+}
+
+/* Button Glass Effects - Enhanced Performance */
+.btn-glass {
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white !important; /* Force white text */
+  transition: all 0.3s ease;
+  contain: layout style;
+  transform: translateZ(0);
+  /* Cross-browser support */
+  -moz-backdrop-filter: blur(10px);
+  -ms-backdrop-filter: blur(10px);
+}
+
+.btn-glass:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px) translateZ(0);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+  color: white !important;
+}
+
+/* Simple Google Sign-in Button - Production Ready */
+.btn-google-signin {
+  background: rgba(255, 255, 255, 0.2);
+  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: rgba(255, 255, 255, 0.95) !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  transition: all 0.3s ease;
+}
+
+.btn-google-signin:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+  transform: translateY(-2px);
+}
+
+.btn-google-signin span {
+  color: rgba(255, 255, 255, 0.95) !important;
+  font-weight: 600 !important;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5) !important;
+}
+
+.btn-google-signin:hover span {
+  color: white !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6) !important;
+}
+
+/* Touch optimizations for mobile */
+@media (pointer: coarse) {
+  .btn-google-signin {
+    min-height: 48px;
+    min-width: 48px;
+  }
+}
+
+/* Focus state accessibility */
+.btn-google-signin:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Navbar Brand Animation - Stable Rendering */
+.brand-text {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 400% 400%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  color: #667eea; /* Fallback color */
+  animation: gradientShift 8s ease infinite;
+  font-weight: 800;
+  letter-spacing: -0.025em;
+  /* Critical fixes for text vanishing */
+  transform: translateZ(0);
+  will-change: background-position;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Fallback for unsupported background-clip */
+@supports not ((-webkit-background-clip: text) or (background-clip: text)) {
+  .brand-text {
+    color: #667eea;
+    -webkit-text-fill-color: unset;
+  }
+}
+
+/* Badge positioning system - Performance optimized */
+.badge-container {
+  position: relative;
+  overflow: visible;
+  contain: layout;
+}
+
+.badge-positioned {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%) translateZ(0);
+  z-index: 1;
+  min-width: 24px;
+  min-height: 24px;
+  font-size: 11px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  contain: layout style paint;
+  will-change: transform;
+}
+
+/* Enhanced gradient for badges */
+.gradient-dynamic-badge {
+  background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+  color: white;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+}
+
+/* Dropdown Glass Effects */
+.dropdown-glass {
+  background: rgba(255, 255, 255, 0.9);
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 16px 64px rgba(0, 0, 0, 0.15);
+}
+
+/* Enhanced Modal Glass Effects with Responsive Design */
+.modal-glass {
+  background: rgba(255, 255, 255, 0.96);
+  -webkit-backdrop-filter: blur(30px);
+  backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  box-shadow: 0 25px 100px rgba(0, 0, 0, 0.25);
+  /* Enterprise-level performance optimizations */
+  contain: layout style paint;
+  transform: translateZ(0);
+  will-change: transform, opacity;
+  /* Enhanced cross-browser support */
+  -moz-backdrop-filter: blur(30px);
+  -ms-backdrop-filter: blur(30px);
+}
+
+/* Responsive Modal Glass Effects */
+@media (max-width: 767px) {
+  .modal-glass {
+    background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
+    box-shadow: 0 15px 60px rgba(0, 0, 0, 0.2);
+  }
+}
+
+@media (min-width: 1024px) {
+  .modal-glass {
+    background: rgba(255, 255, 255, 0.94);
+    -webkit-backdrop-filter: blur(35px);
+    backdrop-filter: blur(35px);
+    box-shadow: 0 30px 120px rgba(0, 0, 0, 0.3);
+  }
+}
+
+/* Enterprise-Level Modal Animations */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-30px) scale(0.95);
+  }
+}
+
+@keyframes backdropFadeIn {
+  from {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+  to {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+  }
+}
+
+@keyframes backdropFadeOut {
+  from {
+    opacity: 1;
+    -webkit-backdrop-filter: blur(30px);
+    backdrop-filter: blur(30px);
+  }
+  to {
+    opacity: 0;
+    -webkit-backdrop-filter: blur(0px);
+    backdrop-filter: blur(0px);
+  }
+}
+
+/* Modal Animation Classes */
+.modal-enter {
+  animation: modalSlideIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.modal-exit {
+  animation: modalSlideOut 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+.modal-backdrop-enter {
+  animation: backdropFadeIn 0.3s ease-out forwards;
+}
+
+.modal-backdrop-exit {
+  animation: backdropFadeOut 0.2s ease-in forwards;
+}
+
+/* Enhanced Responsive Typography Scale */
+.modal-heading-primary {
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+}
+
+.modal-heading-secondary {
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  line-height: 1.3;
+}
+
+.modal-text-body {
+  line-height: 1.5;
+  letter-spacing: 0.01em;
+}
+
+.modal-text-caption {
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+}
+
+/* Mobile Typography (320px - 767px) */
+@media (max-width: 767px) {
+  .modal-heading-primary {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.3;
+  }
+  
+  .modal-heading-secondary {
+    font-size: 1rem; /* 16px */
+    line-height: 1.4;
+  }
+  
+  .modal-text-body {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.5;
+  }
+  
+  .modal-text-caption {
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.4;
+  }
+}
+
+/* Tablet Typography (768px - 1023px) */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .modal-heading-primary {
+    font-size: 1.5rem; /* 24px */
+    line-height: 1.25;
+  }
+  
+  .modal-heading-secondary {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.35;
+  }
+  
+  .modal-text-body {
+    font-size: 1rem; /* 16px */
+    line-height: 1.5;
+  }
+  
+  .modal-text-caption {
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.4;
+  }
+}
+
+/* Desktop Typography (1024px+) */
+@media (min-width: 1024px) {
+  .modal-heading-primary {
+    font-size: 1.875rem; /* 30px */
+    line-height: 1.2;
+  }
+  
+  .modal-heading-secondary {
+    font-size: 1.25rem; /* 20px */
+    line-height: 1.3;
+  }
+  
+  .modal-text-body {
+    font-size: 1.125rem; /* 18px */
+    line-height: 1.5;
+  }
+  
+  .modal-text-caption {
+    font-size: 1rem; /* 16px */
+    line-height: 1.4;
+  }
+}
+
+/* Responsive Spacing Scale */
+.modal-space-xs { margin: 0.25rem; }
+.modal-space-sm { margin: 0.5rem; }
+.modal-space-md { margin: 0.75rem; }
+.modal-space-lg { margin: 1rem; }
+.modal-space-xl { margin: 1.25rem; }
+.modal-space-2xl { margin: 1.5rem; }
+.modal-space-3xl { margin: 2rem; }
+
+/* Mobile spacing adjustments */
+@media (max-width: 767px) {
+  .modal-space-responsive { margin: 0.75rem; }
+  .modal-padding-responsive { padding: 1rem; }
+  .modal-gap-responsive { gap: 0.75rem; }
+}
+
+/* Tablet spacing adjustments */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .modal-space-responsive { margin: 1rem; }
+  .modal-padding-responsive { padding: 1.25rem; }
+  .modal-gap-responsive { gap: 1rem; }
+}
+
+/* Desktop spacing adjustments */
+@media (min-width: 1024px) {
+  .modal-space-responsive { margin: 1.5rem; }
+  .modal-padding-responsive { padding: 1.5rem; }
+  .modal-gap-responsive { gap: 1.5rem; }
+}
+
+/* Performance Optimization Classes */
+.navbar-stable {
+  contain: layout style;
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+.brand-container {
+  flex-shrink: 0;
+  min-width: 0;
+  contain: layout;
+  margin-left: 0;
+  padding-left: 0;
+}
+
+.nav-items-container {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0;
+  contain: layout;
+  margin-right: 0;
+  padding-right: 0;
+  margin-left: auto;
+}
+
+/* Enhanced edge-to-edge navbar layout */
+.navbar-edge-to-edge {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+.navbar-edge-to-edge .brand-container {
+  position: relative;
+  left: 0;
+  transform: translateX(0);
+}
+
+.navbar-edge-to-edge .nav-items-container {
+  position: relative;
+  right: 0;
+  transform: translateX(0);
+}
+
+/* Responsive adjustments for edge-to-edge layout */
+@media (min-width: 640px) {
+  .navbar-edge-to-edge {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .navbar-edge-to-edge {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* Touch optimizations for mobile */
+@media (pointer: coarse) {
+  .btn-glass,
+  .btn-google-signin {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .badge-positioned {
+    min-width: 28px;
+    min-height: 28px;
+    font-size: 12px;
+  }
+}
+
+/* High DPI display optimizations */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .brand-text {
+    -webkit-font-smoothing: subpixel-antialiased;
+  }
+}
+
+/* Responsive Glass Effects */
+@media (max-width: 768px) {
+  .glass-navbar {
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+  }
+  
+  .dropdown-glass {
+    -webkit-backdrop-filter: blur(15px);
+    backdrop-filter: blur(15px);
+  }
+  
+  /* Reduce animations on mobile for better performance */
+  .brand-text {
+    animation-duration: 12s;
+  }
+  
+  .gradient-dynamic-badge {
+    animation-duration: 15s;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .brand-text,
+  .gradient-dynamic,
+  .gradient-dynamic-badge {
+    animation: none;
+  }
+  
+  .gradient-hover {
+    transition: none;
+  }
+}
+
+/* Focus accessibility improvements */
+.btn-glass:focus-visible,
+.btn-google-signin:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Print styles */
+@media print {
+  .glass-navbar,
+  .btn-glass,
+  .dropdown-glass {
+    background: white !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+  }
+  
+  .brand-text {
+    color: #667eea !important;
+    -webkit-text-fill-color: #667eea !important;
+    background: none !important;
+  }
+  
+  .modal-glass {
+    background: white !important;
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1) !important;
+  }
+}
+
+/* Enhanced Focus Management for Modals */
+.modal-focus-trap {
+  outline: none;
+}
+
+.modal-focus-trap:focus-visible {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Enterprise Touch Target Optimization */
+@media (pointer: coarse) {
+  .btn-google-signin {
+    min-height: 48px;
+    min-width: 48px;
+    padding: 0.75rem 1rem;
+  }
+  
+  .modal-close-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* High Contrast Mode Support */
+@media (prefers-contrast: high) {
+  .modal-glass {
+    background: rgba(255, 255, 255, 0.98) !important;
+    border: 2px solid #333 !important;
+  }
+  
+  .btn-google-signin {
+    border: 2px solid #333 !important;
+  }
+}
+
+/* Reduced Motion Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  .modal-enter,
+  .modal-exit,
+  .modal-backdrop-enter,
+  .modal-backdrop-exit {
+    animation: none !important;
+  }
+  
+  .btn-google-signin {
+    transition: none !important;
+  }
+  
+  .glow::before {
+    transition: none !important;
+  }
+}
+
+/* Enterprise Performance Optimizations */
+.modal-performance-optimized {
+  /* Hardware acceleration */
+  transform: translate3d(0, 0, 0);
+  /* Layer creation */
+  will-change: transform, opacity;
+  /* Avoid layout thrashing */
+  contain: layout style paint;
+  /* Subpixel rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Modal Container Performance */
+.modal-container-optimized {
+  /* Prevent repaints during animations */
+  backface-visibility: hidden;
+  /* Optimize compositing */
+  transform-style: preserve-3d;
+  /* Memory efficiency */
+  contain: strict;
 }

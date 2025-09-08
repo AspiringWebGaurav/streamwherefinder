@@ -40,76 +40,81 @@ export function Navbar() {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Logo */}
-            <div className="flex items-center">
-              <Link href="/" className="flex items-center">
-                <div className="text-xl font-bold text-blue-600">
+      <nav className="glass-navbar navbar-stable sticky top-0 z-40 transition-all duration-300 ease-in-out">
+        <div className="navbar-edge-to-edge">
+          <div className="flex justify-between items-center h-20 w-full">
+            {/* Logo - Completely Left Aligned */}
+            <div className="brand-container flex-shrink-0">
+              <Link href="/" className="flex items-center glow">
+                <div className="text-2xl brand-text font-extrabold tracking-tight">
                   StreamWhereFinder
                 </div>
               </Link>
             </div>
 
-            {/* Auth Section */}
-            <div className="flex items-center space-x-3">
+            {/* Auth Section - Completely Right Aligned */}
+            <div className="nav-items-container flex-shrink-0 ml-auto">
               {user ? (
                 /* User Menu */
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                    className="btn-glass flex items-center space-x-3 px-4 py-3 rounded-xl glow transition-all duration-300 hover:shadow-lg"
                   >
                     <ProfilePicture user={user} size="sm" />
                     <div className="hidden sm:flex flex-col items-start">
-                      <span className="text-sm font-medium text-gray-900">
+                      <span className="text-sm font-semibold text-white">
                         {user.displayName || 'User'}
                       </span>
-                      <span className="text-xs text-gray-500">Signed in</span>
+                      <span className="text-xs text-white/80">Signed in</span>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-gray-400" />
+                    <ChevronDown className={cn(
+                      "w-4 h-4 text-white/80 transition-transform duration-200",
+                      showUserMenu && "rotate-180"
+                    )} />
                   </button>
 
                   {/* Dropdown Menu */}
                   {showUserMenu && (
                     <>
                       {/* Backdrop */}
-                      <div 
-                        className="fixed inset-0 z-10" 
+                      <div
+                        className="fixed inset-0 z-10 backdrop-blur-sm bg-black/20"
                         onClick={() => setShowUserMenu(false)}
                       />
                       
                       {/* Menu */}
-                      <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 z-20">
-                        <div className="py-2">
+                      <div className="absolute right-0 mt-3 w-64 dropdown-glass rounded-2xl z-20 overflow-hidden animate-in slide-in-from-top-2 duration-200">
+                        <div className="p-2">
                           {/* User Info */}
-                          <div className="px-4 py-3 border-b border-gray-100">
-                            <p className="text-sm font-medium text-gray-900">
+                          <div className="px-4 py-4 border-b border-white/10">
+                            <p className="text-sm font-semibold text-gray-800">
                               {user.displayName || 'User'}
                             </p>
-                            <p className="text-sm text-gray-500 truncate">
+                            <p className="text-sm text-gray-600 truncate">
                               {user.email}
                             </p>
                           </div>
 
                           {/* Menu Items */}
-                          <Link
-                            href="/profile"
-                            onClick={() => setShowUserMenu(false)}
-                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
-                            <History className="w-4 h-4 mr-3" />
-                            Search History
-                          </Link>
+                          <div className="py-2">
+                            <Link
+                              href="/profile"
+                              onClick={() => setShowUserMenu(false)}
+                              className="flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-white/20 rounded-xl transition-all duration-200 group"
+                            >
+                              <History className="w-4 h-4 mr-3 group-hover:text-purple-600 transition-colors duration-200" />
+                              <span className="group-hover:text-purple-600 transition-colors duration-200">Search History</span>
+                            </Link>
 
-                          <button
-                            onClick={handleLogout}
-                            className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
-                            <LogOut className="w-4 h-4 mr-3" />
-                            Sign Out
-                          </button>
+                            <button
+                              onClick={handleLogout}
+                              className="w-full flex items-center px-4 py-3 text-sm text-gray-700 hover:bg-red-50/50 rounded-xl transition-all duration-200 group"
+                            >
+                              <LogOut className="w-4 h-4 mr-3 group-hover:text-red-600 transition-colors duration-200" />
+                              <span className="group-hover:text-red-600 transition-colors duration-200">Sign Out</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </>
@@ -120,36 +125,34 @@ export function Navbar() {
                 <>
                   {/* Search History Button for Anonymous Users */}
                   {searchHistoryCount > 0 && (
-                    <Link href="/profile">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="border-gray-300 text-gray-700 hover:bg-gray-50 relative"
-                      >
-                        <History className="w-4 h-4 mr-1 sm:mr-2" />
-                        <span className="hidden sm:inline">History</span>
-                        <span className="sm:hidden">
-                          <Clock className="w-4 h-4" />
-                        </span>
-                        {searchHistoryCount > 0 && (
-                          <span className="absolute -top-1 -right-1 bg-blue-600 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center">
-                            {searchHistoryCount > 9 ? '9+' : searchHistoryCount}
+                    <Link href="/profile" className="badge-container">
+                      <button className="btn-glass px-4 py-3 rounded-xl glow transition-all duration-300 hover:shadow-lg group" aria-label={`Search history with ${searchHistoryCount} items`}>
+                        <div className="flex items-center space-x-2">
+                          <History className="w-4 h-4 text-white group-hover:text-cyan-200 transition-colors duration-200" />
+                          <span className="hidden sm:inline text-sm font-medium text-white group-hover:text-cyan-200 transition-colors duration-200">History</span>
+                          <span className="sm:hidden">
+                            <Clock className="w-4 h-4 text-white group-hover:text-cyan-200 transition-colors duration-200" />
                           </span>
-                        )}
-                      </Button>
+                        </div>
+                        <span className="badge-positioned gradient-dynamic-badge" aria-hidden="true">
+                          {searchHistoryCount > 99 ? '99+' : searchHistoryCount > 9 ? '9+' : searchHistoryCount}
+                        </span>
+                      </button>
                     </Link>
                   )}
                   
                   {/* Login Button */}
-                  <Button
+                  <button
                     onClick={() => setShowAuthModal(true)}
-                    variant="outline"
-                    className="border-blue-200 text-blue-700 hover:bg-blue-50"
+                    className="btn-google-signin gradient-hover px-6 py-3 rounded-xl glow transition-all duration-300 hover:shadow-lg group"
+                    aria-label="Sign in with Google to save search history"
                   >
-                    <User className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">One-Click Login to Save History</span>
-                    <span className="sm:hidden">Login</span>
-                  </Button>
+                    <div className="flex items-center space-x-2">
+                      <User className="w-5 h-5 text-white group-hover:scale-110 transition-transform duration-200" />
+                      <span className="hidden sm:inline text-sm font-semibold text-white">One-Click Login to Save History</span>
+                      <span className="sm:hidden text-sm font-semibold text-white">Login</span>
+                    </div>
+                  </button>
                 </>
               )}
             </div>
@@ -158,9 +161,9 @@ export function Navbar() {
       </nav>
 
       {/* Auth Modal */}
-      <AuthModal 
-        isOpen={showAuthModal} 
-        onClose={() => setShowAuthModal(false)} 
+      <AuthModal
+        isOpen={showAuthModal}
+        onClose={() => setShowAuthModal(false)}
       />
     </>
   );

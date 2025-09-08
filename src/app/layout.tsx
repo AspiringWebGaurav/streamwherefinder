@@ -3,6 +3,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { AuthProvider } from '@/lib/auth';
 import { Navbar } from '@/components/ui/Navbar';
+import { Footer } from '@/components/ui/Footer';
 import { ErrorBoundary } from '@/components/ui/ErrorBoundary';
 import { Analytics } from '@vercel/analytics/react';
 import { GoogleAnalytics } from '@next/third-parties/google';
@@ -93,48 +94,18 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-white text-gray-900`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white`}
       >
         <ErrorBoundary>
           <AuthProvider>
-            <div className="min-h-screen flex flex-col">
+            <div className="min-h-screen flex flex-col relative">
               <Navbar />
-              <main className="flex-1">
-                {children}
+              <main className="flex-1 relative z-10">
+                <div className="glass min-h-full">
+                  {children}
+                </div>
               </main>
-            
-            {/* Footer */}
-            <footer className="bg-gray-50 border-t border-gray-200 py-8 mt-16">
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-                  {/* TMDb Attribution */}
-                  <div className="flex items-center space-x-4">
-                    <p className="text-sm text-gray-600">
-                      This product uses the TMDb API but is not endorsed or certified by TMDb.
-                    </p>
-                    <img
-                      src="/tmdb-logo.svg"
-                      alt="The Movie Database"
-                      className="h-6"
-                    />
-                  </div>
-                  
-                  {/* Legal Links */}
-                  <div className="flex space-x-6 text-sm">
-                    <a href="/about" className="text-gray-600 hover:text-gray-900">About</a>
-                    <a href="/privacy" className="text-gray-600 hover:text-gray-900">Privacy</a>
-                    <a href="/terms" className="text-gray-600 hover:text-gray-900">Terms</a>
-                    <a href="/contact" className="text-gray-600 hover:text-gray-900">Contact</a>
-                  </div>
-                </div>
-                
-                <div className="mt-4 pt-4 border-t border-gray-200 text-center">
-                  <p className="text-xs text-gray-500">
-                    © 2024 StreamWhereFinder. We only link to official streaming platforms.
-                  </p>
-                </div>
-              </div>
-            </footer>
+              <Footer />
             </div>
           </AuthProvider>
         </ErrorBoundary>
