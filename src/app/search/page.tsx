@@ -2,7 +2,8 @@
 
 import { Suspense, useEffect, useState } from 'react';
 import { notFound } from 'next/navigation';
-import { Search, ArrowLeft, Shuffle, AlertCircle } from 'lucide-react';
+import { Search, ArrowLeft, ArrowRight, Shuffle, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { comprehensiveSearch, findTypoMatches } from '@/lib/search';
 import { MovieCard, MovieCardSkeleton } from '@/components/movie/MovieCard';
 import { SearchBar } from '@/components/search/SearchBar';
@@ -25,8 +26,8 @@ interface SearchPageProps {
 // Loading component for search results
 function SearchResultsLoading() {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-      {Array.from({ length: 12 }, (_, i) => (
+    <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4">
+      {Array.from({ length: 16 }, (_, i) => (
         <MovieCardSkeleton key={i} size="sm" />
       ))}
     </div>
@@ -36,35 +37,35 @@ function SearchResultsLoading() {
 // No results component
 function NoResults({ query }: { query: string }) {
   return (
-    <div className="text-center py-16">
-      <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-        <Search className="w-12 h-12 text-gray-400" />
+    <div className="text-center py-12 sm:py-16 px-4">
+      <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+        <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
       </div>
       
-      <h2 className="text-2xl font-bold text-gray-900 mb-4">
+      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
         No results found for "{query}"
       </h2>
       
-      <p className="text-gray-600 mb-8 max-w-md mx-auto">
+      <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto leading-relaxed">
         We couldn't find any movies matching your search. Try checking your spelling or searching for a different movie.
       </p>
 
-      <div className="space-y-4">
+      <div className="space-y-4 sm:space-y-6">
         <div className="max-w-lg mx-auto">
-          <SearchBar placeholder="Try a different search..." />
+          <SearchBar placeholder="Try a different search..." size="md" />
         </div>
         
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <Link href="/">
-            <Button variant="outline">
-              <ArrowLeft className="w-4 h-4 mr-2" />
+        <div className="flex flex-col xs:flex-row items-center justify-center gap-3 sm:gap-4">
+          <Link href="/" className="w-full xs:w-auto">
+            <Button variant="outline" className="w-full xs:w-auto">
+              <ArrowLeft className="w-4 h-4 mr-2 flex-shrink-0" />
               Back to Home
             </Button>
           </Link>
           
-          <Link href="/random-movie">
-            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
-              <Shuffle className="w-4 h-4 mr-2" />
+          <Link href="/random-movie" className="w-full xs:w-auto">
+            <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 w-full xs:w-auto">
+              <Shuffle className="w-4 h-4 mr-2 flex-shrink-0" />
               Spin Tonight
             </Button>
           </Link>
@@ -83,11 +84,11 @@ function TypoSuggestions({ query }: { query: string }) {
   }
 
   return (
-    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6 mx-4 sm:mx-0">
       <div className="flex items-start">
-        <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 mr-3 flex-shrink-0" />
-        <div>
-          <p className="text-blue-900 font-medium mb-2">
+        <AlertCircle className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 mt-0.5 mr-2 sm:mr-3 flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-blue-900 font-medium mb-2 text-sm sm:text-base">
             Did you mean one of these?
           </p>
           <div className="flex flex-wrap gap-2">
@@ -95,9 +96,9 @@ function TypoSuggestions({ query }: { query: string }) {
               <Link
                 key={suggestion.id}
                 href={`/search?q=${encodeURIComponent(suggestion.title)}`}
-                className="inline-flex items-center px-3 py-1 bg-blue-100 hover:bg-blue-200 text-blue-800 text-sm rounded-full transition-colors"
+                className="inline-flex items-center px-3 py-1.5 bg-blue-100 hover:bg-blue-200 active:bg-blue-300 text-blue-800 text-sm rounded-full transition-colors min-h-[36px]"
               >
-                {suggestion.title}
+                <span className="truncate max-w-[200px]">{suggestion.title}</span>
               </Link>
             ))}
           </div>
@@ -124,42 +125,47 @@ function Pagination({
   const endPage = Math.min(totalPages, startPage + showPages - 1);
   
   return (
-    <div className="flex justify-center items-center space-x-2 mt-12">
+    <div className="flex justify-center items-center flex-wrap gap-2 mt-8 sm:mt-12 px-4">
       {/* Previous button */}
       {currentPage > 1 && (
         <Link
           href={`/search?q=${encodeURIComponent(query)}&page=${currentPage - 1}`}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-sm sm:text-base min-h-[40px] flex items-center"
         >
-          Previous
+          <span className="hidden xs:inline">Previous</span>
+          <ArrowLeft className="w-4 h-4 xs:hidden" />
         </Link>
       )}
       
-      {/* Page numbers */}
-      {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
-        const pageNum = startPage + i;
-        return (
-          <Link
-            key={pageNum}
-            href={`/search?q=${encodeURIComponent(query)}&page=${pageNum}`}
-            className={`px-4 py-2 rounded-lg transition-colors ${
-              pageNum === currentPage
-                ? 'bg-blue-600 text-white'
-                : 'border border-gray-300 hover:bg-gray-50'
-            }`}
-          >
-            {pageNum}
-          </Link>
-        );
-      })}
+      {/* Page numbers - Responsive display */}
+      <div className="flex items-center gap-1 sm:gap-2">
+        {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
+          const pageNum = startPage + i;
+          return (
+            <Link
+              key={pageNum}
+              href={`/search?q=${encodeURIComponent(query)}&page=${pageNum}`}
+              className={cn(
+                'px-3 sm:px-4 py-2 rounded-lg transition-colors text-sm sm:text-base min-h-[40px] min-w-[40px] flex items-center justify-center',
+                pageNum === currentPage
+                  ? 'bg-blue-600 text-white'
+                  : 'border border-gray-300 hover:bg-gray-50 active:bg-gray-100'
+              )}
+            >
+              {pageNum}
+            </Link>
+          );
+        })}
+      </div>
       
       {/* Next button */}
       {currentPage < totalPages && (
         <Link
           href={`/search?q=${encodeURIComponent(query)}&page=${currentPage + 1}`}
-          className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+          className="px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 active:bg-gray-100 transition-colors text-sm sm:text-base min-h-[40px] flex items-center"
         >
-          Next
+          <span className="hidden xs:inline">Next</span>
+          <ArrowRight className="w-4 h-4 xs:hidden" />
         </Link>
       )}
     </div>
@@ -210,23 +216,23 @@ function SearchResults({ query, page }: { query: string; page: number }) {
   }
 
   return (
-    <div>
-      {/* Results summary */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-        <div>
-          <p className="text-gray-600">
-            Found <span className="font-semibold text-gray-900">{results.totalResults.toLocaleString()}</span> results for 
-            <span className="font-semibold text-gray-900"> "{query}"</span>
+    <div className="px-4 sm:px-0">
+      {/* Results summary - Mobile optimized */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-2 sm:gap-4">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+            Found <span className="font-semibold text-gray-900">{results.totalResults.toLocaleString()}</span> results for
+            <span className="font-semibold text-gray-900 block xs:inline"> "{query}"</span>
           </p>
           {!results.isClientSide && (
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-xs sm:text-sm text-gray-500 mt-1">
               Showing page {results.page} of {results.totalPages}
             </p>
           )}
         </div>
         
         {results.isClientSide && (
-          <div className="mt-2 sm:mt-0">
+          <div className="flex-shrink-0">
             <span className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs rounded-full">
               Instant Results
             </span>
@@ -234,14 +240,14 @@ function SearchResults({ query, page }: { query: string; page: number }) {
         )}
       </div>
 
-      {/* Movies grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 mb-8">
-        {results.movies.map((movie: any) => (
+      {/* Movies grid - Mobile first responsive */}
+      <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 2xl:grid-cols-8 gap-3 sm:gap-4 mb-6 sm:mb-8">
+        {results.movies.map((movie: any, index: number) => (
           <MovieCard
             key={movie.id}
             movie={movie}
             size="sm"
-            priority={results.movies.indexOf(movie) < 6}
+            priority={index < 8} // Prioritize first 8 images for mobile
           />
         ))}
       </div>
@@ -263,32 +269,33 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
 
   if (!query) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 max-w-4xl">
           <div className="text-center">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <Search className="w-12 h-12 text-gray-400" />
+            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
+              <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
             </div>
             
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
               Search Movies
             </h1>
             
-            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto leading-relaxed px-4">
               Search for any movie and find where to watch it legally. Our search works even with typos!
             </p>
 
-            <div className="max-w-2xl mx-auto mb-8">
-              <SearchBar 
+            <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
+              <SearchBar
                 placeholder="Search for any movie..."
                 autoFocus={true}
+                size="md"
               />
             </div>
 
-            <div className="flex justify-center">
-              <Link href="/">
-                <Button variant="outline">
-                  <ArrowLeft className="w-4 h-4 mr-2" />
+            <div className="flex justify-center px-4">
+              <Link href="/" className="w-full xs:w-auto">
+                <Button variant="outline" className="w-full xs:w-auto">
+                  <ArrowLeft className="w-4 h-4 mr-2 flex-shrink-0" />
                   Back to Home
                 </Button>
               </Link>
@@ -300,30 +307,31 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-            <Link 
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      {/* Header - Mobile First */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <Link
               href="/"
-              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 active:text-gray-700 transition-colors text-sm sm:text-base min-h-[40px]"
             >
-              <ArrowLeft className="w-4 h-4 mr-2" />
+              <ArrowLeft className="w-4 h-4 mr-2 flex-shrink-0" />
               Back to Home
             </Link>
             
-            <div className="flex-1 max-w-2xl">
-              <SearchBar 
+            <div className="w-full max-w-2xl sm:mx-0">
+              <SearchBar
                 placeholder="Search for movies..."
                 showSuggestions={false}
+                size="md"
               />
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="container mx-auto px-0 sm:px-6 lg:px-8 py-6 sm:py-8">
         {/* Typo suggestions */}
         <TypoSuggestions query={query} />
 

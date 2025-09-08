@@ -94,14 +94,14 @@ export default function RootLayout({
         )}
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased text-white overflow-x-hidden`}
       >
         <ErrorBoundary>
           <AuthProvider>
-            <div className="min-h-screen flex flex-col relative">
+            <div className="min-h-dvh flex flex-col relative w-full">
               <Navbar />
-              <main className="flex-1 relative z-10">
-                <div className="glass min-h-full">
+              <main className="flex-1 relative z-10 w-full">
+                <div className="glass min-h-full w-full">
                   {children}
                 </div>
               </main>

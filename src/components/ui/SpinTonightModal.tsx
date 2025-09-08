@@ -27,25 +27,25 @@ interface SpinTonightModalProps {
 function SpinAnimation({ isSpinning }: { isSpinning: boolean }) {
   return (
     <div className={cn(
-      'relative w-48 h-48 mx-auto mb-6',
+      'relative w-32 h-32 sm:w-40 sm:h-40 lg:w-48 lg:h-48 mx-auto mb-4 sm:mb-6',
       isSpinning && 'animate-spin'
     )}>
       {/* Outer ring */}
-      <div className="absolute inset-0 rounded-full border-4 border-dashed border-purple-300 animate-pulse" />
+      <div className="absolute inset-0 rounded-full border-2 sm:border-4 border-dashed border-purple-300 animate-pulse" />
       
       {/* Inner circle */}
-      <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+      <div className="absolute inset-2 sm:inset-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
         <Shuffle className={cn(
-          'w-12 h-12 text-white transition-transform duration-500',
+          'w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 text-white transition-transform duration-500',
           isSpinning ? 'rotate-180 scale-110' : 'rotate-0 scale-100'
         )} />
       </div>
       
-      {/* Sparkles */}
+      {/* Sparkles - Responsive */}
       <div className="absolute inset-0">
-        <Sparkles className="absolute top-2 right-6 w-4 h-4 text-yellow-400 animate-bounce delay-100" />
-        <Sparkles className="absolute bottom-6 left-2 w-3 h-3 text-pink-400 animate-bounce delay-300" />
-        <Sparkles className="absolute top-8 left-8 w-4 h-4 text-blue-400 animate-bounce delay-500" />
+        <Sparkles className="absolute top-1 right-4 sm:top-2 sm:right-6 w-3 h-3 sm:w-4 sm:h-4 text-yellow-400 animate-bounce delay-100" />
+        <Sparkles className="absolute bottom-4 left-1 sm:bottom-6 sm:left-2 w-2.5 h-2.5 sm:w-3 sm:h-3 text-pink-400 animate-bounce delay-300" />
+        <Sparkles className="absolute top-6 left-6 sm:top-8 sm:left-8 w-3 h-3 sm:w-4 sm:h-4 text-blue-400 animate-bounce delay-500" />
       </div>
     </div>
   );
@@ -55,13 +55,13 @@ function SpinAnimation({ isSpinning }: { isSpinning: boolean }) {
 function MovieLoadingSkeleton() {
   return (
     <div className="animate-pulse">
-      <div className="flex flex-col lg:flex-row gap-6 items-center">
-        <div className="w-32 h-48 bg-gray-300 rounded-lg flex-shrink-0" />
-        <div className="flex-1 space-y-3 text-center lg:text-left">
-          <div className="h-6 bg-gray-300 rounded w-3/4 mx-auto lg:mx-0" />
-          <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto lg:mx-0" />
-          <div className="h-4 bg-gray-300 rounded w-full" />
-          <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto lg:mx-0" />
+      <div className="flex flex-col sm:flex-row lg:flex-row gap-4 sm:gap-6 items-center">
+        <div className="w-24 h-36 sm:w-28 sm:h-42 lg:w-32 lg:h-48 bg-gray-300 rounded-lg flex-shrink-0" />
+        <div className="flex-1 space-y-2 sm:space-y-3 text-center sm:text-left">
+          <div className="h-4 sm:h-5 lg:h-6 bg-gray-300 rounded w-3/4 mx-auto sm:mx-0" />
+          <div className="h-3 sm:h-4 bg-gray-300 rounded w-1/2 mx-auto sm:mx-0" />
+          <div className="h-3 sm:h-4 bg-gray-300 rounded w-full" />
+          <div className="h-3 sm:h-4 bg-gray-300 rounded w-2/3 mx-auto sm:mx-0" />
         </div>
       </div>
     </div>
@@ -152,38 +152,41 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+      <div
+        className="fixed inset-0 bg-black/50 sm:bg-black/60 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
       
-      {/* Modal */}
-      <div 
-        className="relative bg-gradient-to-br from-purple-50 via-white to-pink-50 rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto"
+      {/* Modal - Mobile First */}
+      <div
+        className="relative bg-gradient-to-br from-purple-50 via-white to-pink-50 w-full h-full sm:h-auto sm:rounded-2xl shadow-2xl sm:max-w-4xl sm:max-h-[90vh] overflow-y-auto"
         role="dialog"
         aria-modal="true"
         aria-labelledby="spin-tonight-title"
+        style={{
+          maxHeight: 'calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom))'
+        }}
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 rounded-t-2xl">
+        {/* Header - Mobile First */}
+        <div className="sticky top-0 bg-white/90 sm:bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 sm:rounded-t-2xl safe-area-inset-top">
           <div className="flex items-center justify-between">
-            <div className="text-center flex-1">
-              <h2 id="spin-tonight-title" className="text-2xl font-bold text-gray-900">
+            <div className="text-center flex-1 min-w-0">
+              <h2 id="spin-tonight-title" className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
                 🎲 Spin Tonight
               </h2>
-              <p className="text-sm text-gray-600">Let us pick something great for you!</p>
+              <p className="text-xs sm:text-sm text-gray-600 mt-1">Let us pick something great for you!</p>
             </div>
             
-            <div className="flex items-center gap-2">
-              {/* Toggle Search Button */}
+            <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
+              {/* Toggle Search Button - Touch Optimized */}
               <button
                 onClick={() => setShowSearch(!showSearch)}
                 className={cn(
-                  'p-2 rounded-lg transition-colors',
-                  showSearch ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 text-gray-500'
+                  'p-2.5 sm:p-2 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center',
+                  showSearch ? 'bg-blue-100 text-blue-600' : 'hover:bg-gray-100 active:bg-gray-200 text-gray-500'
                 )}
                 aria-label="Toggle search"
                 title="Search while browsing"
@@ -191,10 +194,10 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
                 <Search className="w-5 h-5" />
               </button>
               
-              {/* Close Button */}
+              {/* Close Button - Touch Optimized */}
               <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                className="p-2.5 sm:p-2 hover:bg-gray-100 active:bg-gray-200 rounded-lg transition-colors min-w-[44px] min-h-[44px] sm:min-w-[36px] sm:min-h-[36px] flex items-center justify-center"
                 aria-label="Close modal"
               >
                 <X className="w-5 h-5 text-gray-500" />
@@ -202,12 +205,13 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
             </div>
           </div>
           
-          {/* Search Bar (shown when toggled) */}
+          {/* Search Bar - Mobile Optimized */}
           {showSearch && (
-            <div className="mt-4">
-              <SearchBar 
-                placeholder="Search for movies while browsing..." 
-                size="sm"
+            <div className="mt-4 px-0">
+              <SearchBar
+                placeholder="Search for movies while browsing..."
+                size="md"
+                showSuggestions={true}
                 onSearch={(query) => {
                   // Navigate to search page and close modal
                   window.location.href = `/search?q=${encodeURIComponent(query)}`;
@@ -218,8 +222,8 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
           )}
         </div>
 
-        {/* Content */}
-        <div className="p-6">
+        {/* Content - Mobile First Padding */}
+        <div className="p-4 sm:p-6 pb-[calc(1rem+env(safe-area-inset-bottom))] sm:pb-6">
           {/* Spinning Animation or Movie Result */}
           {state.isAnimating || (state.isLoading && !state.movie) ? (
             <div className="text-center py-8">

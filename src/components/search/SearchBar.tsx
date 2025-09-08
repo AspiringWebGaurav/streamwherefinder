@@ -182,8 +182,8 @@ export function SearchBar({
   return (
     <div className={cn('relative w-full max-w-2xl mx-auto', className)}>
       <div className="relative">
-        <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Search className="h-5 w-5 text-gray-400" aria-hidden="true" />
+        <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+          <Search className="h-4 w-4 sm:h-5 sm:w-5 text-gray-400" aria-hidden="true" />
         </div>
         
         <input
@@ -203,10 +203,12 @@ export function SearchBar({
           placeholder={placeholder}
           autoFocus={autoFocus}
           className={cn(
-            'block w-full pl-12 pr-12 py-3 border-2 border-gray-200 rounded-xl',
+            'block w-full pl-10 sm:pl-12 pr-20 sm:pr-24 py-3 border-2 border-gray-200 rounded-xl',
             'bg-white text-gray-900 placeholder-gray-500',
             'focus:ring-2 focus:ring-blue-600 focus:border-blue-600',
             'transition-colors duration-200',
+            // Mobile-first sizing
+            'text-base', // Prevents zoom on iOS
             sizes[size]
           )}
           aria-label="Search movies"
@@ -214,7 +216,7 @@ export function SearchBar({
 
         <div className="absolute inset-y-0 right-0 flex items-center">
           {isLoading && (
-            <div className="mr-3">
+            <div className="mr-2 sm:mr-3">
               <div className="animate-spin h-4 w-4 border-2 border-blue-600 border-t-transparent rounded-full" />
             </div>
           )}
@@ -222,7 +224,7 @@ export function SearchBar({
           {query && (
             <button
               onClick={handleClear}
-              className="mr-3 p-1 rounded-full hover:bg-gray-100 transition-colors"
+              className="mr-2 sm:mr-3 p-1.5 sm:p-2 rounded-full hover:bg-gray-100 active:bg-gray-200 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
               aria-label="Clear search"
             >
               <X className="h-4 w-4 text-gray-400" />
@@ -233,37 +235,55 @@ export function SearchBar({
             onClick={handleSearch}
             disabled={!query.trim()}
             className={cn(
-              'mr-2 px-4 py-2 bg-blue-600 text-white rounded-lg',
-              'hover:bg-blue-700 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2',
+              'mr-1 sm:mr-2 px-3 sm:px-4 py-2 bg-blue-600 text-white rounded-lg',
+              'hover:bg-blue-700 active:bg-blue-800 focus:ring-2 focus:ring-blue-600 focus:ring-offset-2',
               'disabled:opacity-50 disabled:cursor-not-allowed',
-              'transition-colors duration-200'
+              'transition-colors duration-200',
+              'text-sm sm:text-base font-medium',
+              'min-h-[40px] min-w-[60px] sm:min-w-[80px]'
             )}
             aria-label="Search"
           >
-            Search
+            <span className="hidden xs:inline">Search</span>
+            <Search className="h-4 w-4 xs:hidden" />
           </button>
         </div>
       </div>
 
-      {/* Search History & Suggestions Dropdown */}
+      {/* Search History & Suggestions Dropdown - Mobile Optimized */}
       {showDropdown && (
         <div
           ref={dropdownRef}
-          className="absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-80 overflow-y-auto"
+          className={cn(
+            'absolute z-50 w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-lg overflow-y-auto',
+            // Mobile-first sizing
+            'max-h-[50vh] sm:max-h-80',
+            // Better mobile touch scrolling
+            'overscroll-contain'
+          )}
+          style={{
+            WebkitOverflowScrolling: 'touch',
+            // Ensure proper positioning on mobile
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            zIndex: 9999
+          }}
         >
-          {/* Search History Section */}
+          {/* Search History Section - Mobile Optimized */}
           {showHistoryOnly && searchHistory.length > 0 && (
             <>
-              <div className="px-4 py-2 text-xs font-medium text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100">
+              <div className="px-3 sm:px-4 py-2 sm:py-3 text-xs font-medium text-gray-500 uppercase tracking-wide bg-gray-50 border-b border-gray-100 sticky top-0 z-10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
-                    <History className="w-3 h-3 mr-1" />
-                    Recent Searches
+                    <History className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">Recent Searches</span>
                   </div>
                   {!user && (
                     <Link
                       href="/profile"
-                      className="text-blue-600 hover:text-blue-800 normal-case font-normal"
+                      className="text-blue-600 hover:text-blue-800 active:text-blue-900 normal-case font-normal text-xs whitespace-nowrap ml-2"
                     >
                       Sign in to sync
                     </Link>
@@ -278,16 +298,17 @@ export function SearchBar({
                     handleSearch();
                   }}
                   className={cn(
-                    'w-full flex items-center px-4 py-3 hover:bg-gray-50 transition-colors text-left',
+                    'w-full flex items-center px-3 sm:px-4 py-3 sm:py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors text-left',
+                    'min-h-[48px] sm:min-h-[56px]', // Touch-friendly height
                     selectedIndex === index && 'bg-blue-50'
                   )}
                 >
                   <Clock className="w-4 h-4 text-gray-400 mr-3 flex-shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-sm text-gray-900 truncate">
+                    <div className="text-sm sm:text-base text-gray-900 truncate font-medium">
                       {item.query}
                     </div>
-                    <div className="text-xs text-gray-500">
+                    <div className="text-xs sm:text-sm text-gray-500 mt-0.5">
                       {item.timestamp.toLocaleDateString()}
                     </div>
                   </div>
@@ -296,7 +317,7 @@ export function SearchBar({
             </>
           )}
 
-          {/* Movie Suggestions Section */}
+          {/* Movie Suggestions Section - Mobile Optimized */}
           {!showHistoryOnly && suggestions.length > 0 && (
             <>
               {suggestions.map((movie, index) => (
@@ -304,19 +325,18 @@ export function SearchBar({
                   key={movie.id}
                   href={`/movies/${movie.slug}`}
                   onClick={(e) => {
-                    // Save search history when clicking on suggestions
                     console.log('🎬 SEARCH BAR: Movie suggestion clicked, saving search history');
-                    // Save search history asynchronously without blocking navigation
                     saveSearch(user, query.trim()).catch(error => {
                       console.error('❌ Failed to save search history for suggestion click:', error);
                     });
                   }}
                   className={cn(
-                    'flex items-center px-4 py-3 hover:bg-gray-50 transition-colors',
+                    'flex items-center px-3 sm:px-4 py-3 sm:py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors',
+                    'min-h-[60px] sm:min-h-[72px]', // Touch-friendly height
                     selectedIndex === index && 'bg-blue-50'
                   )}
                 >
-                  <div className="flex-shrink-0 w-12 h-16 bg-gray-200 rounded overflow-hidden">
+                  <div className="flex-shrink-0 w-10 h-14 sm:w-12 sm:h-16 bg-gray-200 rounded overflow-hidden">
                     <TMDBImage
                       src={movie.posterPath}
                       alt={`${movie.title} poster`}
@@ -328,20 +348,22 @@ export function SearchBar({
                   </div>
                   
                   <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm font-medium text-gray-900 truncate">
+                    <div className="text-sm sm:text-base font-medium text-gray-900 truncate leading-tight">
                       {movie.title}
                     </div>
-                    <div className="text-xs text-gray-500">
-                      {movie.releaseDate.split('-')[0]} • ★ {movie.rating}
+                    <div className="text-xs sm:text-sm text-gray-500 mt-1 flex items-center">
+                      <span className="truncate">
+                        {movie.releaseDate.split('-')[0]} • ★ {movie.rating}
+                      </span>
                     </div>
                   </div>
                 </Link>
               ))}
               
-              <div className="px-4 py-3 border-t border-gray-100 bg-gray-50">
+              <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-100 bg-gray-50 sticky bottom-0">
                 <button
                   onClick={handleSearch}
-                  className="text-sm text-blue-600 hover:text-blue-800 font-medium"
+                  className="text-sm sm:text-base text-blue-600 hover:text-blue-800 active:text-blue-900 font-medium w-full text-center py-2 min-h-[44px] rounded-lg hover:bg-blue-50 active:bg-blue-100 transition-colors"
                 >
                   See all results for "{query}"
                 </button>
@@ -349,23 +371,23 @@ export function SearchBar({
             </>
           )}
 
-          {/* Sign-in Prompt for Anonymous Users */}
+          {/* Sign-in Prompt for Anonymous Users - Mobile Optimized */}
           {!user && (searchHistory.length > 0 || showHistoryOnly) && (
-            <div className="px-4 py-3 border-t border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50">
-              <div className="flex items-center justify-between">
+            <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-100 bg-gradient-to-r from-blue-50 to-indigo-50 sticky bottom-0">
+              <div className="flex flex-col xs:flex-row xs:items-center gap-3 xs:gap-2">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-blue-900">
+                  <div className="text-sm sm:text-base font-medium text-blue-900 leading-tight">
                     Save searches across devices
                   </div>
-                  <div className="text-xs text-blue-700">
+                  <div className="text-xs sm:text-sm text-blue-700 mt-0.5">
                     Sign in to sync your search history
                   </div>
                 </div>
                 <Link
                   href="/profile"
-                  className="ml-3 inline-flex items-center px-3 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 transition-colors"
+                  className="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors min-h-[44px] whitespace-nowrap"
                 >
-                  <User className="w-3 h-3 mr-1" />
+                  <User className="w-4 h-4 mr-2" />
                   Sign In
                 </Link>
               </div>
