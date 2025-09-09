@@ -1,43 +1,19 @@
-import { Search, ArrowLeft } from 'lucide-react';
+'use client';
+
+import { Suspense, useEffect, useState } from 'react';
+import { Search, ArrowLeft, ArrowRight, Shuffle, AlertCircle } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { comprehensiveSearch, findTypoMatches } from '@/lib/search';
+import { MovieCard, MovieCardSkeleton } from '@/components/movie/MovieCard';
 import { SearchBar } from '@/components/search/SearchBar';
 import { Button } from '@/components/ui/Button';
+import { useAuth } from '@/lib/auth';
+import { saveSearch } from '@/lib/searchHistory';
 import Link from 'next/link';
-import type { Metadata } from 'next';
-import { SearchPageClient } from './SearchPageClient';
 
-interface SearchPageProps {
-  searchParams: Promise<{
-    q?: string;
-    page?: string;
-  }>;
-}
-
-// Generate metadata for SEO
-export async function generateMetadata({ searchParams }: SearchPageProps): Promise<Metadata> {
-  const resolvedSearchParams = await searchParams;
-  const query = resolvedSearchParams.q?.trim() || '';
-  
-  if (!query) {
-    return {
-      title: 'Search Movies | StreamWhereFinder',
-      description: 'Search for any movie and find where to watch it legally. Our search works even with typos!',
-    };
-  }
-
-  return {
-    title: `Search results for "${query}" | StreamWhereFinder`,
-    description: `Find where to watch "${query}" and similar movies online legally.`,
-    openGraph: {
-      title: `Search results for "${query}"`,
-      description: `Find where to watch "${query}" and similar movies online legally.`,
-      type: 'website',
-    },
-    twitter: {
-      card: 'summary',
-      title: `Search results for "${query}"`,
-      description: `Find where to watch "${query}" and similar movies online legally.`,
-    },
-  };
+interface SearchPageClientProps {
+  initialQuery: string;
+  initialPage: number;
 }
 
 // Loading component for search results
@@ -279,51 +255,60 @@ function SearchResults({ query, page }: { query: string; page: number }) {
   );
 }
 
-export default async function SearchPage({ searchParams }: SearchPageProps) {
-  const resolvedSearchParams = await searchParams;
-  const query = resolvedSearchParams.q?.trim() || '';
-  const page = parseInt(resolvedSearchParams.page || '1', 10);
-
-  if (!query) {
-    return (
-      <div className="min-h-screen bg-gray-50 overflow-x-hidden">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 max-w-4xl">
-          <div className="text-center">
-            <div className="w-20 h-20 sm:w-24 sm:h-24 mx-auto mb-4 sm:mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <Search className="w-10 h-10 sm:w-12 sm:h-12 text-gray-400" />
-            </div>
+export function SearchPageClient({ initialQuery, initialPage }: SearchPageClientProps) {
+  return (
+    <div className="min-h-screen bg-gray-50 overflow-x-hidden">
+      {/* Header - Mobile First */}
+      <div className="bg-white border-b border-gray-200 sticky top-0 z-30">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+          <div className="flex flex-col gap-3 sm:gap-4">
+            <Link
+              href="/"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 active:text-gray-700 transition-colors text-sm sm:text-base min-h-[40px]"
+            >
+              <ArrowLeft className="w-4 h-4 mr-2 flex-shrink-0" />
+              Back to Home
+            </Link>
             
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
-              Search Movies
-            </h1>
-            
-            <p className="text-sm sm:text-base text-gray-600 mb-6 sm:mb-8 max-w-md mx-auto leading-relaxed px-4">
-              Search for any movie and find where to watch it legally. Our search works even with typos!
-            </p>
-
-            <div className="max-w-2xl mx-auto mb-6 sm:mb-8">
+            <div className="w-full max-w-2xl sm:mx-0">
               <SearchBar
-                placeholder="Search for any movie..."
-                autoFocus={true}
+                placeholder="Search for movies..."
+                showSuggestions={false}
                 size="md"
               />
-            </div>
-
-            <div className="flex justify-center px-4">
-              <Link href="/" className="w-full xs:w-auto">
-                <Button variant="outline" className="w-full xs:w-auto">
-                  <ArrowLeft className="w-4 h-4 mr-2 flex-shrink-0" />
-                  Back to Home
-                </Button>
-              </Link>
             </div>
           </div>
         </div>
       </div>
-    );
-  }
 
-  return (
-    <SearchPageClient initialQuery={query} initialPage={page} />
+      <div className="container mx-auto px-0 sm:px-6 lg:px-8 py-6 sm:py-8">
+        {/* Typo suggestions */}
+        <TypoSuggestions query={initialQuery} />
+
+        {/* Search Results */}
+        <Suspense fallback={<SearchResultsLoading />}>
+          <SearchResults query={initialQuery} page={initialPage} />
+        </Suspense>
+      </div>
+
+      {/* Structured Data */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "SearchResultsPage",
+            "name": `Search results for "${initialQuery}"`,
+            "description": `Find where to watch "${initialQuery}" and similar movies online legally.`,
+            "url": `${process.env.NEXT_PUBLIC_SITE_URL}/search?q=${encodeURIComponent(initialQuery)}`,
+            "mainEntity": {
+              "@type": "ItemList",
+              "name": `Movies matching "${initialQuery}"`,
+              "description": "Search results for movies with legal streaming information"
+            }
+          })
+        }}
+      />
+    </div>
   );
 }

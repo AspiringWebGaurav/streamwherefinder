@@ -728,3 +728,258 @@ body {
   /* Memory efficiency */
   contain: strict;
 }
+
+/* ====== IMAGE LOADING & FALLBACK SYSTEM ====== */
+
+/* Shimmer animation for loading states */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* Image container optimizations to prevent layout shift */
+.image-container {
+  position: relative;
+  overflow: hidden;
+  /* Prevent layout shift with fixed aspect ratio */
+  contain: layout style;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: auto;
+}
+
+/* Prevent zero-size image containers */
+.image-container:empty {
+  min-height: 100px;
+  min-width: 80px;
+  background-color: #f3f4f6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Image loading states */
+.image-loading {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.4) 50%,
+    transparent 100%
+  );
+  animation: shimmer 2s ease-in-out infinite;
+}
+
+/* Image error states */
+.image-error {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 0.75rem;
+  text-align: center;
+  padding: 0.5rem;
+}
+
+/* Poster-specific styling */
+.poster-container {
+  aspect-ratio: 2/3;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  position: relative;
+}
+
+/* Backdrop-specific styling */
+.backdrop-container {
+  aspect-ratio: 16/9;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  position: relative;
+}
+
+/* Search result thumbnail styling */
+.search-thumbnail {
+  aspect-ratio: 2/3;
+  border-radius: 0.25rem;
+  overflow: hidden;
+  background-color: #f3f4f6;
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* Prevent image overlays from causing blank displays */
+.image-overlay-container {
+  position: relative;
+}
+
+.image-overlay-container > img {
+  position: relative;
+  z-index: 1;
+}
+
+.image-overlay-container .image-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* Performance optimizations for images */
+.image-optimized {
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  /* Prevent layout thrashing */
+  contain: layout style;
+  /* Smooth rendering */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* Prevent blurry images on high DPI */
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}
+
+/* Lazy loading optimization */
+.image-lazy-container {
+  /* Create stacking context */
+  transform: translateZ(0);
+  /* Optimize compositing */
+  will-change: contents;
+  /* Contain layout shifts */
+  contain: layout style paint;
+}
+
+/* Intersection observer optimization */
+.image-intersection-target {
+  /* Minimum size for intersection detection */
+  min-height: 1px;
+  min-width: 1px;
+  /* Ensure visibility for observer */
+  opacity: 0.01;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .image-loading {
+    animation-duration: 1.5s;
+  }
+  
+  .poster-container,
+  .backdrop-container,
+  .search-thumbnail {
+    /* Faster transitions on mobile */
+    transition: transform 0.2s ease;
+  }
+  
+  /* Reduce shimmer intensity on mobile to save battery */
+  .image-loading {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.2) 50%,
+      transparent 100%
+    );
+  }
+}
+
+/* High contrast mode support for images */
+@media (prefers-contrast: high) {
+  .image-error {
+    border: 2px solid #333;
+    background-color: #fff;
+    color: #000;
+  }
+  
+  .poster-container,
+  .backdrop-container,
+  .search-thumbnail {
+    border: 1px solid #333;
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .image-loading {
+    animation: none;
+    background: rgba(255, 255, 255, 0.3);
+  }
+  
+  .image-optimized {
+    transition: none;
+  }
+}
+
+/* Print styles for images */
+@media print {
+  .image-loading {
+    display: none;
+  }
+  
+  .image-error {
+    background: #f5f5f5 !important;
+    border: 1px solid #ccc !important;
+  }
+}
+
+/* Focus states for accessible image containers */
+.image-container:focus-within {
+  outline: 2px solid #667eea;
+  outline-offset: 2px;
+}
+
+/* Ensure images don't break out of containers */
+.image-container img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* Prevent cumulative layout shift (CLS) */
+.image-container[style*="aspect-ratio"] {
+  height: auto;
+}
+
+/* Service Worker cache indicators */
+.image-cached::after {
+  content: '';
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #10b981;
+  border-radius: 50%;
+  opacity: 0.7;
+}
+
+.image-stale::after {
+  background: #f59e0b;
+}
+
+.image-error-cached::after {
+  background: #ef4444;
+}

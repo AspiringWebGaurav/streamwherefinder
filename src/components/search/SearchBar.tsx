@@ -8,7 +8,7 @@ import { PopularMovie } from '@/types/tmdb';
 import { useAuth } from '@/lib/auth';
 import { saveSearch, getSearchHistory, SearchHistoryItem } from '@/lib/searchHistory';
 import Link from 'next/link';
-import { TMDBImage } from '@/components/ui/TMDBImage';
+import { SearchResultItem } from '@/components/search/SearchResultItem';
 
 interface SearchBarProps {
   placeholder?: string;
@@ -321,43 +321,18 @@ export function SearchBar({
           {!showHistoryOnly && suggestions.length > 0 && (
             <>
               {suggestions.map((movie, index) => (
-                <Link
+                <SearchResultItem
                   key={movie.id}
-                  href={`/movies/${movie.slug}`}
-                  onClick={(e) => {
+                  movie={movie}
+                  query={query}
+                  isSelected={selectedIndex === index}
+                  onClick={() => {
                     console.log('🎬 SEARCH BAR: Movie suggestion clicked, saving search history');
                     saveSearch(user, query.trim()).catch(error => {
                       console.error('❌ Failed to save search history for suggestion click:', error);
                     });
                   }}
-                  className={cn(
-                    'flex items-center px-3 sm:px-4 py-3 sm:py-4 hover:bg-gray-50 active:bg-gray-100 transition-colors',
-                    'min-h-[60px] sm:min-h-[72px]', // Touch-friendly height
-                    selectedIndex === index && 'bg-blue-50'
-                  )}
-                >
-                  <div className="flex-shrink-0 w-10 h-14 sm:w-12 sm:h-16 bg-gray-200 rounded overflow-hidden">
-                    <TMDBImage
-                      src={movie.posterPath}
-                      alt={`${movie.title} poster`}
-                      width={48}
-                      height={64}
-                      className="w-full h-full object-cover"
-                      fallbackText="No Image"
-                    />
-                  </div>
-                  
-                  <div className="ml-3 flex-1 min-w-0">
-                    <div className="text-sm sm:text-base font-medium text-gray-900 truncate leading-tight">
-                      {movie.title}
-                    </div>
-                    <div className="text-xs sm:text-sm text-gray-500 mt-1 flex items-center">
-                      <span className="truncate">
-                        {movie.releaseDate.split('-')[0]} • ★ {movie.rating}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                />
               ))}
               
               <div className="px-3 sm:px-4 py-3 sm:py-4 border-t border-gray-100 bg-gray-50 sticky bottom-0">

@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { Star, Calendar } from 'lucide-react';
 import { cn, formatRating, formatReleaseDate } from '@/lib/utils';
 import { PopularMovie, Movie } from '@/types/tmdb';
+import { PosterImage } from '@/components/ui/ImageWithFallback';
 
 interface MovieCardProps {
   movie: PopularMovie | Movie;
@@ -49,25 +49,13 @@ export function MovieCard({
           'focus-within:ring-2 focus-within:ring-blue-500 focus-within:ring-offset-2',
           currentSize.image
         )}>
-          {movie.posterPath ? (
-            <Image
-              src={movie.posterPath}
-              alt={`${movie.title} poster`}
-              width={currentSize.imageSize.width}
-              height={currentSize.imageSize.height}
-              className="object-cover w-full h-full"
-              priority={priority}
-              unoptimized
-              sizes="(max-width: 475px) 24vw, (max-width: 640px) 28vw, (max-width: 768px) 32vw, (max-width: 1024px) 36vw, 192px"
-            />
-          ) : (
-            <div className="flex items-center justify-center w-full h-full text-gray-400 bg-gray-100">
-              <div className="text-center p-2 sm:p-3 lg:p-4">
-                <div className="text-xs sm:text-sm">No Image</div>
-                <div className="text-xs mt-1 break-words leading-tight">{movie.title}</div>
-              </div>
-            </div>
-          )}
+          <PosterImage
+            src={movie.posterPath}
+            alt={`${movie.title} poster`}
+            title={movie.title}
+            className="w-full h-full"
+            priority={priority}
+          />
           
           {/* Rating Badge - Responsive */}
           <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded flex items-center gap-0.5 sm:gap-1">
