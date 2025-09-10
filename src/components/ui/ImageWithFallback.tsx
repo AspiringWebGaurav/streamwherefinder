@@ -170,16 +170,12 @@ export function ImageWithFallback({
   const getProxyUrl = useCallback((imagePath: string | null, size: string = 'w500') => {
     if (!imagePath) return null;
     
-    console.log('[ImageWithFallback] Original imagePath:', imagePath);
-    
     // Check if imagePath is already a full TMDB URL
     if (imagePath.startsWith('https://image.tmdb.org/t/p/')) {
-      console.log('[ImageWithFallback] Detected full TMDB URL, extracting path');
       // Extract just the filename from the full URL
       const urlParts = imagePath.split('/');
       const filename = urlParts[urlParts.length - 1];
       const cleanPath = `/${filename}`;
-      console.log('[ImageWithFallback] Extracted path:', cleanPath);
       
       const params = new URLSearchParams({
         path: cleanPath,
@@ -195,7 +191,6 @@ export function ImageWithFallback({
     
     // Clean path - ensure it starts with /
     const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    console.log('[ImageWithFallback] Using relative path:', cleanPath);
     
     const params = new URLSearchParams({
       path: cleanPath,
@@ -234,7 +229,9 @@ export function ImageWithFallback({
 
   // Handle image load error with retry logic
   const handleError = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
-    console.warn(`Image load failed for ${src}, attempt ${retryCountRef.current + 1}`);
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`Image load failed for ${src}, attempt ${retryCountRef.current + 1}`);
+    }
     
     // Track performance error
     if (performanceIdRef.current && src) {

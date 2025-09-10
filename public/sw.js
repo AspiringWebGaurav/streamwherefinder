@@ -7,9 +7,29 @@ const MAX_CACHE_SIZE = 50; // Maximum number of cached images
 const MAX_CACHE_AGE = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
 const STALE_WHILE_REVALIDATE_AGE = 24 * 60 * 60 * 1000; // 1 day in milliseconds
 
+// Development mode detection for logging
+const isDevelopment = self.location.hostname === 'localhost' || self.location.hostname.includes('localhost') || self.location.hostname.includes('127.0.0.1');
+
+// Conditional logging helper
+const devLog = (message, ...args) => {
+  if (isDevelopment) {
+    console.log(message, ...args);
+  }
+};
+
+const devWarn = (message, ...args) => {
+  if (isDevelopment) {
+    console.warn(message, ...args);
+  }
+};
+
+const devError = (message, ...args) => {
+  console.error(message, ...args); // Always log errors
+};
+
 // Install event - initialize caches
 self.addEventListener('install', (event) => {
-  console.log('Service Worker: Install - Image Cache System');
+  devLog('Service Worker: Install - Image Cache System');
   
   event.waitUntil(
     Promise.all([
@@ -23,7 +43,7 @@ self.addEventListener('install', (event) => {
 
 // Activate event - clean up old caches
 self.addEventListener('activate', (event) => {
-  console.log('Service Worker: Activate - Cleaning old caches');
+  devLog('Service Worker: Activate - Cleaning old caches');
   
   event.waitUntil(
     Promise.all([
@@ -63,27 +83,27 @@ async function handleImageRequest(request) {
       
       // If cache is still fresh, return it immediately
       if (age < STALE_WHILE_REVALIDATE_AGE) {
-        console.log('Service Worker: Serving fresh cached image');
+        devLog('Service Worker: Serving fresh cached image');
         return cachedResponse;
       }
       
       // If cache is stale but not too old, return it and update in background
       if (age < MAX_CACHE_AGE) {
-        console.log('Service Worker: Serving stale cached image, updating in background');
+        devLog('Service Worker: Serving stale cached image, updating in background');
         
         // Return stale cache immediately
         const staleResponse = cachedResponse.clone();
         
         // Update cache in background (don't await)
         updateImageCache(request, cache).catch(error => {
-          console.warn('Service Worker: Background cache update failed:', error);
+          devWarn('Service Worker: Background cache update failed:', error);
         });
         
         return staleResponse;
       }
       
       // Cache is too old, delete it and fetch fresh
-      console.log('Service Worker: Cache too old, fetching fresh');
+      devLog('Service Worker: Cache too old, fetching fresh');
       await cache.delete(request);
     }
     
@@ -91,18 +111,18 @@ async function handleImageRequest(request) {
     return await fetchAndCacheImage(request, cache);
     
   } catch (error) {
-    console.error('Service Worker: Image request failed:', error);
+    devError('Service Worker: Image request failed:', error);
     
     // Try to return any cached version as fallback
     try {
       const cache = await caches.open(CACHE_NAME);
       const cachedResponse = await cache.match(request);
       if (cachedResponse) {
-        console.log('Service Worker: Returning stale cache as fallback');
+        devLog('Service Worker: Returning stale cache as fallback');
         return cachedResponse;
       }
     } catch (fallbackError) {
-      console.error('Service Worker: Fallback cache failed:', fallbackError);
+      devError('Service Worker: Fallback cache failed:', fallbackError);
     }
     
     // If all else fails, try to return the original fetch error
@@ -113,7 +133,7 @@ async function handleImageRequest(request) {
 // Fetch image and cache it with metadata
 async function fetchAndCacheImage(request, cache) {
   try {
-    console.log('Service Worker: Fetching fresh image');
+    devLog('Service Worker: Fetching fresh image');
     const response = await fetch(request);
     
     // Only cache successful responses
@@ -135,20 +155,20 @@ async function fetchAndCacheImage(request, cache) {
       
       // Cache the response
       await cache.put(request, cachedResponse);
-      console.log('Service Worker: Image cached successfully');
+      devLog('Service Worker: Image cached successfully');
       
       // Clean up cache periodically
       limitCacheSize().catch(error => {
-        console.warn('Service Worker: Cache cleanup failed:', error);
+        devWarn('Service Worker: Cache cleanup failed:', error);
       });
     } else {
-      console.warn('Service Worker: Not caching failed response:', response.status);
+      devWarn('Service Worker: Not caching failed response:', response.status);
     }
     
     return response;
     
   } catch (error) {
-    console.error('Service Worker: Fetch failed:', error);
+    devError('Service Worker: Fetch failed:', error);
     throw error;
   }
 }
@@ -170,10 +190,10 @@ async function updateImageCache(request, cache) {
       });
       
       await cache.put(request, cachedResponse);
-      console.log('Service Worker: Background cache update successful');
+      devLog('Service Worker: Background cache update successful');
     }
   } catch (error) {
-    console.warn('Service Worker: Background update failed:', error);
+    devWarn('Service Worker: Background update failed:', error);
   }
 }
 
@@ -189,7 +209,7 @@ async function cleanupOldCaches() {
     
     await Promise.all(
       oldCacheNames.map(cacheName => {
-        console.log('Service Worker: Deleting old cache:', cacheName);
+        devLog('Service Worker: Deleting old cache:', cacheName);
         return caches.delete(cacheName);
       })
     );
@@ -213,22 +233,22 @@ async function cleanupOldCaches() {
           }
         }
       } catch (error) {
-        console.warn('Service Worker: Error checking cache entry:', error);
+        devWarn('Service Worker: Error checking cache entry:', error);
         expiredKeys.push(request);
       }
     }
     
     await Promise.all(
       expiredKeys.map(request => {
-        console.log('Service Worker: Deleting expired cache entry');
+        devLog('Service Worker: Deleting expired cache entry');
         return cache.delete(request);
       })
     );
     
-    console.log(`Service Worker: Cleaned up ${expiredKeys.length} expired entries`);
+    devLog(`Service Worker: Cleaned up ${expiredKeys.length} expired entries`);
     
   } catch (error) {
-    console.error('Service Worker: Cache cleanup failed:', error);
+    devError('Service Worker: Cache cleanup failed:', error);
   }
 }
 
@@ -242,7 +262,7 @@ async function limitCacheSize() {
       return;
     }
     
-    console.log(`Service Worker: Cache size ${keys.length} exceeds limit ${MAX_CACHE_SIZE}`);
+    devLog(`Service Worker: Cache size ${keys.length} exceeds limit ${MAX_CACHE_SIZE}`);
     
     // Sort by cache time (oldest first)
     const sortedEntries = [];
@@ -267,15 +287,15 @@ async function limitCacheSize() {
     
     await Promise.all(
       entriesToDelete.map(entry => {
-        console.log('Service Worker: Deleting old cache entry to free space');
+        devLog('Service Worker: Deleting old cache entry to free space');
         return cache.delete(entry.request);
       })
     );
     
-    console.log(`Service Worker: Deleted ${entriesToDelete.length} entries to maintain cache size`);
+    devLog(`Service Worker: Deleted ${entriesToDelete.length} entries to maintain cache size`);
     
   } catch (error) {
-    console.error('Service Worker: Cache size limiting failed:', error);
+    devError('Service Worker: Cache size limiting failed:', error);
   }
 }
 
@@ -301,7 +321,7 @@ self.addEventListener('message', (event) => {
       break;
       
     default:
-      console.warn('Service Worker: Unknown message type:', type);
+      devWarn('Service Worker: Unknown message type:', type);
   }
 });
 
@@ -310,9 +330,9 @@ async function clearImageCache() {
   try {
     await caches.delete(CACHE_NAME);
     await caches.open(CACHE_NAME);
-    console.log('Service Worker: Image cache cleared');
+    devLog('Service Worker: Image cache cleared');
   } catch (error) {
-    console.error('Service Worker: Failed to clear cache:', error);
+    devError('Service Worker: Failed to clear cache:', error);
     throw error;
   }
 }
@@ -331,9 +351,9 @@ async function getCacheInfo() {
       cacheVersion: CACHE_NAME
     };
   } catch (error) {
-    console.error('Service Worker: Failed to get cache info:', error);
+    devError('Service Worker: Failed to get cache info:', error);
     throw error;
   }
 }
 
-console.log('Service Worker: Enhanced image caching system loaded');
+devLog('Service Worker: Enhanced image caching system loaded');

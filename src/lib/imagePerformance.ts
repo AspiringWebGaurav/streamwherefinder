@@ -296,10 +296,12 @@ export class ImageWebVitalsTracker {
         for (const entry of list.getEntries()) {
           if (entry.entryType === 'layout-shift' && !(entry as any).hadRecentInput) {
             const clsEntry = entry as any; // LayoutShift entry type
-            console.log('CLS detected:', clsEntry.value);
-            // Log significant layout shifts
-            if (clsEntry.value > 0.1) {
-              console.warn('Significant CLS detected:', clsEntry.value);
+            if (process.env.NODE_ENV === 'development') {
+              console.log('CLS detected:', clsEntry.value);
+              // Log significant layout shifts
+              if (clsEntry.value > 0.1) {
+                console.warn('Significant CLS detected:', clsEntry.value);
+              }
             }
           }
         }
@@ -320,11 +322,13 @@ export class ImageWebVitalsTracker {
         
         if (lastEntry) {
           const lcpEntry = lastEntry as any; // LargestContentfulPaint entry type
-          console.log('LCP:', lcpEntry.startTime, lcpEntry.element);
-          
-          // Check if LCP element is one of our tracked images
-          if (lcpEntry.element && this.imageElements.has(lcpEntry.element as HTMLImageElement)) {
-            console.log('LCP is a tracked image element');
+          if (process.env.NODE_ENV === 'development') {
+            console.log('LCP:', lcpEntry.startTime, lcpEntry.element);
+            
+            // Check if LCP element is one of our tracked images
+            if (lcpEntry.element && this.imageElements.has(lcpEntry.element as HTMLImageElement)) {
+              console.log('LCP is a tracked image element');
+            }
           }
         }
       });

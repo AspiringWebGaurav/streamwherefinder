@@ -42,20 +42,20 @@ export function Navbar() {
   return (
     <>
       <nav className="glass-navbar navbar-stable sticky top-0 z-40 transition-all duration-300 ease-in-out">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="navbar-edge-to-edge w-full px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 sm:h-18 lg:h-20 w-full">
-            {/* Logo - Mobile First */}
+            {/* Logo - Enhanced Brand */}
             <div className="brand-container flex-shrink-0">
-              <Link href="/" className="flex items-center glow">
-                <div className="text-lg sm:text-xl lg:text-2xl brand-text font-extrabold tracking-tight">
-                  <span className="hidden xs:inline">StreamWhereFinder</span>
-                  <span className="xs:hidden">SWF</span>
+              <Link href="/" className="flex items-center glow group">
+                <div className="brand-enhanced">
+                  <span className="hidden sm:inline brand-text-full">StreamWhereFinder</span>
+                  <span className="sm:hidden brand-text-compact">SWF</span>
                 </div>
               </Link>
             </div>
 
             {/* Desktop Navigation - Hidden on Mobile */}
-            <div className="hidden lg:flex nav-items-container flex-shrink-0 ml-auto">
+            <div className="hidden lg:flex nav-items-container flex-shrink-0 ml-auto pr-0">
               {user ? (
                 <div className="relative">
                   <button
