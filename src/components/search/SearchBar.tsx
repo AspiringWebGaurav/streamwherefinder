@@ -5,7 +5,7 @@ import { Search, X, History, User, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { hybridSearch } from '@/lib/search';
 import { PopularMovie } from '@/types/tmdb';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/app/providers/FirebaseProvider';
 import { saveSearch, getSearchHistory, SearchHistoryItem } from '@/lib/searchHistory';
 import Link from 'next/link';
 import { SearchResultItem } from '@/components/search/SearchResultItem';

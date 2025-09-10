@@ -1,7 +1,9 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import type { Metadata } from "next";
-import { AuthProvider } from "@/lib/auth";
+import { LoaderProvider } from "@/app/providers/LoaderProvider";
+import { FirebaseProvider } from "@/app/providers/FirebaseProvider";
+import { RouterLoadingManager } from "@/components/RouterLoadingManager";
 import { Navbar } from "@/components/ui/Navbar";
 import { Footer } from "@/components/ui/Footer";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
@@ -109,16 +111,22 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased text-white overflow-x-hidden`}
       >
+        {/* Global Loader Portal Mount Point */}
+        <div id="__global_loader_root" />
+        
         <ErrorBoundary>
-          <AuthProvider>
-            <div className="min-h-dvh flex flex-col relative w-full">
-              <Navbar />
-              <main className="flex-1 relative z-10 w-full">
-                <div className="glass min-h-full w-full">{children}</div>
-              </main>
-              <Footer />
-            </div>
-          </AuthProvider>
+          <LoaderProvider>
+            <FirebaseProvider>
+              <RouterLoadingManager />
+              <div className="min-h-dvh flex flex-col relative w-full">
+                <Navbar />
+                <main className="flex-1 relative z-10 w-full">
+                  <div className="glass min-h-full w-full">{children}</div>
+                </main>
+                <Footer />
+              </div>
+            </FirebaseProvider>
+          </LoaderProvider>
         </ErrorBoundary>
 
         {/* Analytics */}

@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { ArrowLeft, History, Trash2, Search, Calendar, User } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/app/providers/FirebaseProvider';
 import {
   getSearchHistory,
   deleteSearchFromFirestore,

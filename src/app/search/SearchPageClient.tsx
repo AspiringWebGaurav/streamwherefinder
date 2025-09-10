@@ -7,7 +7,7 @@ import { comprehensiveSearch, findTypoMatches } from '@/lib/search';
 import { MovieCard, MovieCardSkeleton } from '@/components/movie/MovieCard';
 import { SearchBar } from '@/components/search/SearchBar';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/app/providers/FirebaseProvider';
 import { saveSearch } from '@/lib/searchHistory';
 import Link from 'next/link';
 

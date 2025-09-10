@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { User, LogOut, History, ChevronDown, Clock, Menu, X } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/app/providers/FirebaseProvider';
 import { AuthModal } from '@/components/auth/AuthModal';
 import { Button } from '@/components/ui/Button';
 import { ProfilePicture } from '@/components/ui/ProfilePicture';
@@ -117,15 +117,17 @@ export function Navbar() {
               ) : (
                 <>
                   {searchHistoryCount > 0 && (
-                    <Link href="/profile" className="badge-container">
-                      <button className="btn-glass px-4 py-3 rounded-xl glow transition-all duration-300 hover:shadow-lg group" aria-label={`Search history with ${searchHistoryCount} items`}>
+                    <Link href="/profile">
+                      <button className="btn-glass px-4 py-3 rounded-xl glow transition-all duration-300 hover:shadow-lg group flex items-center space-x-3" aria-label={`Search history with ${searchHistoryCount} items`}>
                         <div className="flex items-center space-x-2">
                           <History className="w-4 h-4 text-white group-hover:text-cyan-200 transition-colors duration-200" />
                           <span className="text-sm font-medium text-white group-hover:text-cyan-200 transition-colors duration-200">History</span>
                         </div>
-                        <span className="badge-positioned gradient-dynamic-badge" aria-hidden="true">
-                          {searchHistoryCount > 99 ? '99+' : searchHistoryCount > 9 ? '9+' : searchHistoryCount}
-                        </span>
+                        <div className="bg-white/20 backdrop-blur-sm px-2 py-1 rounded-full min-w-[24px] flex items-center justify-center border border-white/30">
+                          <span className="text-xs font-bold text-white leading-none">
+                            {searchHistoryCount > 99 ? '99+' : searchHistoryCount}
+                          </span>
+                        </div>
                       </button>
                     </Link>
                   )}
@@ -239,9 +241,11 @@ export function Navbar() {
                             <History className="w-5 h-5 mr-3 text-white" />
                             <span className="text-white">Search History</span>
                           </div>
-                          <span className="bg-gradient-to-r from-purple-500 to-pink-500 text-white text-xs px-2 py-1 rounded-full">
-                            {searchHistoryCount > 99 ? '99+' : searchHistoryCount}
-                          </span>
+                          <div className="bg-white/20 backdrop-blur-sm px-3 py-1 rounded-full min-w-[28px] flex items-center justify-center border border-white/30">
+                            <span className="text-sm font-bold text-white leading-none">
+                              {searchHistoryCount > 99 ? '99+' : searchHistoryCount}
+                            </span>
+                          </div>
                         </Link>
                       )}
                       

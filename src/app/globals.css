@@ -983,3 +983,267 @@ body {
 .image-error-cached::after {
   background: #ef4444;
 }
+
+/* ====== ENTERPRISE LOADER SYSTEM ====== */
+
+/* Keyframes for Global Loader */
+@keyframes loaderScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0.95) translateZ(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+}
+
+@keyframes loaderScaleOut {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateZ(0);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.95) translateZ(0);
+  }
+}
+
+@keyframes loaderGlow {
+  0%, 100% {
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.3));
+  }
+  50% {
+    filter: drop-shadow(0 0 16px rgba(255, 255, 255, 0.6));
+  }
+}
+
+@keyframes loaderPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+@keyframes loaderSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* Global Loader Styles */
+.global-loader-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: grid;
+  place-items: center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.4) 0%,
+    rgba(139, 92, 246, 0.4) 100%
+  );
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: opacity, backdrop-filter;
+  /* Performance containment */
+  contain: layout style paint;
+}
+
+.global-loader-backdrop.dark {
+  background: linear-gradient(
+    to bottom,
+    rgba(99, 102, 241, 0.6) 0%,
+    rgba(139, 92, 246, 0.6) 100%
+  );
+}
+
+.global-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+  animation: loaderScaleIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: transform, opacity;
+}
+
+.global-loader-logo {
+  width: 4rem;
+  height: 4rem;
+  animation: loaderGlow 2s ease-in-out infinite;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+  will-change: filter;
+}
+
+.global-loader-text {
+  color: white;
+  font-size: 1rem;
+  font-weight: 600;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  animation: loaderPulse 2s ease-in-out infinite;
+  /* Hardware acceleration */
+  transform: translateZ(0);
+}
+
+.global-loader-timeout {
+  margin-top: 1.5rem;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.global-loader-timeout-text {
+  font-size: 0.875rem;
+  margin-bottom: 0.75rem;
+}
+
+.global-loader-retry-button {
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.global-loader-retry-button:hover {
+  background: rgba(255, 255, 255, 0.3);
+  border-color: rgba(255, 255, 255, 0.5);
+  transform: translateY(-1px);
+}
+
+.global-loader-retry-button:focus-visible {
+  outline: 2px solid rgba(255, 255, 255, 0.8);
+  outline-offset: 2px;
+}
+
+/* Animation classes */
+.loader-enter {
+  animation: loaderScaleIn 0.9s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.loader-exit {
+  animation: loaderScaleOut 0.3s cubic-bezier(0.7, 0, 0.84, 0) forwards;
+}
+
+/* Custom spinner animation (respects system preferences) */
+.loader-spin {
+  animation: loaderSpin 1s linear infinite;
+}
+
+/* Fallback for backdrop-filter support */
+@supports not (backdrop-filter: blur(1px)) {
+  .global-loader-backdrop {
+    background: rgba(99, 102, 241, 0.85);
+  }
+  .global-loader-backdrop.dark {
+    background: rgba(139, 92, 246, 0.9);
+  }
+  .global-loader-retry-button {
+    background: rgba(255, 255, 255, 0.9);
+  }
+}
+
+/* Reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  .global-loader-content {
+    animation: none;
+  }
+  
+  .global-loader-logo {
+    animation: none;
+    filter: drop-shadow(0 0 12px rgba(255, 255, 255, 0.5));
+  }
+  
+  .global-loader-text {
+    animation: none;
+  }
+  
+  .loader-spin {
+    animation: none;
+  }
+  
+  .loader-enter,
+  .loader-exit {
+    animation: none;
+  }
+  
+  /* Show static loading indicator */
+  .global-loader-content::after {
+    content: '';
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    margin-top: 0.5rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .global-loader-backdrop {
+    background: rgba(0, 0, 0, 0.9);
+    border: 2px solid white;
+  }
+  
+  .global-loader-retry-button {
+    border: 2px solid white;
+    background: transparent;
+  }
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .global-loader-logo {
+    width: 3rem;
+    height: 3rem;
+  }
+  
+  .global-loader-text {
+    font-size: 0.875rem;
+  }
+  
+  .global-loader-backdrop {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+}
+
+/* Print styles */
+@media print {
+  .global-loader-backdrop {
+    display: none;
+  }
+}
+
+/* Focus management */
+.global-loader-backdrop[aria-hidden="true"] {
+  pointer-events: none;
+}
+
+.global-loader-backdrop:not([aria-hidden="true"]) {
+  pointer-events: auto;
+}

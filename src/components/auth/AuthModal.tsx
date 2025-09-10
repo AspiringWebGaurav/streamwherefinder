@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { Modal } from '@/components/ui/Modal';
 import { Button } from '@/components/ui/Button';
-import { useAuth } from '@/lib/auth';
+import { useAuth } from '@/app/providers/FirebaseProvider';
 import { cn } from '@/lib/utils';
 
 interface AuthModalProps {
