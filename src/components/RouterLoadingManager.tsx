@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, Suspense } from 'react';
 import { useLoader } from '@/app/providers/LoaderProvider';
 import { useRouterLoading, RouterLoadingScript } from '@/lib/router-loading';
 
@@ -9,7 +9,7 @@ import { useRouterLoading, RouterLoadingScript } from '@/lib/router-loading';
  * Wires Next.js App Router navigation events to the global LoaderProvider
  * Should be included in the root layout or app component
  */
-export function RouterLoadingManager() {
+function RouterLoadingManagerCore() {
   const loader = useLoader();
   
   // Initialize router loading integration
@@ -52,6 +52,18 @@ export function RouterLoadingManager() {
   }, [loader]);
   
   return <RouterLoadingScript />;
+}
+
+/**
+ * RouterLoadingManager wrapped in Suspense to handle useSearchParams() usage
+ * This prevents build errors on statically generated pages like 404
+ */
+export function RouterLoadingManager() {
+  return (
+    <Suspense fallback={null}>
+      <RouterLoadingManagerCore />
+    </Suspense>
+  );
 }
 
 export default RouterLoadingManager;
