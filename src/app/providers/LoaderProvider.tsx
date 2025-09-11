@@ -333,6 +333,19 @@ export function LoaderProvider({
         timeoutMessage={showTimeoutMessage ? timeoutMessage : undefined}
         onRetry={showTimeoutMessage ? handleRetry : undefined}
       />
+      
+      {/* Emergency reset button for development */}
+      {process.env.NODE_ENV === 'development' && isLoaderVisible && (
+        <div className="fixed bottom-4 right-4 z-[10002]">
+          <button
+            onClick={forceCleanupAllTasks}
+            className="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors duration-200 shadow-lg"
+            title="Emergency: Force clear all loader tasks"
+          >
+            🚨 Reset Loader
+          </button>
+        </div>
+      )}
     </LoaderContext.Provider>
   );
 }

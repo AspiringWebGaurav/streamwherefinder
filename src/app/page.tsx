@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense, useState, useEffect } from 'react';
+import { Suspense, useState, useEffect, useCallback } from 'react';
 import { SearchBar } from '@/components/search/SearchBar';
 import { MovieCarousel } from '@/components/movie/MovieCarousel';
 import { Button } from '@/components/ui/Button';
@@ -49,7 +49,10 @@ function CarouselLoading({ title }: { title: string }) {
 }
 
 // Hero section component
-function HeroSection({ onSpinTonight }: { onSpinTonight: () => void }) {
+function HeroSection({ onSpinTonight, isSpinTonightLoading }: {
+  onSpinTonight: () => void;
+  isSpinTonightLoading: boolean;
+}) {
   return (
     <section className="relative glass-cinema-primary py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -84,9 +87,14 @@ function HeroSection({ onSpinTonight }: { onSpinTonight: () => void }) {
               size="lg"
               className="btn-cinema-gold px-6 sm:px-8 w-full sm:w-auto min-h-[48px]"
               onClick={onSpinTonight}
+              disabled={isSpinTonightLoading}
             >
-              <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
-              Spin Tonight
+              {isSpinTonightLoading ? (
+                <RefreshCw className="w-4 h-4 sm:w-5 sm:h-5 mr-2 animate-spin" />
+              ) : (
+                <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
+              )}
+              {isSpinTonightLoading ? 'Opening...' : 'Spin Tonight'}
             </Button>
             <p className="text-xs sm:text-sm text-center px-4" style={{color: 'var(--cinema-cream)'}}>
               Can't decide? Let us pick something great for you!
@@ -123,6 +131,7 @@ function HeroSection({ onSpinTonight }: { onSpinTonight: () => void }) {
 // Main homepage component
 export default function HomePage() {
   const [isSpinTonightOpen, setIsSpinTonightOpen] = useState(false);
+  const [isSpinTonightLoading, setIsSpinTonightLoading] = useState(false);
   const [data, setData] = useState({
     trending: [] as PopularMovie[],
     popular: [] as PopularMovie[],
@@ -146,14 +155,48 @@ export default function HomePage() {
     loadData();
   }, []);
 
-  const handleSpinTonight = () => {
-    setIsSpinTonightOpen(true);
-  };
+  const handleSpinTonight = useCallback(() => {
+    if (isSpinTonightLoading || isSpinTonightOpen) return;
+    
+    // First set loading state
+    setIsSpinTonightLoading(true);
+    
+    // Open modal after a brief delay to ensure proper rendering
+    setTimeout(() => {
+      setIsSpinTonightOpen(true);
+      setIsSpinTonightLoading(false);
+    }, 150);
+  }, [isSpinTonightLoading, isSpinTonightOpen]);
+
+  const handleSpinTonightClose = useCallback(() => {
+    // Immediate cleanup
+    setIsSpinTonightOpen(false);
+    setIsSpinTonightLoading(false);
+    
+    // Force body cleanup as fail-safe
+    setTimeout(() => {
+      document.body.style.overflow = 'unset';
+      document.body.style.paddingRight = '0px';
+    }, 100);
+  }, []);
+
+  // Emergency cleanup effect
+  useEffect(() => {
+    const handleEmergencyCleanup = (e: KeyboardEvent) => {
+      // ESC key emergency cleanup
+      if (e.key === 'Escape' && (isSpinTonightOpen || isSpinTonightLoading)) {
+        handleSpinTonightClose();
+      }
+    };
+
+    document.addEventListener('keydown', handleEmergencyCleanup);
+    return () => document.removeEventListener('keydown', handleEmergencyCleanup);
+  }, [isSpinTonightOpen, isSpinTonightLoading, handleSpinTonightClose]);
 
   return (
     <div className="min-h-screen w-full overflow-x-hidden">
       {/* Hero Section */}
-      <HeroSection onSpinTonight={handleSpinTonight} />
+      <HeroSection onSpinTonight={handleSpinTonight} isSpinTonightLoading={isSpinTonightLoading} />
       
       {/* Movie Carousels - Mobile First Container */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16 space-y-8 sm:space-y-12 lg:space-y-16">
@@ -333,7 +376,7 @@ export default function HomePage() {
       {/* Spin Tonight Modal */}
       <SpinTonightModal
         isOpen={isSpinTonightOpen}
-        onClose={() => setIsSpinTonightOpen(false)}
+        onClose={handleSpinTonightClose}
       />
     </div>
   );

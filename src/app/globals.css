@@ -1314,7 +1314,7 @@ body {
 .global-loader-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 9999;
+  z-index: 9998;
   display: grid;
   place-items: center;
   backdrop-filter: blur(16px);
@@ -1511,6 +1511,37 @@ body {
 
 .global-loader-backdrop:not([aria-hidden="true"]) {
   pointer-events: auto;
+}
+
+/* SpinTonightModal specific z-index overrides - REMOVED CONFLICTING RULES */
+/* These overrides were causing z-index stacking conflicts */
+/* Modal now uses proper z-index: 50 (backdrop: 40, content: 50) */
+
+/* Emergency reset button styles - Fixed z-index */
+.loader-emergency-reset {
+  z-index: 60;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+}
+
+.loader-emergency-reset:hover {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
+}
+
+/* Modal backdrop blur fail-safe */
+.modal-backdrop-blur-fix {
+  backdrop-filter: blur(0px) !important;
+  -webkit-backdrop-filter: blur(0px) !important;
+}
+
+/* Emergency body scroll fix */
+.body-scroll-fix {
+  overflow: unset !important;
+  padding-right: 0px !important;
 }
 
 
