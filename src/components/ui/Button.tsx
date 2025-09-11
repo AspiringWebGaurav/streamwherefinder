@@ -9,14 +9,29 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'primary', size = 'md', isLoading = false, children, disabled, ...props }, ref) => {
-    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 select-none touch-manipulation';
+    const baseStyles = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-200 cinema-focus disabled:pointer-events-none disabled:opacity-50 select-none touch-manipulation';
     
     const variants = {
-      primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800 active:scale-95',
-      secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 active:bg-gray-300 active:scale-95',
-      outline: 'border-2 border-blue-600 text-blue-600 hover:bg-blue-50 active:bg-blue-100 active:scale-95',
-      ghost: 'text-gray-700 hover:bg-gray-100 active:bg-gray-200 active:scale-95',
-      destructive: 'bg-red-600 text-white hover:bg-red-700 active:bg-red-800 active:scale-95',
+      primary: 'btn-cinema-primary active:scale-95',
+      secondary: 'active:scale-95',
+      outline: 'border-2 hover:bg-black/10 active:bg-black/20 active:scale-95',
+      ghost: 'hover:bg-black/10 active:bg-black/20 active:scale-95',
+      destructive: 'active:scale-95',
+    };
+    
+    const getVariantStyles = (variant: string): React.CSSProperties => {
+      switch (variant) {
+        case 'secondary':
+          return { backgroundColor: 'var(--cinema-slate)', color: 'var(--cinema-white)' };
+        case 'outline':
+          return { borderColor: 'var(--cinema-violet)', color: 'var(--cinema-violet)' };
+        case 'ghost':
+          return { color: 'var(--cinema-cream)' };
+        case 'destructive':
+          return { backgroundColor: 'var(--cinema-error)', color: 'var(--cinema-white)' };
+        default:
+          return {};
+      }
     };
     
     const sizes = {
@@ -26,6 +41,8 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       xl: 'min-h-[52px] px-8 text-lg gap-3', // Increased from h-14 to min-h-[52px]
     };
 
+    const variantStyles = getVariantStyles(variant);
+    
     return (
       <button
         ref={ref}
@@ -35,6 +52,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           sizes[size],
           className
         )}
+        style={variantStyles}
         disabled={disabled || isLoading}
         {...props}
       >

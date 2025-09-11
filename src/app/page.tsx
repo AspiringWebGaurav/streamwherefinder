@@ -51,19 +51,19 @@ function CarouselLoading({ title }: { title: string }) {
 // Hero section component
 function HeroSection({ onSpinTonight }: { onSpinTonight: () => void }) {
   return (
-    <section className="relative bg-gradient-to-br from-blue-50 via-white to-purple-50 py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
+    <section className="relative glass-cinema-primary py-12 sm:py-16 md:py-20 lg:py-24 xl:py-32">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
           {/* Main Heading - Mobile First */}
-          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
+          <h1 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-4 sm:mb-6 leading-tight" style={{color: 'var(--cinema-white)'}}>
             Find Where to
-            <span className="text-blue-600 block mt-1 sm:mt-0 sm:inline sm:ml-2 lg:block lg:ml-0 lg:mt-2">Stream Movies</span>
+            <span className="block mt-1 sm:mt-0 sm:inline sm:ml-2 lg:block lg:ml-0 lg:mt-2" style={{color: 'var(--cinema-gold)'}}>Stream Movies</span>
           </h1>
           
           {/* Subtitle - Responsive Text */}
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-600 mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-3xl mx-auto leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
             Search thousands of movies and discover where to watch them legally.
-            <span className="text-blue-600 font-medium block mt-2">
+            <span className="font-medium block mt-2" style={{color: 'var(--cinema-gold)'}}>
               Works even with typos!
             </span>
           </p>
@@ -82,29 +82,29 @@ function HeroSection({ onSpinTonight }: { onSpinTonight: () => void }) {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 mb-8 sm:mb-10 lg:mb-12">
             <Button
               size="lg"
-              className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-6 sm:px-8 w-full sm:w-auto min-h-[48px]"
+              className="btn-cinema-gold px-6 sm:px-8 w-full sm:w-auto min-h-[48px]"
               onClick={onSpinTonight}
             >
               <Shuffle className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
               Spin Tonight
             </Button>
-            <p className="text-xs sm:text-sm text-gray-500 text-center px-4">
+            <p className="text-xs sm:text-sm text-center px-4" style={{color: 'var(--cinema-cream)'}}>
               Can't decide? Let us pick something great for you!
             </p>
           </div>
           
           {/* Trust indicators - Mobile Stacked */}
-          <div className="flex flex-col xs:flex-row xs:flex-wrap justify-center items-center gap-4 xs:gap-6 text-sm text-gray-500">
+          <div className="flex flex-col xs:flex-row xs:flex-wrap justify-center items-center gap-4 xs:gap-6 text-sm" style={{color: 'var(--cinema-cream)'}}>
             <div className="flex items-center">
-              <Star className="w-4 h-4 mr-2 text-yellow-500 flex-shrink-0" />
+              <Star className="w-4 h-4 mr-2 flex-shrink-0" style={{color: 'var(--cinema-gold)'}} />
               <span className="whitespace-nowrap">Legal sources only</span>
             </div>
             <div className="flex items-center">
-              <Award className="w-4 h-4 mr-2 text-green-500 flex-shrink-0" />
+              <Award className="w-4 h-4 mr-2 flex-shrink-0" style={{color: 'var(--cinema-success)'}} />
               <span className="whitespace-nowrap">Updated daily</span>
             </div>
             <div className="flex items-center">
-              <TrendingUp className="w-4 h-4 mr-2 text-blue-500 flex-shrink-0" />
+              <TrendingUp className="w-4 h-4 mr-2 flex-shrink-0" style={{color: 'var(--cinema-info)'}} />
               <span className="whitespace-nowrap">Trending worldwide</span>
             </div>
           </div>
@@ -183,14 +183,14 @@ export default function HomePage() {
         
         {/* Platform-specific sections - Mobile First Grid */}
         <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
-          <div className="bg-red-50 p-4 sm:p-6 rounded-xl border border-red-100">
+          <div className="card-cinema p-4 sm:p-6 rounded-xl">
             <div className="flex items-center mb-3 sm:mb-4">
               <div className="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                 <span className="text-white font-bold text-sm">N</span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Popular on Netflix</h3>
+              <h3 className="text-base sm:text-lg font-semibold leading-tight" style={{color: 'var(--cinema-white)'}}>Popular on Netflix</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+            <p className="text-sm mb-4 leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
               Discover what's trending on Netflix right now
             </p>
             <Button variant="outline" size="sm" className="w-full sm:w-auto min-h-[40px]">
@@ -198,14 +198,14 @@ export default function HomePage() {
             </Button>
           </div>
           
-          <div className="bg-blue-50 p-4 sm:p-6 rounded-xl border border-blue-100">
+          <div className="card-cinema p-4 sm:p-6 rounded-xl">
             <div className="flex items-center mb-3 sm:mb-4">
               <div className="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                 <span className="text-white font-bold text-sm">P</span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Amazon Prime Video</h3>
+              <h3 className="text-base sm:text-lg font-semibold leading-tight" style={{color: 'var(--cinema-white)'}}>Amazon Prime Video</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+            <p className="text-sm mb-4 leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
               Latest releases and Prime exclusives
             </p>
             <Button variant="outline" size="sm" className="w-full sm:w-auto min-h-[40px]">
@@ -213,14 +213,14 @@ export default function HomePage() {
             </Button>
           </div>
           
-          <div className="bg-purple-50 p-4 sm:p-6 rounded-xl border border-purple-100 sm:col-span-2 lg:col-span-1">
+          <div className="card-cinema p-4 sm:p-6 rounded-xl sm:col-span-2 lg:col-span-1">
             <div className="flex items-center mb-3 sm:mb-4">
               <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center mr-3 flex-shrink-0">
                 <span className="text-white font-bold text-sm">D+</span>
               </div>
-              <h3 className="text-base sm:text-lg font-semibold text-gray-900 leading-tight">Disney+ Hotstar</h3>
+              <h3 className="text-base sm:text-lg font-semibold leading-tight" style={{color: 'var(--cinema-white)'}}>Disney+ Hotstar</h3>
             </div>
-            <p className="text-sm text-gray-600 mb-4 leading-relaxed">
+            <p className="text-sm mb-4 leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
               Marvel, Star Wars, and family favorites
             </p>
             <Button variant="outline" size="sm" className="w-full sm:w-auto min-h-[40px]">
@@ -255,13 +255,13 @@ export default function HomePage() {
       </div>
 
       {/* Search History Benefits Section - Mobile First */}
-      <section className="bg-gradient-to-r from-blue-50 via-indigo-50 to-purple-50 py-12 sm:py-16">
+      <section className="section-cinema-content py-12 sm:py-16">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-6xl">
           <div className="text-center mb-8 sm:mb-10 lg:mb-12">
-            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+            <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 leading-tight" style={{color: 'var(--cinema-white)'}}>
               Never Lose Track of Your Searches Again
             </h2>
-            <p className="text-sm sm:text-base lg:text-lg text-gray-600 max-w-3xl mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base lg:text-lg max-w-3xl mx-auto leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
               Sign in with one click to automatically save your search history across all your devices
             </p>
           </div>
@@ -269,30 +269,30 @@ export default function HomePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 mb-8 sm:mb-10 lg:mb-12">
             <div className="text-center">
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-blue-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <History className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+                <History className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" style={{color: 'var(--cinema-white)'}} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 leading-tight">Search History</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight" style={{color: 'var(--cinema-white)'}}>Search History</h3>
+              <p className="text-sm sm:text-base leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
                 Keep track of every movie you've searched for and easily find them again
               </p>
             </div>
 
             <div className="text-center">
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-green-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <RefreshCw className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+                <RefreshCw className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" style={{color: 'var(--cinema-white)'}} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 leading-tight">Sync Across Devices</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight" style={{color: 'var(--cinema-white)'}}>Sync Across Devices</h3>
+              <p className="text-sm sm:text-base leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
                 Access your search history from any device - phone, tablet, or computer
               </p>
             </div>
 
             <div className="text-center sm:col-span-2 lg:col-span-1">
               <div className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-purple-600 rounded-xl sm:rounded-2xl flex items-center justify-center mx-auto mb-3 sm:mb-4">
-                <Shield className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8 text-white" />
+                <Shield className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8" style={{color: 'var(--cinema-white)'}} />
               </div>
-              <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2 leading-tight">Private & Secure</h3>
-              <p className="text-sm sm:text-base text-gray-600 leading-relaxed">
+              <h3 className="text-lg sm:text-xl font-semibold mb-2 leading-tight" style={{color: 'var(--cinema-white)'}}>Private & Secure</h3>
+              <p className="text-sm sm:text-base leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
                 Your search history is private to you and secured with Google authentication
               </p>
             </div>
@@ -302,13 +302,13 @@ export default function HomePage() {
             <Link href="/profile">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg w-full sm:w-auto min-h-[48px]"
+                className="btn-cinema-primary px-6 sm:px-8 py-3 sm:py-4 text-base sm:text-lg w-full sm:w-auto min-h-[48px]"
               >
                 <User className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                 Sign In with Google - It's Free!
               </Button>
             </Link>
-            <p className="text-xs sm:text-sm text-gray-500 mt-3 px-4">
+            <p className="text-xs sm:text-sm mt-3 px-4" style={{color: 'var(--cinema-indigo)'}}>
               One click sign-in • No passwords • Instant sync
             </p>
           </div>
@@ -316,12 +316,12 @@ export default function HomePage() {
       </section>
       
       {/* Call to Action - Mobile First */}
-      <section className="bg-gray-50 py-12 sm:py-16">
+      <section className="section-cinema-elevated py-12 sm:py-16">
         <div className="container mx-auto text-center px-4 sm:px-6 lg:px-8 max-w-4xl">
-          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-3 sm:mb-4 leading-tight">
+          <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold mb-3 sm:mb-4 leading-tight" style={{color: 'var(--cinema-white)'}}>
             Can't Find What You're Looking For?
           </h2>
-          <p className="text-sm sm:text-base lg:text-lg text-gray-600 mb-6 sm:mb-8 leading-relaxed">
+          <p className="text-sm sm:text-base lg:text-lg mb-6 sm:mb-8 leading-relaxed" style={{color: 'var(--cinema-cream)'}}>
             Our search works even with spelling mistakes. Try searching for your favorite movie!
           </p>
           <div className="max-w-2xl mx-auto">
