@@ -829,6 +829,11 @@ body {
   }
 }
 
+/* Ensure shimmer animation works properly */
+.image-loading {
+  animation: shimmer 2s ease-in-out infinite;
+}
+
 /* Image container optimizations to prevent layout shift */
 .image-container {
   position: relative;
@@ -1122,6 +1127,11 @@ body {
   100% {
     transform: translateX(100%);
   }
+}
+
+/* Ensure shimmer animation works properly */
+.image-loading {
+  animation: shimmer 2s ease-in-out infinite;
 }
 
 @keyframes loaderSpin {

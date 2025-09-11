@@ -9,10 +9,11 @@ import type { LoaderContextType } from '@/types/loader';
  * Automatically manages global loading states during navigation
  */
 
-// Global state for router loading
-let routerTaskKey = 'router_navigation';
+// Global state for router loading - improved synchronization
+let currentRouterTaskKey: string | null = null;
 let routerStartTime = 0;
 let routerGraceTimer: NodeJS.Timeout | null = null;
+let routerDebounceTimer: NodeJS.Timeout | null = null;
 let isNavigating = false;
 
 /**
@@ -43,23 +44,42 @@ export function useRouterLoading(loaderContext: LoaderContextType) {
     
     if (pathnameChanged || searchParamsChanged) {
       // Navigation completed - end any active router loading
-      if (isNavigating) {
+      if (isNavigating && currentRouterTaskKey) {
         // Add grace period to prevent flicker on fast navigations
         if (routerGraceTimer) {
           clearTimeout(routerGraceTimer);
         }
         
+        const taskKeyToEnd = currentRouterTaskKey;
         routerGraceTimer = setTimeout(() => {
-          endTask(routerTaskKey);
+          endTask(taskKeyToEnd);
           isNavigating = false;
+          currentRouterTaskKey = null;
           routerGraceTimer = null;
           
-          // Debug logging
+          // Enhanced debug logging
           if (process.env.NODE_ENV === 'development') {
             const duration = Date.now() - routerStartTime;
-            console.log(`[RouterLoading] Navigation completed in ${duration}ms`);
+            console.log(`🚀 [RouterLoading] Navigation completed in ${duration}ms`, {
+              taskKey: taskKeyToEnd,
+              duration,
+              pathname: currentPathname,
+              searchParams: currentSearchParams,
+              timestamp: new Date().toISOString()
+            });
           }
         }, GRACE_PERIOD);
+      } else if (currentRouterTaskKey) {
+        // Force end any orphaned router tasks immediately
+        endTask(currentRouterTaskKey);
+        currentRouterTaskKey = null;
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔧 [RouterLoading] Cleaned up orphaned router task`, {
+            taskKey: currentRouterTaskKey,
+            pathname: currentPathname,
+            timestamp: new Date().toISOString()
+          });
+        }
       }
       
       // Update refs for next comparison
@@ -75,12 +95,27 @@ export function useRouterLoading(loaderContext: LoaderContextType) {
       if (routerGraceTimer) {
         clearTimeout(routerGraceTimer);
       }
+      if (routerDebounceTimer) {
+        clearTimeout(routerDebounceTimer);
+      }
+      
+      // Clean up any remaining router task
+      if (currentRouterTaskKey && isNavigating) {
+        endTask(currentRouterTaskKey);
+        currentRouterTaskKey = null;
+        isNavigating = false;
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🧹 [RouterLoading] Cleaned up router task on hook cleanup`);
+        }
+      }
     };
   }, [pathname, searchParams, endTask]);
   
   // Return function to manually start router loading
   const startRouterLoading = (customKey?: string) => {
-    const taskKey = customKey || routerTaskKey;
+    // Generate unique task key
+    const taskKey = customKey || `router_navigation_${Date.now()}`;
     
     // Clear any existing timers
     if (debounceTimerRef.current) {
@@ -89,19 +124,34 @@ export function useRouterLoading(loaderContext: LoaderContextType) {
     if (routerGraceTimer) {
       clearTimeout(routerGraceTimer);
     }
+    if (routerDebounceTimer) {
+      clearTimeout(routerDebounceTimer);
+    }
+    
+    // End any previous navigation task
+    if (currentRouterTaskKey && isNavigating) {
+      endTask(currentRouterTaskKey);
+    }
     
     // Start loading with debounce
-    debounceTimerRef.current = setTimeout(() => {
-      if (!isNavigating) {
+    routerDebounceTimer = setTimeout(() => {
+      if (!isNavigating || currentRouterTaskKey !== taskKey) {
         startTask(taskKey);
+        currentRouterTaskKey = taskKey;
         isNavigating = true;
         routerStartTime = Date.now();
         
-        // Debug logging
+        // Enhanced debug logging
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[RouterLoading] Started navigation loading`);
+          console.log(`🔄 [RouterLoading] Started navigation loading`, {
+            taskKey,
+            isNavigating,
+            routerStartTime: routerStartTime,
+            timestamp: new Date().toISOString()
+          });
         }
       }
+      routerDebounceTimer = null;
     }, DEBOUNCE_DELAY);
   };
   
@@ -217,27 +267,61 @@ export const RouterLoadingUtils = {
   /**
    * Start router loading manually (for programmatic navigation)
    */
-  startLoading: (taskKey = routerTaskKey) => {
+  startLoading: (customKey?: string) => {
+    const taskKey = customKey || `router_navigation_${Date.now()}`;
     const event = new CustomEvent('navigation-start', {
       detail: { taskKey }
     });
     window.dispatchEvent(event);
+    return taskKey; // Return the key so caller can use it for ending
   },
   
   /**
    * End router loading manually
    */
-  endLoading: (taskKey = routerTaskKey) => {
-    const event = new CustomEvent('navigation-end', {
-      detail: { taskKey }
-    });
-    window.dispatchEvent(event);
+  endLoading: (taskKey?: string) => {
+    const keyToUse = taskKey || currentRouterTaskKey;
+    if (keyToUse) {
+      const event = new CustomEvent('navigation-end', {
+        detail: { taskKey: keyToUse }
+      });
+      window.dispatchEvent(event);
+    }
+  },
+  
+  /**
+   * Force end all router loading (emergency cleanup)
+   */
+  forceEndAll: () => {
+    if (currentRouterTaskKey) {
+      const event = new CustomEvent('navigation-end', {
+        detail: { taskKey: currentRouterTaskKey }
+      });
+      window.dispatchEvent(event);
+    }
+    
+    // Clean up global state
+    isNavigating = false;
+    currentRouterTaskKey = null;
+    if (routerGraceTimer) {
+      clearTimeout(routerGraceTimer);
+      routerGraceTimer = null;
+    }
+    if (routerDebounceTimer) {
+      clearTimeout(routerDebounceTimer);
+      routerDebounceTimer = null;
+    }
   },
   
   /**
    * Check if router is currently loading
    */
-  isLoading: () => isNavigating
+  isLoading: () => isNavigating,
+  
+  /**
+   * Get current task key
+   */
+  getCurrentTaskKey: () => currentRouterTaskKey
 };
 
 export default useRouterLoading;

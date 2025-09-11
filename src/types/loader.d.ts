@@ -4,8 +4,8 @@
  */
 
 export interface LoaderContextType {
-  /** Start a loading task with optional key for tracking */
-  startTask: (key?: string) => void;
+  /** Start a loading task with optional key for tracking - returns the task key */
+  startTask: (key?: string) => string | void;
   /** End a loading task with optional key for tracking */
   endTask: (key?: string) => void;
   /** Current loading state - true when any tasks are active */
@@ -16,6 +16,8 @@ export interface LoaderContextType {
   timeoutMessage?: string;
   /** Retry callback for timeout scenarios */
   onRetry?: () => void;
+  /** Emergency cleanup function (debug mode only) */
+  _forceCleanup?: () => number;
 }
 
 export interface LoaderProviderProps {

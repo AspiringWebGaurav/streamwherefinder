@@ -202,6 +202,17 @@ export function useGlobalLoader(
   const [timeoutId, setTimeoutId] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
+    // Enhanced debug logging
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🔄 [GlobalLoader] Task count changed to ${taskCount}, current visibility: ${isVisible}`, {
+        taskCount,
+        isVisible,
+        hasTimeout: !!timeoutId,
+        debounceDelay,
+        timestamp: new Date().toISOString()
+      });
+    }
+
     // Clear existing timeout
     if (timeoutId) {
       clearTimeout(timeoutId);
@@ -211,12 +222,34 @@ export function useGlobalLoader(
     if (taskCount > 0) {
       // Show loader after debounce delay
       const newTimeoutId = setTimeout(() => {
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🔵 [GlobalLoader] SHOWING loader (debounce completed)`, {
+            taskCount,
+            debounceDelay,
+            timestamp: new Date().toISOString()
+          });
+        }
         setIsVisible(true);
         setTimeoutId(null);
       }, debounceDelay);
       setTimeoutId(newTimeoutId);
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`⏱️ [GlobalLoader] Debounce timer started (${debounceDelay}ms)`, {
+          taskCount,
+          debounceDelay,
+          timestamp: new Date().toISOString()
+        });
+      }
     } else {
       // Hide loader immediately when no tasks
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`❌ [GlobalLoader] HIDING loader (no tasks)`, {
+          taskCount,
+          wasVisible: isVisible,
+          timestamp: new Date().toISOString()
+        });
+      }
       setIsVisible(false);
     }
 

@@ -67,13 +67,13 @@ function LoadingOverlay({
   if (!isVisible) return null;
 
   if (skeleton) {
-    return <Skeleton className={cn('absolute inset-0', className)} />;
+    return <Skeleton className={cn('absolute inset-0 z-10', className)} />;
   }
 
   if (spinner !== false) {
     return (
       <div className={cn(
-        'absolute inset-0 flex items-center justify-center bg-gray-100 dark:bg-gray-800',
+        'absolute inset-0 z-10 flex items-center justify-center bg-gray-100 dark:bg-gray-800',
         className
       )}>
         <Spinner size="md" variant="gray" />
@@ -81,7 +81,16 @@ function LoadingOverlay({
     );
   }
 
-  return null;
+  // Even if spinner is disabled, show some loading indication
+  return (
+    <div className={cn(
+      'absolute inset-0 z-10 bg-gray-200 dark:bg-gray-700',
+      'bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 dark:from-gray-700 dark:via-gray-600 dark:to-gray-700',
+      className
+    )}>
+      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 dark:via-white/10 to-transparent image-loading" />
+    </div>
+  );
 }
 
 /**
@@ -200,15 +209,26 @@ export function SmartImage({
     // Call external callback
     onLoadComplete?.();
     
-    // Debug logging
+    // Enhanced debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[SmartImage] Loaded: ${src}`);
+      console.log(`🖼️ [SmartImage] Loaded successfully`, {
+        src,
+        width: img.naturalWidth,
+        height: img.naturalHeight,
+        retryCount,
+        timestamp: new Date().toISOString()
+      });
     }
   }, [src, onLoadComplete]);
 
   // Handle image load error with retry logic
   const handleError = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
-    console.warn(`[SmartImage] Error loading ${src}, attempt ${retryCount + 1}`);
+    console.warn(`❌ [SmartImage] Error loading image`, {
+      src,
+      attempt: retryCount + 1,
+      maxRetries: maxRetries + 1,
+      timestamp: new Date().toISOString()
+    });
     
     if (retryCount < maxRetries) {
       // Retry with progressive delay
@@ -236,6 +256,15 @@ export function SmartImage({
   // Start loading when element becomes visible
   useEffect(() => {
     if (isIntersecting && src && loadingState === 'idle' && !hasError) {
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🔄 [SmartImage] Starting to load`, {
+          src,
+          isIntersecting,
+          loadingState,
+          hasError,
+          timestamp: new Date().toISOString()
+        });
+      }
       setLoadingState('loading');
     }
   }, [isIntersecting, src, loadingState, hasError]);
@@ -263,15 +292,15 @@ export function SmartImage({
   return (
     <div
       ref={containerRef}
-      className={cn('relative overflow-hidden', containerClassName)}
+      className={cn('relative overflow-hidden bg-gray-100 dark:bg-gray-800', containerClassName)}
       style={{ width, height }}
     >
-      {/* Loading overlay - only show when intersecting and loading */}
+      {/* Always show loading overlay initially or when loading */}
       <LoadingOverlay
         spinner={spinner}
         skeleton={skeleton}
         className={className}
-        isVisible={hasIntersected && (loadingState === 'idle' || loadingState === 'loading') && !hasError}
+        isVisible={loadingState === 'idle' || loadingState === 'loading'}
       />
 
       {/* Error fallback */}
@@ -279,7 +308,7 @@ export function SmartImage({
         <ErrorFallback
           fallbackSrc={fallbackSrc}
           alt={alt}
-          className={className}
+          className={cn('z-20', className)}
           onRetry={handleRetry}
         />
       )}
@@ -292,8 +321,8 @@ export function SmartImage({
           width={width}
           height={height}
           className={cn(
-            'transition-opacity duration-300',
-            loadingState === 'loaded' ? 'opacity-100' : 'opacity-0',
+            'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
+            loadingState === 'loaded' ? 'opacity-100 z-30' : 'opacity-0 z-20',
             className
           )}
           onLoad={handleLoad}

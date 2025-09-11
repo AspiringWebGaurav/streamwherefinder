@@ -55,9 +55,6 @@ export async function GET(request: NextRequest) {
 
     // Security: Validate path format to prevent SSRF
     if (!isValidTMDBPath(path)) {
-      console.warn(`[DEBUG] Invalid TMDB path attempted: ${path}`);
-      console.warn(`[DEBUG] Path length: ${path.length}, starts with /: ${path.startsWith('/')}, ends with .jpg: ${path.endsWith('.jpg')}`);
-      console.warn(`[DEBUG] Regex test result: ${/^\/[a-zA-Z0-9_-]+\.jpg$/.test(path)}`);
       return new NextResponse(
         generateFallbackSVG('Invalid Path'),
         {
@@ -72,7 +69,6 @@ export async function GET(request: NextRequest) {
 
     // Validate size parameter
     if (!isValidSize(size)) {
-      console.warn(`Invalid size parameter: ${size}`);
       return new NextResponse(
         generateFallbackSVG('Invalid Size'),
         {
@@ -87,8 +83,6 @@ export async function GET(request: NextRequest) {
 
     // Construct TMDB image URL
     const imageUrl = `${TMDB_IMAGE_BASE}/${size}${path}`;
-    
-    console.log(`Fetching image: ${imageUrl}`);
 
     // Fetch image from TMDB with appropriate headers
     const response = await fetch(imageUrl, {
@@ -104,8 +98,6 @@ export async function GET(request: NextRequest) {
 
     // Handle TMDB response errors
     if (!response.ok) {
-      console.warn(`TMDB image fetch failed: ${response.status} ${response.statusText} for ${imageUrl}`);
-      
       // Return SVG fallback for any failure
       return new NextResponse(
         generateFallbackSVG(title),
@@ -124,7 +116,6 @@ export async function GET(request: NextRequest) {
     
     // Validate content type
     if (!contentType.startsWith('image/')) {
-      console.warn(`Invalid content type received: ${contentType} for ${imageUrl}`);
       return new NextResponse(
         generateFallbackSVG(title),
         {
@@ -142,7 +133,6 @@ export async function GET(request: NextRequest) {
     
     // Validate image buffer
     if (!imageBuffer || imageBuffer.byteLength === 0) {
-      console.warn(`Empty image buffer received for ${imageUrl}`);
       return new NextResponse(
         generateFallbackSVG(title),
         {
@@ -174,8 +164,6 @@ export async function GET(request: NextRequest) {
 
   } catch (error) {
     // Handle any unexpected errors (network issues, timeouts, etc.)
-    console.error('Image proxy error:', error);
-    
     const { searchParams } = new URL(request.url);
     const title = searchParams.get('title') || 'Error';
     

@@ -27,6 +27,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const inactivityTimer = useRef<NodeJS.Timeout | null>(null);
+  const authTaskStarted = useRef<boolean>(false);
   
   // Integrate with global loader system
   const loader = useLoader();
@@ -80,27 +81,21 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    // Start auth loading task
-    loader.startTask('firebase_auth_init');
+    // Start auth loading task only once
+    if (!authTaskStarted.current) {
+      loader.startTask('firebase_auth_init');
+      authTaskStarted.current = true;
+    }
 
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      // Debug logging for user data
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Auth State Changed:', {
-          hasUser: !!user,
-          uid: user?.uid,
-          email: user?.email,
-          displayName: user?.displayName,
-          photoURL: user?.photoURL,
-          providerData: user?.providerData
-        });
-      }
-      
       setUser(user);
       setLoading(false);
       
-      // End auth loading task
-      loader.endTask('firebase_auth_init');
+      // End auth loading task only on first auth resolution and keep flag true to prevent restarts
+      if (authTaskStarted.current) {
+        loader.endTask('firebase_auth_init');
+        // Don't reset the flag to prevent repeated start/end cycles
+      }
       
       if (!user && inactivityTimer.current) {
         clearTimeout(inactivityTimer.current);
@@ -110,8 +105,10 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
 
     return () => {
       unsubscribe();
-      // Ensure we end the loading task if component unmounts
-      loader.endTask('firebase_auth_init');
+      // Only end task if it was actually started
+      if (authTaskStarted.current) {
+        loader.endTask('firebase_auth_init');
+      }
     };
   }, [loader]);
 
@@ -126,21 +123,6 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
       loader.startTask('firebase_signin');
       
       const result = await signInWithPopup(auth, googleProvider);
-      
-      // Debug logging for Google sign-in result
-      if (process.env.NODE_ENV === 'development') {
-        console.log('Google Sign-In Result:', {
-          user: {
-            uid: result.user.uid,
-            email: result.user.email,
-            displayName: result.user.displayName,
-            photoURL: result.user.photoURL,
-            emailVerified: result.user.emailVerified,
-            providerId: result.user.providerId,
-            providerData: result.user.providerData
-          }
-        });
-      }
       
     } catch (error) {
       console.error('Error signing in with Google:', error);

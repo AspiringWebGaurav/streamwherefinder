@@ -67,22 +67,31 @@ function useIntersectionObserver(
 }
 
 // Shimmer loading component
-function LoadingShimmer({ 
-  className, 
-  aspectRatio 
-}: { 
-  className?: string; 
+function LoadingShimmer({
+  className,
+  aspectRatio
+}: {
+  className?: string;
   aspectRatio: number;
 }) {
   return (
-    <div 
+    <div
       className={cn(
-        'relative overflow-hidden bg-gray-200 animate-pulse',
+        'relative overflow-hidden bg-gray-200',
         className
       )}
       style={{ aspectRatio }}
     >
-      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/60 to-transparent animate-[shimmer_2s_infinite]" />
+      {/* Base shimmer background */}
+      <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
+      
+      {/* Animated shimmer overlay */}
+      <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent image-loading" />
+      
+      {/* Loading indicator */}
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
+      </div>
     </div>
   );
 }
@@ -323,24 +332,24 @@ export function ImageWithFallback({
   }
 
   return (
-    <div 
-      ref={containerRef} 
-      className={cn('relative overflow-hidden', className)}
+    <div
+      ref={containerRef}
+      className={cn('relative overflow-hidden bg-gray-100', className)}
       style={{ aspectRatio: aspectRatioValue }}
     >
-      {/* Loading shimmer - shown until image loads or errors */}
-      {loadingState !== 'loaded' && loadingState !== 'error' && (
-        <LoadingShimmer 
-          className={cn('absolute inset-0', shimmerClassName)}
+      {/* Always show loading state initially or when loading */}
+      {(loadingState === 'idle' || loadingState === 'loading') && (
+        <LoadingShimmer
+          className={cn('absolute inset-0 z-10', shimmerClassName)}
           aspectRatio={aspectRatioValue}
         />
       )}
 
       {/* Error fallback */}
       {(loadingState === 'error' || hasError) && (
-        <FallbackDisplay 
-          text={fallbackText} 
-          className="absolute inset-0"
+        <FallbackDisplay
+          text={fallbackText}
+          className="absolute inset-0 z-20"
           aspectRatio={aspectRatioValue}
         />
       )}
@@ -354,7 +363,7 @@ export function ImageWithFallback({
           height={height}
           className={cn(
             'absolute inset-0 w-full h-full object-cover transition-opacity duration-300',
-            loadingState === 'loaded' ? 'opacity-100' : 'opacity-0'
+            loadingState === 'loaded' ? 'opacity-100 z-30' : 'opacity-0 z-20'
           )}
           priority={priority}
           sizes={sizes}

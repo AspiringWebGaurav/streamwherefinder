@@ -31,11 +31,64 @@ export function LoaderProvider({
   const taskCounterRef = useRef(0);
   const globalTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const retryHandlerRef = useRef(onRetry);
+  const cleanupIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Constants for fail-safe mechanisms
+  const MAX_TASK_DURATION = 30000; // 30 seconds max per task
+  const CLEANUP_INTERVAL = 5000;   // Check every 5 seconds
+  const MAX_TOTAL_TASKS = 10;      // Maximum concurrent tasks
   
   // Update retry handler ref when it changes
   useEffect(() => {
     retryHandlerRef.current = onRetry;
   }, [onRetry]);
+  
+  // Periodic cleanup of stuck tasks
+  useEffect(() => {
+    const cleanupStuckTasks = () => {
+      const now = Date.now();
+      const tasksToCleanup: string[] = [];
+      
+      tasksRef.current.forEach((task, key) => {
+        const taskAge = now - task.startTime;
+        if (taskAge > MAX_TASK_DURATION) {
+          tasksToCleanup.push(key);
+          
+          if (process.env.NODE_ENV === 'development') {
+            console.warn(`🚨 [LoaderProvider] Task "${key}" stuck for ${taskAge}ms, cleaning up`);
+          }
+        }
+      });
+      
+      // Clean up stuck tasks
+      tasksToCleanup.forEach(key => {
+        tasksRef.current.delete(key);
+      });
+      
+      if (tasksToCleanup.length > 0) {
+        const newCount = tasksRef.current.size;
+        setTaskCount(newCount);
+        
+        // Clear global timeout if no tasks remain
+        if (newCount === 0) {
+          clearGlobalTimeout();
+        }
+        
+        if (process.env.NODE_ENV === 'development') {
+          console.log(`🧹 [LoaderProvider] Cleaned up ${tasksToCleanup.length} stuck tasks`);
+        }
+      }
+    };
+    
+    // Start periodic cleanup
+    cleanupIntervalRef.current = setInterval(cleanupStuckTasks, CLEANUP_INTERVAL);
+    
+    return () => {
+      if (cleanupIntervalRef.current) {
+        clearInterval(cleanupIntervalRef.current);
+      }
+    };
+  }, []);
 
   // Generate unique task key
   const generateTaskKey = useCallback(() => {
@@ -69,8 +122,30 @@ export function LoaderProvider({
     
     // Don't add duplicate tasks
     if (tasksRef.current.has(taskKey)) {
-      console.warn(`LoaderProvider: Task with key "${taskKey}" already exists`);
-      return;
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[LoaderProvider] Task with key "${taskKey}" already exists, refreshing timestamp`);
+      }
+      // Update existing task timestamp instead of ignoring
+      const existingTask = tasksRef.current.get(taskKey)!;
+      existingTask.startTime = now;
+      return taskKey;
+    }
+    
+    // Fail-safe: prevent too many concurrent tasks
+    if (tasksRef.current.size >= MAX_TOTAL_TASKS) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[LoaderProvider] Maximum task limit reached (${MAX_TOTAL_TASKS}), forcing cleanup`);
+      }
+      
+      // Remove oldest tasks to make room
+      const oldestTasks = Array.from(tasksRef.current.entries())
+        .sort(([, a], [, b]) => a.startTime - b.startTime)
+        .slice(0, Math.floor(MAX_TOTAL_TASKS / 2))
+        .map(([key]) => key);
+      
+      oldestTasks.forEach(oldKey => {
+        tasksRef.current.delete(oldKey);
+      });
     }
 
     // Add task to map
@@ -90,10 +165,17 @@ export function LoaderProvider({
       startGlobalTimeout();
     }
 
-    // Debug logging
+    // Enhanced debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[LoaderProvider] Started task "${taskKey}" (${newCount} active)`);
+      console.log(`🟡 [LoaderProvider] Started task "${taskKey}" (${newCount} active)`, {
+        taskKey,
+        totalTasks: newCount,
+        activeTasks: Array.from(tasksRef.current.keys()),
+        timestamp: new Date().toISOString()
+      });
     }
+    
+    return taskKey;
   }, [generateTaskKey, startGlobalTimeout]);
 
   // End a loading task
@@ -102,11 +184,22 @@ export function LoaderProvider({
     let taskKey = key;
     if (!taskKey && tasksRef.current.size > 0) {
       taskKey = Array.from(tasksRef.current.keys())[0];
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[LoaderProvider] No key provided, ending oldest task: ${taskKey}`);
+      }
     }
     
-    if (!taskKey || !tasksRef.current.has(taskKey)) {
+    if (!taskKey) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[LoaderProvider] No task key to end and no active tasks`);
+      }
+      return;
+    }
+    
+    if (!tasksRef.current.has(taskKey)) {
       if (process.env.NODE_ENV === 'development') {
         console.warn(`[LoaderProvider] Attempted to end non-existent task "${taskKey}"`);
+        console.log(`[LoaderProvider] Active tasks:`, Array.from(tasksRef.current.keys()));
       }
       return;
     }
@@ -123,12 +216,35 @@ export function LoaderProvider({
       clearGlobalTimeout();
     }
 
-    // Debug logging
+    // Enhanced debug logging
     if (process.env.NODE_ENV === 'development') {
-      console.log(`[LoaderProvider] Ended task "${taskKey}" (${newCount} active)`);
+      console.log(`🟢 [LoaderProvider] Ended task "${taskKey}" (${newCount} active)`, {
+        taskKey,
+        totalTasks: newCount,
+        activeTasks: Array.from(tasksRef.current.keys()),
+        timestamp: new Date().toISOString()
+      });
     }
   }, [clearGlobalTimeout]);
 
+  // Emergency cleanup function
+  const forceCleanupAllTasks = useCallback(() => {
+    const taskCount = tasksRef.current.size;
+    
+    // Clear all tasks
+    tasksRef.current.clear();
+    setTaskCount(0);
+    
+    // Clear all timeouts
+    clearGlobalTimeout();
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`🚨 [LoaderProvider] Emergency cleanup: removed ${taskCount} tasks`);
+    }
+    
+    return taskCount;
+  }, [clearGlobalTimeout]);
+  
   // Handle retry callback
   const handleRetry = useCallback(() => {
     // Clear current timeout and reset state
@@ -138,19 +254,23 @@ export function LoaderProvider({
     if (retryHandlerRef.current) {
       retryHandlerRef.current();
     } else {
-      // Default retry behavior: restart all tasks
+      // Default retry behavior: clear all tasks and restart cleanly
       const activeTasks = Array.from(tasksRef.current.keys());
       
-      // Clear all tasks
-      tasksRef.current.clear();
-      setTaskCount(0);
+      // Force cleanup
+      forceCleanupAllTasks();
       
-      // Restart tasks after a brief delay
+      // Restart essential tasks after a brief delay
       setTimeout(() => {
-        activeTasks.forEach(taskKey => startTask(taskKey));
+        // Only restart non-router tasks to prevent double-loading
+        const essentialTasks = activeTasks.filter(key =>
+          !key.includes('router_') &&
+          !key.includes('navigation')
+        );
+        essentialTasks.forEach(taskKey => startTask(taskKey));
       }, 100);
     }
-  }, [clearGlobalTimeout, startTask]);
+  }, [clearGlobalTimeout, startTask, forceCleanupAllTasks]);
 
   // Use the global loader visibility hook
   const isLoaderVisible = useGlobalLoader(taskCount, debounceDelay);
@@ -159,9 +279,35 @@ export function LoaderProvider({
   useEffect(() => {
     return () => {
       clearGlobalTimeout();
+      if (cleanupIntervalRef.current) {
+        clearInterval(cleanupIntervalRef.current);
+      }
       tasksRef.current.clear();
+      
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`🧹 [LoaderProvider] Component unmounted, cleaned up all tasks`);
+      }
     };
   }, [clearGlobalTimeout]);
+  
+  // Add emergency cleanup to window for debugging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      (window as any).__debugLoader = {
+        getTasks: () => Array.from(tasksRef.current.entries()),
+        getTaskCount: () => tasksRef.current.size,
+        forceCleanup: forceCleanupAllTasks,
+        startTask,
+        endTask
+      };
+    }
+    
+    return () => {
+      if (process.env.NODE_ENV === 'development') {
+        delete (window as any).__debugLoader;
+      }
+    };
+  }, [forceCleanupAllTasks, startTask, endTask]);
 
   // Context value with stable references
   const contextValue: LoaderContextType = {
@@ -170,7 +316,11 @@ export function LoaderProvider({
     isLoading: taskCount > 0,
     taskCount,
     timeoutMessage: showTimeoutMessage ? timeoutMessage : undefined,
-    onRetry: showTimeoutMessage ? handleRetry : undefined
+    onRetry: showTimeoutMessage ? handleRetry : undefined,
+    // Add emergency cleanup for debugging
+    ...(process.env.NODE_ENV === 'development' && {
+      _forceCleanup: forceCleanupAllTasks
+    })
   };
 
   return (
