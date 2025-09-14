@@ -13,6 +13,15 @@
           "image-rendering: crisp-edges"
         ]
       }
-    ]
+    ],
+    "compat-api/html": [
+      "default",
+      {
+        "ignore": [
+          "meta[name=theme-color]"
+        ]
+      }
+    ],
+    "apple-touch-icons": "off"
   }
 }
