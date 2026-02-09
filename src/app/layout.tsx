@@ -7,8 +7,7 @@ import { RouterLoadingManager } from "@/components/RouterLoadingManager";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import { CaptchaProvider } from "@/components/CaptchaProvider";
-import { TurnstileWidget } from "@/components/TurnstileWidget";
+
 import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 const geistSans = Geist({
@@ -184,17 +183,14 @@ export default function RootLayout({
         <div id="__global_loader_root" />
 
         <ErrorBoundary>
-          <CaptchaProvider>
-            <LoaderProvider>
-              <FirebaseProvider>
-                <TurnstileWidget />
-                <MaintenanceGate>
-                  <RouterLoadingManager />
-                  {children}
-                </MaintenanceGate>
-              </FirebaseProvider>
-            </LoaderProvider>
-          </CaptchaProvider>
+          <LoaderProvider>
+            <FirebaseProvider>
+              <MaintenanceGate>
+                <RouterLoadingManager />
+                {children}
+              </MaintenanceGate>
+            </FirebaseProvider>
+          </LoaderProvider>
         </ErrorBoundary>
 
         {/* Analytics */}
