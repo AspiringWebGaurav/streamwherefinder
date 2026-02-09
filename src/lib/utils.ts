@@ -15,15 +15,15 @@ export function formatRuntime(minutes: number): string {
   if (!minutes) return '';
   const hours = Math.floor(minutes / 60);
   const remainingMinutes = minutes % 60;
-  
+
   if (hours === 0) {
     return `${remainingMinutes}min`;
   }
-  
+
   if (remainingMinutes === 0) {
     return `${hours}h`;
   }
-  
+
   return `${hours}h ${remainingMinutes}min`;
 }
 
@@ -32,7 +32,7 @@ export function formatRuntime(minutes: number): string {
  */
 export function formatReleaseDate(dateString: string): string {
   if (!dateString) return '';
-  
+
   try {
     const date = new Date(dateString);
     return date.getFullYear().toString();
@@ -93,7 +93,7 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: NodeJS.Timeout;
-  
+
   return (...args: Parameters<T>) => {
     clearTimeout(timeout);
     timeout = setTimeout(() => func(...args), wait);
@@ -108,11 +108,16 @@ export function sleep(ms: number): Promise<void> {
 }
 
 /**
- * Get contrast ratio between two colors (simplified)
+ * Get contrast ratio between two colors
+ * @deprecated This function needs proper WCAG implementation - currently returns default value
  */
 export function getContrastRatio(color1: string, color2: string): number {
-  // This is a simplified version - in production you'd want a more robust solution
-  return 4.5; // Assuming good contrast for now
+  // TODO: Implement proper WCAG contrast ratio calculation if needed
+  // For now, log a warning in development and return safe default
+  if (process.env.NODE_ENV === 'development') {
+    console.warn('getContrastRatio is not fully implemented - returning default WCAG AA compliant value');
+  }
+  return 4.5; // Default WCAG AA compliant contrast ratio
 }
 
 /**
@@ -122,7 +127,7 @@ export function generateMetaDescription(title: string, overview: string, maxLeng
   if (!overview) {
     return `Watch ${title} - Find where to stream movies online legally. StreamWhereFinder helps you discover movies and where to watch them.`;
   }
-  
+
   const description = `${title} - ${overview}`;
   return truncateText(description, maxLength);
 }
@@ -132,10 +137,10 @@ export function generateMetaDescription(title: string, overview: string, maxLeng
  */
 export function generatePageTitle(title: string, subtitle?: string): string {
   const siteName = 'StreamWhereFinder';
-  
+
   if (subtitle) {
     return `${title} - ${subtitle} | ${siteName}`;
   }
-  
+
   return `${title} | ${siteName}`;
 }

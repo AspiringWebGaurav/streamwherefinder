@@ -15,6 +15,7 @@ interface WatchProvidersProps {
   };
   movieTitle: string;
   movieId: number;
+  releaseDate?: string;
   className?: string;
 }
 
@@ -67,7 +68,7 @@ function ProviderButton({
   const platformKey = PROVIDER_NAME_MAP[provider.provider_name];
   const baseUrl = platformKey ? PLATFORM_URLS[platformKey] : '#';
   const searchUrl = `${baseUrl}${encodeURIComponent(movieTitle)}`;
-  
+
   const typeLabels = {
     streaming: 'Stream',
     rent: 'Rent',
@@ -82,10 +83,10 @@ function ProviderButton({
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    
+
     // Track outbound click
     trackOutboundClick(provider.provider_name, movieTitle, type);
-    
+
     // Open link
     window.open(searchUrl, '_blank', 'noopener,noreferrer');
   };
@@ -106,7 +107,7 @@ function ProviderButton({
             unoptimized
           />
         </div>
-        
+
         <div className="text-center">
           <p className="text-xs font-medium text-gray-900 mb-1">
             {provider.provider_name}
@@ -116,10 +117,10 @@ function ProviderButton({
             {typeLabels[type]}
           </span>
         </div>
-        
+
         <ExternalLink className="w-3 h-3 text-gray-400 mt-1 opacity-0 group-hover:opacity-100 transition-opacity" />
       </button>
-      
+
       {/* Report incorrect link */}
       <button
         onClick={(e) => {
@@ -135,7 +136,7 @@ function ProviderButton({
   );
 }
 
-export function WatchProviders({ watchProviders, movieTitle, movieId, className }: WatchProvidersProps) {
+export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDate, className }: WatchProvidersProps) {
   const hasProviders = watchProviders && (
     (watchProviders.streaming && watchProviders.streaming.length > 0) ||
     (watchProviders.rent && watchProviders.rent.length > 0) ||
@@ -145,10 +146,10 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, className 
   const handleReportIncorrect = (provider: string, type: string) => {
     // For now, just log the report. In production, this would send to an API
     console.log(`Report: ${provider} ${type} link incorrect for ${movieTitle}`);
-    
+
     // Track the report
     trackOutboundClick(`${provider}_REPORT`, movieTitle, type as any);
-    
+
     // Show user feedback
     alert(`Thank you for reporting the incorrect link for ${provider}. We'll review it shortly.`);
   };
@@ -159,40 +160,216 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, className 
   };
 
   if (!hasProviders) {
+    // Check if movie is likely still in theaters (released within last 90 days)
+    const isRecentRelease = releaseDate ? (() => {
+      const release = new Date(releaseDate);
+      const now = new Date();
+      const daysSinceRelease = Math.floor((now.getTime() - release.getTime()) / (1000 * 60 * 60 * 24));
+      return daysSinceRelease >= 0 && daysSinceRelease <= 90;
+    })() : false;
+
+    // Check if movie hasn't released yet
+    const isUpcoming = releaseDate ? new Date(releaseDate) > new Date() : false;
+
+    // Estimate OTT release (typically 45-60 days after theatrical)
+    const estimatedOTTDate = releaseDate ? (() => {
+      const release = new Date(releaseDate);
+      release.setDate(release.getDate() + 60);
+      return release;
+    })() : null;
+
+    const handleExternalClick = (url: string, platform: string) => {
+      trackOutboundClick(platform, movieTitle, 'fallback');
+      window.open(url, '_blank', 'noopener,noreferrer');
+    };
+
     return (
-      <div className={`bg-gray-50 border border-gray-200 rounded-xl p-6 ${className}`}>
-        <div className="text-center">
-          <div className="w-12 h-12 bg-gray-200 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Play className="w-6 h-6 text-gray-400" />
+      <div className={`bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 rounded-xl p-6 ${className}`}>
+        <div className="text-center mb-6">
+          {/* Fun header */}
+          <div className="text-4xl mb-3">🎬</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">
+            Ohhoo! Not on Streaming Yet
+          </h3>
+
+          {/* Status message based on release type */}
+          {isUpcoming ? (
+            <div className="bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+              <p className="text-blue-800 font-medium">
+                🗓️ Coming Soon! Releases on {new Date(releaseDate!).toLocaleDateString('en-IN', {
+                  day: 'numeric', month: 'long', year: 'numeric'
+                })}
+              </p>
+            </div>
+          ) : isRecentRelease ? (
+            <div className="bg-green-100 border border-green-200 rounded-lg p-3 mb-4">
+              <p className="text-green-800 font-medium">
+                🎭 Currently in Theaters!
+              </p>
+              <p className="text-green-700 text-sm mt-1">
+                Expected on OTT around {estimatedOTTDate?.toLocaleDateString('en-IN', {
+                  month: 'long', year: 'numeric'
+                })}
+              </p>
+            </div>
+          ) : (
+            <p className="text-gray-600 mb-4">
+              This title isn't available for streaming yet. It may be in theaters, awaiting OTT release, or region-restricted.
+            </p>
+          )}
+        </div>
+
+        {/* BookMyShow Section - For Theater Movies */}
+        {(isRecentRelease || isUpcoming) && (
+          <div className="mb-6">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center justify-center">
+              <span className="w-2 h-2 bg-red-500 rounded-full mr-2"></span>
+              Book Theater Tickets
+            </h4>
+            <div className="flex justify-center">
+              <Button
+                onClick={() => handleExternalClick(
+                  `https://in.bookmyshow.com/explore/movies-${encodeURIComponent(movieTitle.toLowerCase().replace(/\s+/g, '-'))}`,
+                  'BookMyShow'
+                )}
+                className="bg-red-600 hover:bg-red-700 text-white px-6"
+              >
+                🎟️ Book on BookMyShow
+              </Button>
+            </div>
           </div>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Where to Watch</h3>
-          <p className="text-gray-600 mb-4">
-            We couldn't find streaming information for this movie in your region.
-          </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-            {/* Fallback buttons to major platforms */}
+        )}
+
+        {/* Search on OTT Platforms */}
+        <div className="mb-6">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center justify-center">
+            <span className="w-2 h-2 bg-purple-500 rounded-full mr-2"></span>
+            Search on Popular Platforms
+          </h4>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleFallbackClick('NETFLIX', 'Netflix')}
+              className="border-red-200 hover:bg-red-50 text-gray-700"
             >
-              Search Netflix
+              🎬 Netflix
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleFallbackClick('AMAZON_PRIME', 'Amazon Prime Video')}
+              className="border-blue-200 hover:bg-blue-50 text-gray-700"
             >
-              Search Prime
+              📺 Prime Video
             </Button>
             <Button
               variant="outline"
               size="sm"
               onClick={() => handleFallbackClick('DISNEY_PLUS', 'Disney+ Hotstar')}
+              className="border-indigo-200 hover:bg-indigo-50 text-gray-700"
             >
-              Search Hotstar
+              ⭐ Hotstar
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFallbackClick('JIOCINEMA', 'Jio Cinema')}
+              className="border-pink-200 hover:bg-pink-50 text-gray-700"
+            >
+              🎥 JioCinema
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFallbackClick('SONY_LIV', 'SonyLIV')}
+              className="border-gray-200 hover:bg-gray-50 text-gray-700"
+            >
+              📱 SonyLIV
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFallbackClick('ZEE5', 'Zee5')}
+              className="border-purple-200 hover:bg-purple-50 text-gray-700"
+            >
+              🎞️ Zee5
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFallbackClick('YOUTUBE', 'YouTube')}
+              className="border-red-200 hover:bg-red-50 text-gray-700"
+            >
+              ▶️ YouTube
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => handleFallbackClick('APPLE_TV', 'Apple TV+')}
+              className="border-gray-300 hover:bg-gray-50 text-gray-700"
+            >
+              🍎 Apple TV+
             </Button>
           </div>
+        </div>
+
+        {/* Additional Links Section - Affiliate Ready */}
+        <div className="border-t border-amber-200 pt-4">
+          <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center justify-center">
+            <span className="w-2 h-2 bg-amber-500 rounded-full mr-2"></span>
+            More Options
+          </h4>
+          <div className="flex flex-wrap justify-center gap-3 text-sm">
+            <a
+              href={`https://www.google.com/search?q=${encodeURIComponent(movieTitle + ' OTT release date India')}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackOutboundClick('Google Search', movieTitle, 'fallback')}
+              className="text-blue-600 hover:text-blue-800 hover:underline flex items-center"
+            >
+              🔍 Check OTT Release Date
+            </a>
+            <span className="text-gray-300">|</span>
+            <a
+              href={`https://in.bookmyshow.com/explore/movies`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackOutboundClick('BookMyShow Browse', movieTitle, 'fallback')}
+              className="text-red-600 hover:text-red-800 hover:underline flex items-center"
+            >
+              🎟️ Browse All Movies
+            </a>
+            <span className="text-gray-300">|</span>
+            <a
+              href={`https://www.justwatch.com/in/search?q=${encodeURIComponent(movieTitle)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackOutboundClick('JustWatch', movieTitle, 'fallback')}
+              className="text-yellow-600 hover:text-yellow-800 hover:underline flex items-center"
+            >
+              📊 JustWatch
+            </a>
+            <span className="text-gray-300">|</span>
+            <a
+              href={`https://www.imdb.com/find?q=${encodeURIComponent(movieTitle)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => trackOutboundClick('IMDB', movieTitle, 'fallback')}
+              className="text-amber-600 hover:text-amber-800 hover:underline flex items-center"
+            >
+              ⭐ IMDB
+            </a>
+          </div>
+        </div>
+
+        {/* Disclaimer */}
+        <div className="mt-4 pt-3 border-t border-amber-100">
+          <p className="text-xs text-gray-500 text-center">
+            💡 Tip: New movies typically arrive on OTT 45-60 days after theatrical release.
+            <br />
+            <span className="text-gray-400">Links open official platforms. We may earn from qualifying purchases.</span>
+          </p>
         </div>
       </div>
     );
@@ -283,7 +460,7 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, className 
         </p>
         {watchProviders.link && (
           <p className="text-xs text-gray-400 text-center mt-1">
-            <a 
+            <a
               href={watchProviders.link}
               target="_blank"
               rel="noopener noreferrer"

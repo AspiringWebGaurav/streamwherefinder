@@ -35,7 +35,7 @@ function SpinLoader({ isSpinning }: { isSpinning: boolean }) {
           <div className="absolute inset-0 rounded-full bg-purple-400/20 blur-xl animate-pulse" />
         )}
       </div>
-      
+
       <div className="text-center space-y-2">
         <h3 className="text-lg font-semibold text-gray-900">
           {isSpinning ? "Finding your perfect movie..." : "Ready to spin!"}
@@ -73,7 +73,7 @@ function MovieDisplay({ movie }: { movie: Movie }) {
                 className="w-32 h-48 rounded-lg shadow-lg transition-transform duration-300 group-hover:scale-105"
                 priority
               />
-              
+
               {/* Rating overlay */}
               {movie.rating > 0 && (
                 <div className="absolute top-2 right-2 bg-black/80 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
@@ -83,14 +83,14 @@ function MovieDisplay({ movie }: { movie: Movie }) {
               )}
             </div>
           </div>
-          
+
           {/* Movie information */}
           <div className="flex-1 space-y-4 text-center lg:text-left">
             <div>
               <h3 className="text-xl lg:text-2xl font-bold text-gray-900 mb-2">
                 {movie.title}
               </h3>
-              
+
               <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 text-sm text-gray-600 mb-4">
                 {movie.rating > 0 && (
                   <div className="flex items-center gap-1">
@@ -98,14 +98,14 @@ function MovieDisplay({ movie }: { movie: Movie }) {
                     <span>{formatRating(movie.rating)}/10</span>
                   </div>
                 )}
-                
+
                 {movie.releaseDate && (
                   <div className="flex items-center gap-1">
                     <Calendar className="w-4 h-4" />
                     <span>{formatReleaseDate(movie.releaseDate)}</span>
                   </div>
                 )}
-                
+
                 {movie.runtime && (
                   <div className="flex items-center gap-1">
                     <Clock className="w-4 h-4" />
@@ -114,7 +114,7 @@ function MovieDisplay({ movie }: { movie: Movie }) {
                 )}
               </div>
             </div>
-            
+
             {movie.overview && (
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Synopsis</h4>
@@ -123,7 +123,7 @@ function MovieDisplay({ movie }: { movie: Movie }) {
                 </p>
               </div>
             )}
-            
+
             {movie.genres && movie.genres.length > 0 && (
               <div>
                 <h4 className="font-semibold text-gray-900 mb-2">Genres</h4>
@@ -139,12 +139,12 @@ function MovieDisplay({ movie }: { movie: Movie }) {
                 </div>
               </div>
             )}
-            
+
             <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start pt-2">
               <Link href={`/movies/${movie.slug}`}>
-                <Button 
-                  variant="primary" 
-                  size="lg" 
+                <Button
+                  variant="primary"
+                  size="lg"
                   className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
                 >
                   <ExternalLink className="w-4 h-4 mr-2" />
@@ -175,7 +175,7 @@ function SpinError({ error, onRetry }: { error: string; onRetry: () => void }) {
       <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
         <RefreshCw className="w-8 h-8 text-red-500" />
       </div>
-      
+
       <div>
         <h3 className="text-lg font-semibold text-gray-900 mb-2">
           Oops! Something went wrong
@@ -184,7 +184,7 @@ function SpinError({ error, onRetry }: { error: string; onRetry: () => void }) {
           {error}
         </p>
       </div>
-      
+
       <Button onClick={onRetry} variant="primary" size="lg">
         <RefreshCw className="w-4 h-4 mr-2" />
         Try Again
@@ -198,7 +198,7 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch random movie
+  // Fetch random movie with improved algorithm
   const fetchRandomMovie = useCallback(async () => {
     if (isLoading) return;
 
@@ -206,26 +206,43 @@ export function SpinTonightModal({ isOpen, onClose }: SpinTonightModalProps) {
     setError(null);
 
     try {
-      // Get either trending or popular movies
-      const usePopular = Math.random() > 0.5;
-      const response = usePopular
-        ? await tmdbClient.getPopularMovies()
-        : await tmdbClient.getTrendingMovies();
-      
-      if (response.results.length === 0) {
+      // Helper for cryptographically secure random numbers
+      const getSecureRandom = (): number => {
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        return array[0] / (0xffffffff + 1);
+      };
+
+      // Get random page (1-3) for more variety
+      const randomPage = Math.floor(getSecureRandom() * 3) + 1;
+
+      // Fetch from BOTH sources for maximum variety
+      const [popularResponse, trendingResponse] = await Promise.all([
+        tmdbClient.getPopularMovies(randomPage),
+        tmdbClient.getTrendingMovies(),
+      ]);
+
+      // Combine and deduplicate results for larger pool
+      const trendingIds = new Set(trendingResponse.results.map(m => m.id));
+      const allMovies = [
+        ...trendingResponse.results,
+        ...popularResponse.results.filter(m => !trendingIds.has(m.id)),
+      ];
+
+      if (allMovies.length === 0) {
         throw new Error('No movies found. Please try again!');
       }
-      
-      // Pick a random movie from the first 15 results
-      const randomIndex = Math.floor(Math.random() * Math.min(response.results.length, 15));
-      const randomMovieData = response.results[randomIndex];
-      
+
+      // Pick random movie from combined pool (typically 30-40 movies)
+      const randomIndex = Math.floor(getSecureRandom() * allMovies.length);
+      const randomMovieData = allMovies[randomIndex];
+
       // Fetch full details
       const movieDetails = await tmdbClient.getMovieDetails(randomMovieData.id);
       const transformedMovie = tmdbClient.transformMovie(movieDetails);
-      
+
       setMovie(transformedMovie);
-      
+
     } catch (err) {
       console.error('Failed to fetch random movie:', err);
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch movie. Please try again.';

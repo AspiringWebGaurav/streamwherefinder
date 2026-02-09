@@ -26,7 +26,7 @@ function SpinAnimation({ isSpinning }: { isSpinning: boolean }) {
     )}>
       {/* Outer ring */}
       <div className="absolute inset-0 rounded-full border-4 border-dashed border-purple-300 animate-pulse" />
-      
+
       {/* Inner circle */}
       <div className="absolute inset-4 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
         <Shuffle className={cn(
@@ -34,7 +34,7 @@ function SpinAnimation({ isSpinning }: { isSpinning: boolean }) {
           isSpinning ? 'rotate-180 scale-110' : 'rotate-0 scale-100'
         )} />
       </div>
-      
+
       {/* Sparkles */}
       <div className="absolute inset-0">
         <Sparkles className="absolute top-4 right-8 w-6 h-6 text-yellow-400 animate-bounce delay-100" />
@@ -70,39 +70,56 @@ export default function RandomMoviePage() {
     error: null,
   });
 
-  // Get random movie from trending or top rated
+  // Get random movie with improved algorithm
   const getRandomMovie = async () => {
     setState(prev => ({ ...prev, isLoading: true, isAnimating: true, error: null }));
-    
+
     try {
       // Add delay for animation effect
       await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Randomly choose between trending and popular movies
-      const usePopular = Math.random() > 0.5;
-      const response = usePopular 
-        ? await tmdbClient.getPopularMovies()
-        : await tmdbClient.getTrendingMovies();
-      
-      if (response.results.length === 0) {
+
+      // Helper for cryptographically secure random numbers
+      const getSecureRandom = (): number => {
+        const array = new Uint32Array(1);
+        crypto.getRandomValues(array);
+        return array[0] / (0xffffffff + 1);
+      };
+
+      // Get random page (1-3) for more variety
+      const randomPage = Math.floor(getSecureRandom() * 3) + 1;
+
+      // Fetch from BOTH sources for maximum variety
+      const [popularResponse, trendingResponse] = await Promise.all([
+        tmdbClient.getPopularMovies(randomPage),
+        tmdbClient.getTrendingMovies(),
+      ]);
+
+      // Combine and deduplicate results for larger pool
+      const trendingIds = new Set(trendingResponse.results.map(m => m.id));
+      const allMovies = [
+        ...trendingResponse.results,
+        ...popularResponse.results.filter(m => !trendingIds.has(m.id)),
+      ];
+
+      if (allMovies.length === 0) {
         throw new Error('No movies found');
       }
-      
-      // Get random movie from results
-      const randomIndex = Math.floor(Math.random() * Math.min(response.results.length, 15));
-      const randomMovieData = response.results[randomIndex];
-      
+
+      // Pick random movie from combined pool (typically 30-40 movies)
+      const randomIndex = Math.floor(getSecureRandom() * allMovies.length);
+      const randomMovieData = allMovies[randomIndex];
+
       // Fetch full details
       const movieDetails = await tmdbClient.getMovieDetails(randomMovieData.id);
       const movie = tmdbClient.transformMovie(movieDetails);
-      
-      setState(prev => ({ 
-        ...prev, 
-        movie, 
-        isLoading: false, 
-        isAnimating: false 
+
+      setState(prev => ({
+        ...prev,
+        movie,
+        isLoading: false,
+        isAnimating: false
       }));
-      
+
     } catch (error) {
       console.error('Failed to fetch random movie:', error);
       setState(prev => ({
@@ -125,19 +142,19 @@ export default function RandomMoviePage() {
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-center justify-between">
-            <Link 
+            <Link
               href="/"
               className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Home
             </Link>
-            
+
             <div className="text-center">
               <h1 className="text-2xl font-bold text-gray-900">Spin Tonight</h1>
               <p className="text-sm text-gray-600">Let us pick something great for you!</p>
             </div>
-            
+
             <div className="w-20" /> {/* Spacer for centering */}
           </div>
         </div>
@@ -165,7 +182,7 @@ export default function RandomMoviePage() {
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">Oops!</h2>
             <p className="text-gray-600 mb-8">{state.error}</p>
-            <Button 
+            <Button
               onClick={getRandomMovie}
               disabled={state.isLoading}
               size="lg"
@@ -199,14 +216,14 @@ export default function RandomMoviePage() {
               <div className="flex flex-col lg:flex-row gap-8 items-start">
                 {/* Movie Poster */}
                 <div className="flex-shrink-0">
-                  <MovieCard 
-                    movie={state.movie} 
+                  <MovieCard
+                    movie={state.movie}
                     size="lg"
                     className="mx-auto"
                     priority
                   />
                 </div>
-                
+
                 {/* Movie Info */}
                 <div className="flex-1 space-y-6">
                   {state.movie.overview && (
@@ -217,7 +234,7 @@ export default function RandomMoviePage() {
                       </p>
                     </div>
                   )}
-                  
+
                   {state.movie.genres.length > 0 && (
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900 mb-3">Genres</h3>
@@ -233,14 +250,14 @@ export default function RandomMoviePage() {
                       </div>
                     </div>
                   )}
-                  
+
                   <div className="flex gap-4">
                     <Link href={`/movies/${state.movie.slug}`}>
                       <Button variant="primary">
                         View Full Details
                       </Button>
                     </Link>
-                    
+
                     <Button
                       onClick={getRandomMovie}
                       disabled={state.isLoading}

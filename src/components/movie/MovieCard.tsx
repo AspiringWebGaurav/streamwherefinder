@@ -12,9 +12,9 @@ interface MovieCardProps {
   priority?: boolean;
 }
 
-export function MovieCard({ 
-  movie, 
-  size = 'md', 
+export function MovieCard({
+  movie,
+  size = 'md',
   showDetails = true,
   className,
   priority = false
@@ -55,8 +55,9 @@ export function MovieCard({
             title={movie.title}
             className="w-full h-full"
             priority={priority}
+            tmdbSize={size === 'sm' ? 'w154' : size === 'md' ? 'w185' : 'w342'}
           />
-          
+
           {/* Rating Badge - Responsive */}
           <div className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-black/80 text-white text-xs px-1.5 py-0.5 sm:px-2 sm:py-1 rounded flex items-center gap-0.5 sm:gap-1">
             <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-yellow-400 text-yellow-400" />
@@ -73,7 +74,7 @@ export function MovieCard({
             <h3 className="font-semibold text-xs sm:text-sm text-gray-900 line-clamp-2 leading-tight">
               {movie.title}
             </h3>
-            
+
             <div className="flex items-center text-xs text-gray-600">
               <Calendar className="w-2.5 h-2.5 sm:w-3 sm:h-3 mr-1 flex-shrink-0" />
               <span className="truncate">{formatReleaseDate(movie.releaseDate)}</span>

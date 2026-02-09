@@ -6,10 +6,10 @@ import { tmdbClient } from '@/lib/tmdb';
 import { WatchProviders } from '@/components/movie/WatchProviders';
 import { CompactMovieCarousel } from '@/components/movie/MovieCarousel';
 import { Button } from '@/components/ui/Button';
-import { 
-  formatRuntime, 
-  formatReleaseDate, 
-  formatRating, 
+import {
+  formatRuntime,
+  formatReleaseDate,
+  formatRating,
   truncateText,
   getYouTubeEmbedUrl,
   generateMetaDescription,
@@ -33,7 +33,7 @@ async function getMovieData(slug: string) {
 
     const movieDetails = await tmdbClient.getMovieDetails(movieId);
     const transformedMovie = tmdbClient.transformMovie(movieDetails);
-    
+
     return {
       movie: transformedMovie,
       raw: movieDetails,
@@ -48,7 +48,7 @@ async function getMovieData(slug: string) {
 export async function generateMetadata({ params }: MoviePageProps): Promise<Metadata> {
   const { slug } = await params;
   const data = await getMovieData(slug);
-  
+
   if (!data) {
     return {
       title: 'Movie Not Found',
@@ -120,7 +120,7 @@ function MovieDetailsSkeleton() {
 export default async function MoviePage({ params }: MoviePageProps) {
   const { slug } = await params;
   const data = await getMovieData(slug);
-  
+
   if (!data) {
     notFound();
   }
@@ -134,7 +134,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
       {/* Back Navigation */}
       <div className="bg-white border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
           >
@@ -176,10 +176,10 @@ export default async function MoviePage({ params }: MoviePageProps) {
               {/* Title and Metadata */}
               <div>
                 <h1 className="text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-                  {movie.title} 
+                  {movie.title}
                   {year && <span className="text-gray-600 font-normal"> ({year})</span>}
                 </h1>
-                
+
                 <div className="flex flex-wrap items-center gap-4 text-gray-600">
                   {movie.rating > 0 && (
                     <div className="flex items-center">
@@ -188,14 +188,14 @@ export default async function MoviePage({ params }: MoviePageProps) {
                       <span className="text-gray-400 ml-1">/10</span>
                     </div>
                   )}
-                  
+
                   {movie.releaseDate && (
                     <div className="flex items-center">
                       <Calendar className="w-4 h-4 mr-1" />
                       {year}
                     </div>
                   )}
-                  
+
                   {movie.runtime && (
                     <div className="flex items-center">
                       <Clock className="w-4 h-4 mr-1" />
@@ -254,6 +254,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
           watchProviders={movie.watchProviders}
           movieTitle={movie.title}
           movieId={movie.id}
+          releaseDate={movie.releaseDate}
           className="mb-8"
         />
 
@@ -281,7 +282,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </div>
               </Link>
             )}
-            
+
             {year === '2024' && (
               <Link href="/collections/bollywood-2024" className="group">
                 <div className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -290,7 +291,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </div>
               </Link>
             )}
-            
+
             {movie.rating >= 7.5 && (
               <Link href="/collections/imdb-top-rated-indian" className="group">
                 <div className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -299,7 +300,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </div>
               </Link>
             )}
-            
+
             {movie.runtime && movie.runtime < 90 && (
               <Link href="/collections/short-movies-under-90min" className="group">
                 <div className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -308,7 +309,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </div>
               </Link>
             )}
-            
+
             {movie.genres.includes('Comedy') && (
               <Link href="/collections/bollywood-comedy-classics" className="group">
                 <div className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -317,7 +318,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                 </div>
               </Link>
             )}
-            
+
             {movie.genres.includes('Science Fiction') && (
               <Link href="/collections/sci-fi-masterpieces" className="group">
                 <div className="p-4 bg-gray-50 hover:bg-gray-100 rounded-lg transition-colors">
@@ -332,7 +333,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
         {/* Disclaimer */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-600 bg-gray-100 rounded-lg p-4 inline-block">
-            <span className="font-medium">Legal Notice:</span> We only link to official streaming platforms. 
+            <span className="font-medium">Legal Notice:</span> We only link to official streaming platforms.
             StreamWhereFinder does not host or provide illegal streaming links.
           </p>
         </div>

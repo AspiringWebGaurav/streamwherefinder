@@ -4,11 +4,12 @@ import type { Metadata } from "next";
 import { LoaderProvider } from "@/app/providers/LoaderProvider";
 import { FirebaseProvider } from "@/app/providers/FirebaseProvider";
 import { RouterLoadingManager } from "@/components/RouterLoadingManager";
-import { Navbar } from "@/components/ui/Navbar";
-import { Footer } from "@/components/ui/Footer";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { Analytics } from "@vercel/analytics/react";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import { CaptchaProvider } from "@/components/CaptchaProvider";
+import { TurnstileWidget } from "@/components/TurnstileWidget";
+import { MaintenanceGate } from "@/components/MaintenanceGate";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -108,17 +109,17 @@ export default function RootLayout({
         <link rel="icon" type="image/png" sizes="128x128" href="/icon-128x128.png" />
         <link rel="icon" type="image/png" sizes="256x256" href="/icon-256x256.png" />
         <link rel="icon" type="image/png" sizes="512x512" href="/icon-512x512.png" />
-        
+
         {/* Apple Touch Icon */}
         <link rel="apple-touch-icon" href="/icon-512x512.png" />
-        
+
         {/* PWA Manifest */}
         <link rel="manifest" href="/manifest.json" />
-        
+
         {/* Theme Color */}
         <meta name="theme-color" content="#00bfa5" />
         <meta name="msapplication-TileColor" content="#00bfa5" />
-        
+
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://image.tmdb.org" />
         <link rel="preconnect" href="https://api.themoviedb.org" />
@@ -129,7 +130,7 @@ export default function RootLayout({
             <link rel="preconnect" href="https://www.google-analytics.com" />
           </>
         )}
-        
+
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
@@ -181,20 +182,19 @@ export default function RootLayout({
       >
         {/* Global Loader Portal Mount Point */}
         <div id="__global_loader_root" />
-        
+
         <ErrorBoundary>
-          <LoaderProvider>
-            <FirebaseProvider>
-              <RouterLoadingManager />
-              <div className="min-h-dvh flex flex-col relative w-full">
-                <Navbar />
-                <main className="flex-1 relative z-10 w-full">
-                  <div className="glass min-h-full w-full">{children}</div>
-                </main>
-                <Footer />
-              </div>
-            </FirebaseProvider>
-          </LoaderProvider>
+          <CaptchaProvider>
+            <LoaderProvider>
+              <FirebaseProvider>
+                <TurnstileWidget />
+                <MaintenanceGate>
+                  <RouterLoadingManager />
+                  {children}
+                </MaintenanceGate>
+              </FirebaseProvider>
+            </LoaderProvider>
+          </CaptchaProvider>
         </ErrorBoundary>
 
         {/* Analytics */}

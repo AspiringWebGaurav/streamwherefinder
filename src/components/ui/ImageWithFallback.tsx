@@ -17,6 +17,7 @@ interface ImageWithFallbackProps {
   sizes?: string;
   aspectRatio?: 'poster' | 'backdrop' | 'square' | number;
   shimmerClassName?: string;
+  tmdbSize?: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original';
   onLoad?: () => void;
   onError?: () => void;
 }
@@ -27,13 +28,14 @@ type LoadingState = 'idle' | 'loading' | 'loaded' | 'error';
 function useIntersectionObserver(
   elementRef: React.RefObject<HTMLDivElement | null>,
   threshold: number = 0.1,
-  rootMargin: string = '50px'
+  rootMargin: string = '200px' // Increased margin for earlier loading
 ) {
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [hasIntersected, setHasIntersected] = useState(false);
 
   useEffect(() => {
     const element = elementRef.current;
+    // ... (keep existing effect content until line 67)
     if (!element) return;
 
     // If intersection observer is not supported, load immediately
@@ -84,10 +86,10 @@ function LoadingShimmer({
     >
       {/* Base shimmer background */}
       <div className="absolute inset-0 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200" />
-      
+
       {/* Animated shimmer overlay */}
       <div className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/40 to-transparent image-loading" />
-      
+
       {/* Loading indicator */}
       <div className="absolute inset-0 flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-gray-300 border-t-blue-500 rounded-full animate-spin" />
@@ -97,17 +99,17 @@ function LoadingShimmer({
 }
 
 // Fallback display component
-function FallbackDisplay({ 
-  text, 
-  className, 
-  aspectRatio 
-}: { 
-  text?: string; 
+function FallbackDisplay({
+  text,
+  className,
+  aspectRatio
+}: {
+  text?: string;
   className?: string;
   aspectRatio: number;
 }) {
   return (
-    <div 
+    <div
       className={cn(
         'flex items-center justify-center bg-gray-100 text-gray-400 border border-gray-200',
         className
@@ -116,17 +118,17 @@ function FallbackDisplay({
     >
       <div className="text-center p-2">
         <div className="w-8 h-8 mx-auto mb-2 bg-gray-300 rounded-full flex items-center justify-center">
-          <svg 
-            className="w-4 h-4 text-gray-400" 
-            fill="none" 
-            stroke="currentColor" 
+          <svg
+            className="w-4 h-4 text-gray-400"
+            fill="none"
+            stroke="currentColor"
             viewBox="0 0 24 24"
           >
-            <path 
-              strokeLinecap="round" 
-              strokeLinejoin="round" 
-              strokeWidth={2} 
-              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" 
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
             />
           </svg>
         </div>
@@ -150,9 +152,11 @@ export function ImageWithFallback({
   sizes,
   aspectRatio = 'poster',
   shimmerClassName,
+  tmdbSize = 'w500',
   onLoad,
   onError,
 }: ImageWithFallbackProps) {
+  // ... (keep state declarations)
   const [loadingState, setLoadingState] = useState<LoadingState>('idle');
   const [hasError, setHasError] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -161,63 +165,63 @@ export function ImageWithFallback({
   const performanceIdRef = useRef<string | null>(null);
 
   // Calculate aspect ratio
-  const aspectRatioValue = 
+  const aspectRatioValue =
     typeof aspectRatio === 'number' ? aspectRatio :
-    aspectRatio === 'poster' ? 2/3 :
-    aspectRatio === 'backdrop' ? 16/9 :
-    aspectRatio === 'square' ? 1 :
-    width / height;
+      aspectRatio === 'poster' ? 2 / 3 :
+        aspectRatio === 'backdrop' ? 16 / 9 :
+          aspectRatio === 'square' ? 1 :
+            width / height;
 
   // Use intersection observer for lazy loading
   const { isIntersecting } = useIntersectionObserver(
     containerRef,
     0.1,
-    priority ? '0px' : '50px'
+    priority ? '0px' : '200px' // Increased preload margin
   );
 
   // Construct proxy URL for TMDB images
-  const getProxyUrl = useCallback((imagePath: string | null, size: string = 'w500') => {
+  const getProxyUrl = useCallback((imagePath: string | null, size: string = tmdbSize) => {
     if (!imagePath) return null;
-    
+
     // Check if imagePath is already a full TMDB URL
     if (imagePath.startsWith('https://image.tmdb.org/t/p/')) {
-      // Extract just the filename from the full URL
+      // ... (rest of logic same but uses size param correctly)
       const urlParts = imagePath.split('/');
       const filename = urlParts[urlParts.length - 1];
       const cleanPath = `/${filename}`;
-      
+
       const params = new URLSearchParams({
         path: cleanPath,
         size: size,
       });
-      
+
       if (title) {
         params.append('title', title);
       }
-      
+
       return `/api/image?${params.toString()}`;
     }
-    
+
     // Clean path - ensure it starts with /
     const cleanPath = imagePath.startsWith('/') ? imagePath : `/${imagePath}`;
-    
+
     const params = new URLSearchParams({
       path: cleanPath,
       size: size,
     });
-    
+
     if (title) {
       params.append('title', title);
     }
-    
+
     return `/api/image?${params.toString()}`;
-  }, [title]);
+  }, [title, tmdbSize]);
 
   // Handle image load success
   const handleLoad = useCallback((event: React.SyntheticEvent<HTMLImageElement>) => {
     const img = event.currentTarget;
     const fromCache = img.complete && img.naturalHeight !== 0;
-    
+
     // Track performance
     if (performanceIdRef.current && src) {
       imagePerformanceMonitor.trackLoadSuccess(
@@ -226,10 +230,10 @@ export function ImageWithFallback({
         fromCache
       );
     }
-    
+
     // Track for web vitals
     imageWebVitalsTracker.trackImageElement(img);
-    
+
     setLoadingState('loaded');
     setHasError(false);
     retryCountRef.current = 0;
@@ -241,7 +245,7 @@ export function ImageWithFallback({
     if (process.env.NODE_ENV === 'development') {
       console.warn(`Image load failed for ${src}, attempt ${retryCountRef.current + 1}`);
     }
-    
+
     // Track performance error
     if (performanceIdRef.current && src) {
       const errorType = event.currentTarget.src ? 'load_failed' : 'src_missing';
@@ -252,7 +256,7 @@ export function ImageWithFallback({
         retryCountRef.current
       );
     }
-    
+
     if (retryCountRef.current < maxRetries) {
       retryCountRef.current++;
       // Retry after a short delay
@@ -267,12 +271,12 @@ export function ImageWithFallback({
     } else {
       setLoadingState('error');
       setHasError(true);
-      
+
       // Track fallback usage
       if (src) {
         imagePerformanceMonitor.trackFallback(src, 'max_retries_exceeded');
       }
-      
+
       onError?.();
     }
   }, [src, onError]);
@@ -300,7 +304,7 @@ export function ImageWithFallback({
     useEffect(() => {
       imagePerformanceMonitor.trackFallback(null, 'no_src_provided');
     }, []);
-    
+
     return (
       <div ref={containerRef} className={cn('relative', className)}>
         <FallbackDisplay
@@ -313,13 +317,13 @@ export function ImageWithFallback({
   }
 
   const proxyUrl = getProxyUrl(src);
-  
+
   if (!proxyUrl) {
     // Track fallback usage for invalid proxy URL
     useEffect(() => {
       imagePerformanceMonitor.trackFallback(src, 'invalid_proxy_url');
     }, [src]);
-    
+
     return (
       <div ref={containerRef} className={cn('relative', className)}>
         <FallbackDisplay
@@ -377,18 +381,20 @@ export function ImageWithFallback({
 }
 
 // Specialized components for common use cases
-export function PosterImage({ 
-  src, 
-  alt, 
-  title, 
-  className, 
-  priority = false 
+export function PosterImage({
+  src,
+  alt,
+  title,
+  className,
+  priority = false,
+  tmdbSize = 'w500'
 }: {
   src: string | null;
   alt: string;
   title?: string;
   className?: string;
   priority?: boolean;
+  tmdbSize?: 'w92' | 'w154' | 'w185' | 'w342' | 'w500' | 'w780' | 'original';
 }) {
   return (
     <ImageWithFallback
@@ -402,22 +408,25 @@ export function PosterImage({
       fallbackText="No Poster"
       priority={priority}
       sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+      tmdbSize={tmdbSize}
     />
   );
 }
 
-export function BackdropImage({ 
-  src, 
-  alt, 
-  title, 
-  className, 
-  priority = false 
+export function BackdropImage({
+  src,
+  alt,
+  title,
+  className,
+  priority = false,
+  tmdbSize = 'original'
 }: {
   src: string | null;
   alt: string;
   title?: string;
   className?: string;
   priority?: boolean;
+  tmdbSize?: 'w300' | 'w780' | 'w1280' | 'original';
 }) {
   return (
     <ImageWithFallback
@@ -431,6 +440,7 @@ export function BackdropImage({
       fallbackText="No Backdrop"
       priority={priority}
       sizes="(max-width: 640px) 100vw, (max-width: 1024px) 80vw, 1280px"
+      tmdbSize={tmdbSize as any}
     />
   );
 }

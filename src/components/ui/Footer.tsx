@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, ExternalLink, Shield, FileText, Mail, Info } from 'lucide-react';
+import { Heart, ExternalLink, Shield, FileText, Mail, Info, Settings } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -11,6 +11,7 @@ export function Footer() {
     { href: '/privacy', label: 'Privacy', icon: Shield },
     { href: '/terms', label: 'Terms', icon: FileText },
     { href: '/contact', label: 'Contact', icon: Mail },
+    { href: '/admin', label: 'Admin', icon: Settings },
   ];
 
   return (
@@ -18,7 +19,7 @@ export function Footer() {
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 lg:py-12">
         {/* Main Footer Content - Mobile First Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 sm:gap-8 lg:gap-12">
-          
+
           {/* Brand Section - Full Width on Mobile */}
           <div className="md:col-span-2 xl:col-span-1 space-y-4 sm:space-y-6">
             <div>
@@ -31,7 +32,7 @@ export function Footer() {
                 and get official streaming links.
               </p>
             </div>
-            
+
             {/* Branding - Responsive Layout */}
             <div className="glass p-3 sm:p-4 rounded-xl">
               <div className="flex flex-wrap items-center gap-2 text-white/90">
@@ -55,6 +56,7 @@ export function Footer() {
                 <Link
                   key={href}
                   href={href}
+                  target={label === 'Admin' ? '_blank' : undefined}
                   className="btn-glass flex items-center justify-center sm:justify-start space-x-2 px-3 py-2 sm:px-4 sm:py-3 rounded-lg sm:rounded-xl glow transition-all duration-300 hover:shadow-lg group min-h-[44px]"
                 >
                   <Icon className="w-4 h-4 text-white/80 group-hover:text-cyan-300 transition-colors duration-200 flex-shrink-0" />
@@ -91,14 +93,14 @@ export function Footer() {
         {/* Bottom Bar - Mobile First */}
         <div className="mt-8 sm:mt-10 lg:mt-12 pt-6 sm:pt-8 border-t border-white/10">
           <div className="flex flex-col space-y-4 sm:space-y-6 lg:flex-row lg:justify-between lg:items-center lg:space-y-0">
-            
+
             {/* Copyright - Center on Mobile */}
             <div className="text-center lg:text-left">
               <p className="text-xs sm:text-sm text-white/70 leading-relaxed">
                 © {currentYear} StreamWhereFinder. We only link to official streaming platforms.
               </p>
             </div>
-            
+
             {/* Legal Compliance - Stack on Mobile */}
             <div className="flex flex-col xs:flex-row items-center justify-center lg:justify-end gap-3 xs:gap-4">
               <div className="glass px-3 py-1.5 sm:px-4 sm:py-2 rounded-md sm:rounded-lg">

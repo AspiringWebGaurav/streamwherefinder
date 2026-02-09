@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, History, Trash2, Search, Calendar, User } from 'lucide-react';
+import { ArrowLeft, History, Trash2, Search, Calendar, User, AlertTriangle, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/app/providers/FirebaseProvider';
 import {
@@ -11,15 +11,19 @@ import {
   clearLocalSearchHistory,
   SearchHistoryItem
 } from '@/lib/searchHistory';
+import { deleteAllUserData } from '@/lib/deleteUserData';
 import { Button } from '@/components/ui/Button';
 import { SearchBar } from '@/components/search/SearchBar';
 import { ProfilePicture } from '@/components/ui/ProfilePicture';
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [searchHistory, setSearchHistory] = useState<SearchHistoryItem[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const [isClearing, setIsClearing] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Load search history
   useEffect(() => {
@@ -43,9 +47,9 @@ export default function ProfilePage() {
       if (user && item.id) {
         await deleteSearchFromFirestore(item.id);
       }
-      
+
       // Remove from local state
-      setSearchHistory(prev => prev.filter(h => 
+      setSearchHistory(prev => prev.filter(h =>
         user ? h.id !== item.id : h.query !== item.query || h.timestamp !== item.timestamp
       ));
     } catch (error) {
@@ -69,11 +73,43 @@ export default function ProfilePage() {
     }
   };
 
+  const handleDeleteAccount = async () => {
+    if (!user) return;
+
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      // Delete all user data from Firebase
+      const result = await deleteAllUserData(user.uid);
+
+      if (!result.success) {
+        setDeleteError(result.error || 'Failed to delete data');
+        return;
+      }
+
+      // Also clear any local storage data
+      clearLocalSearchHistory();
+      localStorage.removeItem('captcha_verified');
+
+      // Sign out the user
+      await logout();
+
+      // Redirect to home
+      window.location.href = '/';
+    } catch (error) {
+      console.error('Error deleting account:', error);
+      setDeleteError('An unexpected error occurred');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const formatDate = (date: Date) => {
     const now = new Date();
     const diff = now.getTime() - date.getTime();
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-    
+
     if (days === 0) {
       return 'Today';
     } else if (days === 1) {
@@ -108,7 +144,7 @@ export default function ProfilePage() {
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex items-center mb-8">
-          <Link 
+          <Link
             href="/"
             className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors mr-4"
           >
@@ -121,7 +157,7 @@ export default function ProfilePage() {
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-8">
           <div className="flex items-center">
             <ProfilePicture user={user} size="lg" className="mr-4" />
-            
+
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-gray-900">
                 {user ? `Welcome, ${user.displayName || 'User'}!` : 'Your Profile'}
@@ -179,7 +215,7 @@ export default function ProfilePage() {
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No searches yet</h3>
               <p className="text-gray-600 mb-6">
-                {user 
+                {user
                   ? 'Start searching for movies to see your history here!'
                   : 'Your recent searches will appear here. Sign in to sync across devices.'
                 }
@@ -237,12 +273,105 @@ export default function ProfilePage() {
         {/* Privacy Notice */}
         <div className="mt-8 text-center">
           <p className="text-sm text-gray-500">
-            {user 
+            {user
               ? 'Your search history is securely stored and only visible to you. We automatically delete searches after 50 entries.'
               : 'Your searches are stored locally in your browser. Clear your browser data to remove them.'
             }
           </p>
         </div>
+
+        {/* Delete Account Section - Only for logged in users */}
+        {user && (
+          <div className="mt-8 bg-red-50 border border-red-200 rounded-xl p-6">
+            <div className="flex items-start space-x-4">
+              <div className="flex-shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-500" />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-lg font-semibold text-red-900">Delete Account & Data</h3>
+                <p className="text-sm text-red-700 mt-1">
+                  Permanently delete all your data from our servers. This includes search history and any synced preferences. This action cannot be undone.
+                </p>
+                <Button
+                  onClick={() => setShowDeleteModal(true)}
+                  variant="outline"
+                  className="mt-4 text-red-600 border-red-300 hover:bg-red-100"
+                >
+                  <Trash2 className="w-4 h-4 mr-2" />
+                  Delete My Data & Account
+                </Button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Delete Confirmation Modal */}
+        {showDeleteModal && (
+          <>
+            <div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm"
+              onClick={() => !isDeleting && setShowDeleteModal(false)}
+            />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+              <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center">
+                    <AlertTriangle className="w-6 h-6 text-red-600" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Delete All Data?</h3>
+                    <p className="text-sm text-gray-500">This cannot be undone</p>
+                  </div>
+                </div>
+
+                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+                  <p className="text-sm text-red-800">
+                    <strong>The following will be permanently deleted:</strong>
+                  </p>
+                  <ul className="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                    <li>All search history from our database</li>
+                    <li>Any synced preferences or settings</li>
+                    <li>Your account connection</li>
+                  </ul>
+                </div>
+
+                {deleteError && (
+                  <div className="bg-red-100 border border-red-300 rounded-lg p-3 mb-4">
+                    <p className="text-sm text-red-800">{deleteError}</p>
+                  </div>
+                )}
+
+                <div className="flex space-x-3">
+                  <Button
+                    onClick={() => setShowDeleteModal(false)}
+                    variant="outline"
+                    disabled={isDeleting}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleDeleteAccount}
+                    disabled={isDeleting}
+                    className="flex-1 bg-red-600 hover:bg-red-700 text-white"
+                  >
+                    {isDeleting ? (
+                      <>
+                        <span className="animate-spin mr-2">⏳</span>
+                        Deleting...
+                      </>
+                    ) : (
+                      <>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete Everything
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </div>
   );

@@ -9,7 +9,7 @@ declare global {
 }
 
 // Track outbound clicks to streaming platforms
-export function trackOutboundClick(platform: string, movieTitle: string, linkType: 'streaming' | 'rent' | 'buy') {
+export function trackOutboundClick(platform: string, movieTitle: string, linkType: 'streaming' | 'rent' | 'buy' | 'fallback') {
   try {
     // Vercel Analytics
     track('outbound_click', {
