@@ -1,16 +1,13 @@
-'use server';
-
 import { Movie, PopularMovie, SearchApiResponse } from '@/lib/types';
+import { tmdbClient } from '@/lib/tmdb';
 
 /**
- * All fetchers call the app's own /api routes (which call TMDB directly).
- * No external backend server needed.
+ * Server-side data fetchers.
+ * Homepage fetchers (trending, popular, upcoming) call tmdbClient directly
+ * to avoid the self-referencing fetch anti-pattern that breaks on Vercel SSR.
  */
 
 function getOrigin(): string {
-    // In server components / server actions, we need an absolute URL.
-    // NEXT_PUBLIC_SITE_URL or Vercel's auto-injected VERCEL_URL work in prod.
-    // Fallback to localhost:3000 for local dev.
     if (process.env.NEXT_PUBLIC_SITE_URL) return process.env.NEXT_PUBLIC_SITE_URL;
     if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
     return 'http://localhost:3000';
@@ -18,12 +15,8 @@ function getOrigin(): string {
 
 export async function fetchTrending(): Promise<PopularMovie[]> {
     try {
-        const res = await fetch(`${getOrigin()}/api/movies/trending`, {
-            next: { revalidate: 3600 },
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.movies ?? data.results ?? [];
+        const response = await tmdbClient.getTrendingMovies('week');
+        return response.results.slice(0, 20).map(m => tmdbClient.transformPopularMovie(m));
     } catch {
         return [];
     }
@@ -31,12 +24,8 @@ export async function fetchTrending(): Promise<PopularMovie[]> {
 
 export async function fetchPopular(): Promise<PopularMovie[]> {
     try {
-        const res = await fetch(`${getOrigin()}/api/movies/popular`, {
-            next: { revalidate: 3600 },
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.movies ?? data.results ?? [];
+        const response = await tmdbClient.getPopularMovies();
+        return response.results.slice(0, 20).map(m => tmdbClient.transformPopularMovie(m));
     } catch {
         return [];
     }
@@ -44,12 +33,8 @@ export async function fetchPopular(): Promise<PopularMovie[]> {
 
 export async function fetchUpcoming(): Promise<PopularMovie[]> {
     try {
-        const res = await fetch(`${getOrigin()}/api/movies/upcoming`, {
-            next: { revalidate: 7200 },
-        });
-        if (!res.ok) return [];
-        const data = await res.json();
-        return data.movies ?? data.results ?? [];
+        const response = await tmdbClient.getUpcomingMovies();
+        return response.results.slice(0, 20).map(m => tmdbClient.transformPopularMovie(m));
     } catch {
         return [];
     }
