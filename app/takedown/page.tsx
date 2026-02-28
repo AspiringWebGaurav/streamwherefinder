@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { ArrowLeft, Shield, CheckCircle, AlertCircle, Send } from 'lucide-react';
 import Link from 'next/link';
+import { Navbar } from '@/components/Navbar';
 
 interface TakedownFormData {
     name: string;
@@ -108,18 +109,7 @@ export default function TakedownPage() {
 
     return (
         <div className="min-h-screen bg-[var(--saas-bg)] pb-16">
-            {/* Header */}
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-                    <Link
-                        href="/terms"
-                        className="inline-flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Terms
-                    </Link>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Hero */}
@@ -127,29 +117,39 @@ export default function TakedownPage() {
                     <div className="w-16 h-16 bg-rose-50 border border-rose-100/50 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-sm">
                         <Shield className="w-8 h-8 text-rose-600" />
                     </div>
-                    <h1 className="text-3xl font-extrabold text-[var(--saas-text-primary)] mb-3 tracking-tight">
+                    <h1 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl mb-4">
                         DMCA Takedown Request
                     </h1>
-                    <p className="text-[var(--saas-text-secondary)] font-medium">
-                        Submit a formal request to remove copyrighted content from StreamWhereFinder.
+                    <p className="text-lg text-gray-600">
+                        Submit a formal request to remove copyrighted content from StreamWhere.
                     </p>
                 </div>
 
-                {/* Important Notice */}
-                <div className="bg-rose-50/50 border border-rose-200/50 rounded-2xl p-6 mb-8 shadow-sm">
-                    <div className="flex items-start gap-4">
-                        <AlertCircle className="w-5 h-5 text-rose-600 mt-0.5 flex-shrink-0" />
-                        <div>
-                            <h2 className="font-bold text-rose-900 mb-1.5">Important Legal Notice</h2>
-                            <p className="text-rose-800/80 text-sm font-medium mb-3 leading-relaxed">
-                                StreamWhereFinder is a discovery service only. We do not host, stream, or provide access to movies or copyrighted content.
-                                We only provide information about where to find legal streaming options.
-                            </p>
-                            <p className="text-rose-900 text-sm font-semibold">
-                                72-Hour Commitment: We will review and respond to your request within 72 hours of receipt.
-                            </p>
+                {/* Important Notice */}                        <div className="rounded-xl bg-amber-50 p-6 border border-amber-200">
+                    <div className="flex">
+                        <div className="flex-shrink-0">
+                            <AlertCircle className="h-5 w-5 text-amber-600" aria-hidden="true" />
+                        </div>
+                        <div className="ml-3">
+                            <h3 className="text-sm font-medium text-amber-800">Important Notice Before You File</h3>
+                            <div className="mt-2 text-sm text-amber-700 space-y-2">
+                                <p>
+                                    StreamWhere is a discovery service only. We do not host, stream, or provide access to movies or copyrighted content.
+                                </p>
+                                <p>
+                                    We only provide information about where to find legal streaming options.
+                                </p>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* 72 Hour Commitment */}
+                {/* 72 Hour Commitment */}
+                <div className="bg-rose-50/50 border border-rose-200/50 rounded-2xl p-6 mb-8 shadow-sm">
+                    <p className="text-rose-900 text-sm font-semibold">
+                        72-Hour Commitment: We will review and respond to your request within 72 hours of receipt.
+                    </p>
                 </div>
 
                 {/* Form */}
@@ -246,13 +246,11 @@ export default function TakedownPage() {
                                     Detailed Description *
                                 </label>
                                 <textarea
-                                    id="description"
-                                    required
+                                    id="urls"
+                                    name="urls"
                                     rows={4}
-                                    value={formData.description}
-                                    onChange={(e) => updateFormData('description', e.target.value)}
                                     className="w-full p-4 bg-[var(--saas-bg)] border border-[var(--saas-border)] rounded-xl text-sm font-medium focus:ring-2 focus:ring-[var(--saas-accent)] focus:border-transparent transition-all outline-none resize-none"
-                                    placeholder="Describe the copyrighted work and how it appears on our site..."
+                                    placeholder="https://streamwhere.com/movies/..."
                                 />
                             </div>
                         </div>

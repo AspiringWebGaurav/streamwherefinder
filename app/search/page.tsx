@@ -14,13 +14,13 @@ export async function generateMetadata({ searchParams }: SearchPageProps): Promi
 
     if (!query) {
         return {
-            title: 'Search Movies | StreamWhereFinder',
+            title: 'Search Movies | StreamWhere',
             description: 'Search for any movie and find where to watch it legally using our Enterprise Search engine.',
         };
     }
 
     return {
-        title: `Search results for "${query}" | StreamWhereFinder`,
+        title: `Search results for "${query}" | StreamWhere`,
         description: `Find where to watch "${query}" and similar movies online legally.`,
     };
 }

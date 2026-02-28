@@ -34,7 +34,7 @@ interface Props {
 const EMPTY_DATASET: { title: string; slug: string }[] = [];
 
 export function EnterpriseSearchBar({
-    placeholder = 'Search movies, platforms, genres...',
+    placeholder = 'Search movies, genres...',
     autoFocus = false,
     onSearch,
     titleDataset = EMPTY_DATASET,
@@ -240,11 +240,11 @@ export function EnterpriseSearchBar({
         <div className={cn('relative w-full', className)}>
             <div className="relative group">
                 {/* Left icon / Loader */}
-                <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
+                <div className="absolute inset-y-0 left-0 flex items-center pl-5 pointer-events-none z-20">
                     {isLoading ? (
                         <div className="w-5 h-5 border-2 border-[var(--saas-border)] border-t-[var(--saas-accent)] rounded-full animate-spin" />
                     ) : (
-                        <Search className="w-5 h-5 text-[var(--saas-text-muted)] group-focus-within:text-[var(--saas-accent)] transition-colors" />
+                        <Search className="w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-all duration-300" />
                     )}
                 </div>
 
@@ -261,14 +261,14 @@ export function EnterpriseSearchBar({
                     onClick={() => setShowDropdown(true)}
                     placeholder={!animatedPlaceholders || animatedPlaceholders.length === 0 ? t.placeholder : ''}
                     autoFocus={autoFocus}
-                    className="w-full h-12 sm:h-14 pl-12 pr-28 bg-transparent text-[15px] sm:text-base font-medium text-[var(--saas-text-primary)] placeholder:text-[var(--saas-text-muted)] outline-none transition-all relative z-10"
+                    className="w-full h-14 sm:h-16 pl-14 pr-32 bg-transparent text-[15px] sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all relative z-10"
                     aria-label="Search movies"
                     aria-autocomplete="list"
                 />
 
                 {/* Animated Placeholder Overlay */}
                 {!query && animatedPlaceholders && animatedPlaceholders.length > 0 && (
-                    <div className="absolute inset-y-0 left-12 right-28 flex items-center pointer-events-none overflow-hidden z-0">
+                    <div className="absolute inset-y-0 left-14 right-32 flex items-center pointer-events-none overflow-hidden z-0">
                         <AnimatePresence mode="wait">
                             <motion.span
                                 key={placeholderIdx}
@@ -285,7 +285,7 @@ export function EnterpriseSearchBar({
                 )}
 
                 {/* Right actions */}
-                <div className="absolute inset-y-0 right-0 flex items-center gap-1.5 pr-1.5">
+                <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-2 z-20">
                     <AnimatePresence>
                         {query && (
                             <motion.button
@@ -302,7 +302,7 @@ export function EnterpriseSearchBar({
                     <button
                         onClick={handleSearch}
                         disabled={!query.trim()}
-                        className="btn-primary py-1.5 px-3.5 text-xs h-auto disabled:opacity-50 disabled:cursor-not-allowed hidden sm:flex"
+                        className="btn-primary py-2.5 px-6 text-sm font-semibold h-auto disabled:opacity-50 disabled:cursor-not-allowed hidden sm:flex active:scale-95 transition-all shadow-sm hover:shadow-md"
                         aria-label="Search"
                     >
                         {t.search}

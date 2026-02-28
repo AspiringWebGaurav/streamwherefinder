@@ -14,6 +14,7 @@ import {
 import { deleteAllUserData } from '@/lib/deleteUserData';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { ProfilePicture } from '@/components/ProfilePicture';
+import { Navbar } from '@/components/Navbar';
 
 export default function ProfilePage() {
     const { user, loading, logout } = useAuth();
@@ -133,18 +134,7 @@ export default function ProfilePage() {
 
     return (
         <div className="min-h-screen bg-[var(--saas-bg)] pb-16">
-            {/* Header */}
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Explore
-                    </Link>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                 {/* User Info */}

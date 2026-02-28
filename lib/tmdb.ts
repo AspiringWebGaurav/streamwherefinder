@@ -20,14 +20,6 @@ export interface TMDbMovie {
     genres?: { id: number; name: string }[];
     runtime?: number;
     videos?: { results: { key: string; type: string; site: string }[] };
-    'watch/providers'?: {
-        results: Record<string, {
-            link: string;
-            flatrate?: { provider_name: string; logo_path: string }[];
-            rent?: { provider_name: string; logo_path: string }[];
-            buy?: { provider_name: string; logo_path: string }[];
-        }>;
-    };
 }
 
 interface TMDbPagedResponse {
@@ -53,12 +45,6 @@ export interface Movie extends PopularMovie {
     runtime?: number;
     genres: string[];
     trailerKey?: string;
-    watchProviders?: {
-        link: string;
-        streaming?: { provider_name: string; logo_path: string }[];
-        rent?: { provider_name: string; logo_path: string }[];
-        buy?: { provider_name: string; logo_path: string }[];
-    };
 }
 
 /* ─── Client ───────────────────────────────────────────────────────────────── */
@@ -112,7 +98,7 @@ class TMDbClient {
 
     async getMovieDetails(movieId: number): Promise<TMDbMovie> {
         return this.fetchWithAuth(`/movie/${movieId}`, {
-            append_to_response: 'videos,similar,watch/providers',
+            append_to_response: 'videos,similar',
         });
     }
 
@@ -138,14 +124,7 @@ class TMDbClient {
         });
     }
 
-    async getMoviesByProvider(providerId: number, page = 1): Promise<TMDbPagedResponse> {
-        return this.fetchWithAuth('/discover/movie', {
-            'with_watch_providers': providerId.toString(),
-            'watch_region': 'IN',
-            page: page.toString(),
-            'sort_by': 'popularity.desc',
-        });
-    }
+
 
     async getDiscoverMovies(params: Record<string, string>, page = 1): Promise<TMDbPagedResponse> {
         return this.fetchWithAuth('/discover/movie', {
@@ -196,11 +175,6 @@ class TMDbClient {
             if (trailer) movie.trailerKey = trailer.key;
         }
 
-        if (raw['watch/providers']?.results?.IN) {
-            const p = raw['watch/providers'].results.IN;
-            movie.watchProviders = { link: p.link, streaming: p.flatrate, rent: p.rent, buy: p.buy };
-        }
-
         return movie;
     }
 
@@ -222,11 +196,4 @@ class TMDbClient {
 
 export const tmdbClient = new TMDbClient();
 
-export const PROVIDER_IDS = {
-    NETFLIX: 8,
-    AMAZON_PRIME: 119,
-    DISNEY_PLUS: 337,
-    APPLE_TV: 350,
-    YOUTUBE: 192,
-    GOOGLE_PLAY: 3,
-} as const;
+

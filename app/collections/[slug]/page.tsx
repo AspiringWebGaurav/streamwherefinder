@@ -1,9 +1,10 @@
 import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, TrendingUp, Star, Calendar, Award } from 'lucide-react';
-import { tmdbClient, PROVIDER_IDS } from '@/lib/tmdb';
+import { tmdbClient } from '@/lib/tmdb';
 import { MovieCard, MovieCardSkeleton } from '@/components/MovieCard';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
+import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 import { cn } from '@/lib/utils';
@@ -46,27 +47,6 @@ const COLLECTIONS = {
         color: 'bg-purple-50 text-purple-600 border-purple-100',
         fetchData: (page: number) => tmdbClient.getBestOfLastYear().then(r => ({ ...r, page: 1, total_pages: 1 })),
     },
-    'netflix-india': {
-        title: 'Netflix India Movies',
-        description: 'Best Hindi and regional movies streaming on Netflix India',
-        icon: Star,
-        color: 'bg-red-50 text-red-600 border-red-100',
-        fetchData: (page: number) => tmdbClient.getMoviesByProvider(PROVIDER_IDS.NETFLIX, page),
-    },
-    'prime-video-hindi': {
-        title: 'Prime Video Hindi Movies',
-        description: 'Top Bollywood and Hindi movies on Amazon Prime Video',
-        icon: Star,
-        color: 'bg-sky-50 text-sky-600 border-sky-100',
-        fetchData: (page: number) => tmdbClient.getMoviesByProvider(PROVIDER_IDS.AMAZON_PRIME, page),
-    },
-    'hotstar-bollywood': {
-        title: 'Disney+ Hotstar Bollywood',
-        description: 'Latest Bollywood blockbusters and classics on Disney+ Hotstar',
-        icon: Star,
-        color: 'bg-indigo-50 text-indigo-600 border-indigo-100',
-        fetchData: (page: number) => tmdbClient.getMoviesByProvider(PROVIDER_IDS.DISNEY_PLUS, page),
-    },
 } as const;
 
 type CollectionSlug = keyof typeof COLLECTIONS;
@@ -82,7 +62,7 @@ export async function generateMetadata({ params }: CollectionPageProps): Promise
     }
 
     return {
-        title: `${collection.title} | StreamWhereFinder`,
+        title: `${collection.title} | StreamWhere`,
         description: collection.description,
     };
 }
@@ -109,7 +89,7 @@ function Pagination({ currentPage, totalPages, slug }: { currentPage: number; to
             {currentPage > 1 && (
                 <Link
                     href={`/collections/${slug}?page=${currentPage - 1}`}
-                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-[var(--saas-text-secondary)] bg-white border border-[var(--saas-border)] rounded-lg hover:bg-[var(--saas-bg)] hover:text-[var(--saas-text-primary)] transition-colors shadow-sm"
+                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-slate-600 bg-white border border-[var(--cinema-border)] rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
                 >
                     Previous
                 </Link>
@@ -123,10 +103,10 @@ function Pagination({ currentPage, totalPages, slug }: { currentPage: number; to
                             key={pageNum}
                             href={`/collections/${slug}?page=${pageNum}`}
                             className={cn(
-                                'flex items-center justify-center w-10 h-10 text-sm font-semibold rounded-lg transition-colors shadow-sm',
+                                'flex items-center justify-center w-10 h-10 text-sm font-semibold rounded-lg transition-all shadow-sm',
                                 pageNum === currentPage
-                                    ? 'bg-[var(--saas-accent)] text-white border border-[var(--saas-accent)]'
-                                    : 'bg-white text-[var(--saas-text-secondary)] border border-[var(--saas-border)] hover:bg-[var(--saas-bg)] hover:text-[var(--saas-text-primary)]'
+                                    ? 'bg-[var(--cinema-accent)] text-white border border-[var(--cinema-accent)] shadow-[0_2px_12px_rgba(37,99,235,0.2)]'
+                                    : 'bg-white text-slate-600 border border-[var(--cinema-border)] hover:bg-slate-50 hover:text-slate-900'
                             )}
                         >
                             {pageNum}
@@ -138,7 +118,7 @@ function Pagination({ currentPage, totalPages, slug }: { currentPage: number; to
             {currentPage < totalPages && (
                 <Link
                     href={`/collections/${slug}?page=${currentPage + 1}`}
-                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-[var(--saas-text-secondary)] bg-white border border-[var(--saas-border)] rounded-lg hover:bg-[var(--saas-bg)] hover:text-[var(--saas-text-primary)] transition-colors shadow-sm"
+                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-slate-600 bg-white border border-[var(--cinema-border)] rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
                 >
                     Next
                 </Link>
@@ -156,12 +136,12 @@ async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: n
 
         if (movies.length === 0) {
             return (
-                <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--saas-border-light)] shadow-sm">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-[var(--saas-bg)] border border-[var(--saas-border)] rounded-full flex items-center justify-center">
-                        <collection.icon className="w-8 h-8 text-[var(--saas-text-muted)]" />
+                <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--cinema-border)] shadow-sm">
+                    <div className="w-20 h-20 mx-auto mb-6 bg-slate-50 border border-[var(--cinema-border)] rounded-full flex items-center justify-center">
+                        <collection.icon className="w-8 h-8 text-slate-400" />
                     </div>
-                    <h2 className="text-2xl font-bold text-[var(--saas-text-primary)] mb-3">No movies found</h2>
-                    <p className="text-[var(--saas-text-secondary)] mb-8">We couldn't find any movies for this collection right now.</p>
+                    <h2 className="text-2xl font-bold text-slate-900 mb-3">No movies found</h2>
+                    <p className="text-slate-600 mb-8">We couldn't find any movies for this collection right now.</p>
                     <Link href="/" className="btn-secondary inline-flex px-6 h-11">
                         <ArrowLeft className="w-4 h-4 mr-2" />
                         Back to Explore
@@ -183,12 +163,12 @@ async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: n
 
     } catch (error) {
         return (
-            <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--saas-border-light)] shadow-sm">
+            <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--cinema-border)] shadow-sm">
                 <div className="w-20 h-20 mx-auto mb-6 bg-red-50 border border-red-100 rounded-full flex items-center justify-center">
                     <collection.icon className="w-8 h-8 text-red-500" />
                 </div>
-                <h2 className="text-2xl font-bold text-[var(--saas-text-primary)] mb-3">Failed to load movies</h2>
-                <p className="text-[var(--saas-text-secondary)] mb-8">We're having trouble loading this collection. Please try again later.</p>
+                <h2 className="text-2xl font-bold text-slate-900 mb-3">Failed to load movies</h2>
+                <p className="text-slate-600 mb-8">We're having trouble loading this collection. Please try again later.</p>
                 <Link href="/" className="btn-secondary inline-flex px-6 h-11">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Explore
@@ -211,41 +191,34 @@ export default async function CollectionPage({ params, searchParams }: Collectio
     const IconComponent = collection.icon;
 
     return (
-        <div className="min-h-screen bg-[var(--saas-bg)] pb-16">
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-col sm:flex-row items-center gap-4">
-                    <Link
-                        href="/"
-                        className="hidden sm:flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors pr-4 border-r border-[var(--saas-border)]"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-1.5" />
-                        Explore
-                    </Link>
-                    <div className="w-full max-w-2xl flex-1 relative z-50">
-                        <EnterpriseSearchBar placeholder="Search for movies..." />
-                    </div>
-                </div>
-            </div>
+        <div className="min-h-[100dvh] flex flex-col bg-[var(--cinema-bg)]">
+            <Navbar />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-8">
-                    <div className={`p-4 rounded-2xl border flex-shrink-0 shadow-sm ${collection.color}`}>
-                        <IconComponent className="w-8 h-8" />
+            <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
+                <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-8 mt-2">
+                    <div className="flex items-center gap-4">
+                        <div className={`p-4 rounded-2xl border flex-shrink-0 shadow-sm ${collection.color}`}>
+                            <IconComponent className="w-8 h-8" />
+                        </div>
+                        <div>
+                            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                {collection.title}
+                            </h1>
+                            <p className="text-sm font-medium text-slate-600 mt-1.5 line-clamp-2">
+                                {collection.description}
+                            </p>
+                        </div>
                     </div>
-                    <div>
-                        <h1 className="text-2xl sm:text-3xl font-extrabold text-[var(--saas-text-primary)] tracking-tight">
-                            {collection.title}
-                        </h1>
-                        <p className="text-sm font-medium text-[var(--saas-text-secondary)] mt-1.5 line-clamp-2">
-                            {collection.description}
-                        </p>
+
+                    <div className="w-full md:max-w-md shrink-0 relative z-40">
+                        <EnterpriseSearchBar placeholder="Search within collection..." />
                     </div>
                 </div>
 
                 <Suspense fallback={<CollectionLoading />}>
                     <CollectionContent slug={slug as CollectionSlug} page={page} />
                 </Suspense>
-            </div>
+            </main>
         </div>
     );
 }

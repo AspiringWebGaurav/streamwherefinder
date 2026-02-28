@@ -11,7 +11,7 @@ export interface SearchHistoryItem {
 
 const SEARCH_HISTORY_COLLECTION = 'searchHistory';
 const MAX_HISTORY_ITEMS = 50;
-const LOCAL_STORAGE_KEY = 'streamwherefinder_search_history';
+const LOCAL_STORAGE_KEY = 'streamwhere_search_history';
 
 // Save search to Firestore for logged-in users
 export async function saveSearchToFirestore(user: User, query: string): Promise<void> {

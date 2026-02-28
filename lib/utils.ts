@@ -39,12 +39,12 @@ export function getYouTubeEmbedUrl(videoKey: string): string {
 
 export function generateMetaDescription(title: string, overview: string, maxLength = 160): string {
     if (!overview) {
-        return `Watch ${title} - Find where to stream movies online legally. StreamWhereFinder helps you discover movies and where to watch them.`;
+        return `Watch ${title} - Find where to stream movies online legally. StreamWhere helps you discover movies and where to watch them.`;
     }
     return truncateText(`${title} - ${overview}`, maxLength);
 }
 
 export function generatePageTitle(title: string, subtitle?: string): string {
-    const siteName = 'StreamWhereFinder';
+    const siteName = 'StreamWhere';
     return subtitle ? `${title} - ${subtitle} | ${siteName}` : `${title} | ${siteName}`;
 }

@@ -1,28 +1,18 @@
 import { ArrowLeft, Mail, MessageCircle, Bug, Shield, AlertTriangle } from 'lucide-react';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
+import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
-    title: 'Contact Us - StreamWhereFinder',
-    description: 'Get in touch with StreamWhereFinder for support, feedback, or to report issues. We are here to help.',
+    title: 'Contact Us - StreamWhere',
+    description: 'Get in touch with StreamWhere for support, feedback, or to report issues. We are here to help.',
 };
 
 export default function ContactPage() {
     return (
         <div className="min-h-screen bg-[var(--saas-bg)]">
-            {/* Header */}
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Explore
-                    </Link>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 {/* Hero Section */}
@@ -34,7 +24,7 @@ export default function ContactPage() {
                         Contact Us
                     </h1>
                     <p className="text-lg text-[var(--saas-text-secondary)] max-w-2xl mx-auto">
-                        We'd love to hear from you. Get in touch for support, feedback, or any questions about StreamWhereFinder.
+                        We'd love to hear from you. Get in touch for support, feedback, or any questions about StreamWhere.
                     </p>
                 </div>
 
@@ -51,10 +41,10 @@ export default function ContactPage() {
                                 Questions about our service, partnerships, or general feedback.
                             </p>
                             <a
-                                href="mailto:hello@streamwherefinder.com"
+                                href="mailto:hello@streamwhere.com"
                                 className="inline-flex items-center text-sm font-semibold text-blue-600 hover:text-blue-800"
                             >
-                                hello@streamwherefinder.com
+                                hello@streamwhere.com
                             </a>
                         </div>
                     </div>
@@ -70,10 +60,10 @@ export default function ContactPage() {
                                 Report bugs, technical issues, or problems with the website.
                             </p>
                             <a
-                                href="mailto:support@streamwherefinder.com"
+                                href="mailto:support@streamwhere.com"
                                 className="inline-flex items-center text-sm font-semibold text-emerald-600 hover:text-emerald-800"
                             >
-                                support@streamwherefinder.com
+                                support@streamwhere.com
                             </a>
                         </div>
                     </div>

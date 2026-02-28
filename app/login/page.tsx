@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Play, ArrowLeft, Loader2, ShieldCheck, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/FirebaseProvider';
+import { Navbar } from '@/components/Navbar';
 
 function LoginContent() {
     const [isLoading, setIsLoading] = useState(false);
@@ -100,20 +101,7 @@ function LoginContent() {
 export default function LoginPage() {
     return (
         <div className="min-h-screen flex flex-col bg-[var(--saas-bg)]">
-            <header className="absolute top-0 w-full p-6 sm:p-8 flex items-center justify-between">
-                <Link href="/" className="flex items-center gap-2 group">
-                    <div className="w-8 h-8 md:w-10 md:h-10 rounded-xl bg-[var(--saas-accent)] flex items-center justify-center shadow-lg shadow-[var(--saas-accent)]/20">
-                        <Play className="w-4 h-4 md:w-5 md:h-5 text-white ml-1" />
-                    </div>
-                    <span className="font-extrabold text-xl md:text-2xl text-[var(--saas-text-primary)] tracking-tight">
-                        StreamWhereFinder
-                    </span>
-                </Link>
-                <Link href="/" className="flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-text-primary)] transition-colors">
-                    <ArrowLeft className="w-4 h-4 mr-1.5" />
-                    Back
-                </Link>
-            </header>
+            <Navbar />
 
             <main className="flex-1 flex items-center justify-center p-4">
                 <Suspense fallback={<div className="flex justify-center p-8"><Loader2 className="w-8 h-8 animate-spin text-[var(--saas-text-muted)]" /></div>}>

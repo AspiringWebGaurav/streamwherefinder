@@ -3,8 +3,8 @@ import Image from 'next/image';
 import { Suspense } from 'react';
 import { Star, Calendar, Clock, Play, ArrowLeft } from 'lucide-react';
 import { tmdbClient } from '@/lib/tmdb';
-import { WatchProviders } from '@/components/WatchProviders';
 import { MovieCarousel } from '@/components/MovieCarousel';
+import { Navbar } from '@/components/Navbar';
 import {
     formatRuntime,
     formatReleaseDate,
@@ -112,18 +112,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
     return (
         <main className="min-h-screen bg-[var(--saas-bg)] pb-16">
-            {/* Back Navigation */}
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Exlore
-                    </Link>
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                 {/* Movie Details - Enterprise Layout */}
@@ -214,41 +203,29 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     </div>
                 </div>
 
-                <div className="grid lg:grid-cols-3 gap-8 mb-8 lg:mb-12">
-                    {/* Where to Watch Section (Takes up 2 cols on Desktop if we have trailer, else 3) */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {movie.trailerKey && (
-                            <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-6 lg:p-8">
-                                <h3 className="text-xl font-bold text-[var(--saas-text-primary)] mb-6 flex items-center">
-                                    <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mr-3">
-                                        <Play className="w-4 h-4 text-red-500 ml-0.5" />
+                {/* Trailer Section */}
+                {movie.trailerKey && (
+                    <div className="mb-8 lg:mb-12">
+                        <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-6 lg:p-8 max-w-5xl mx-auto">
+                            <h3 className="text-xl font-bold text-[var(--saas-text-primary)] mb-6 flex items-center">
+                                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mr-3">
+                                    <Play className="w-4 h-4 text-red-500 ml-0.5" />
+                                </div>
+                                Official Trailer
+                            </h3>
+                            <Suspense fallback={
+                                <div className="w-full aspect-video bg-[var(--saas-bg)] rounded-xl flex items-center justify-center border border-[var(--saas-border-light)]">
+                                    <div className="flex flex-col items-center">
+                                        <div className="w-12 h-12 rounded-full border-2 border-[var(--saas-accent)] border-t-transparent animate-spin mb-3"></div>
+                                        <span className="text-sm font-semibold text-[var(--saas-text-muted)]">Loading Player...</span>
                                     </div>
-                                    Official Trailer
-                                </h3>
-                                <Suspense fallback={
-                                    <div className="w-full aspect-video bg-[var(--saas-bg)] rounded-xl flex items-center justify-center border border-[var(--saas-border-light)]">
-                                        <div className="flex flex-col items-center">
-                                            <div className="w-12 h-12 rounded-full border-2 border-[var(--saas-accent)] border-t-transparent animate-spin mb-3"></div>
-                                            <span className="text-sm font-semibold text-[var(--saas-text-muted)]">Loading Player...</span>
-                                        </div>
-                                    </div>
-                                }>
-                                    <TrailerEmbed trailerKey={movie.trailerKey} title={movie.title} />
-                                </Suspense>
-                            </div>
-                        )}
+                                </div>
+                            }>
+                                <TrailerEmbed trailerKey={movie.trailerKey} title={movie.title} />
+                            </Suspense>
+                        </div>
                     </div>
-
-                    <div className="lg:col-span-1">
-                        <WatchProviders
-                            watchProviders={movie.watchProviders}
-                            movieTitle={movie.title}
-                            movieId={movie.id}
-                            releaseDate={movie.releaseDate}
-                            className="h-full"
-                        />
-                    </div>
-                </div>
+                )}
 
                 {/* Similar Movies */}
                 {similarMovies.length > 0 && (

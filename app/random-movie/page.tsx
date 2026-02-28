@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { Shuffle, RefreshCw, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
 import { MovieCard } from '@/components/MovieCard';
-import { WatchProviders } from '@/components/WatchProviders';
 import { tmdbClient } from '@/lib/tmdb';
 import { Movie } from '@/lib/types';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
+import { Navbar } from '@/components/Navbar';
 
 interface RandomMovieState {
     movie: Movie | null;
@@ -131,24 +131,7 @@ export default function RandomMoviePage() {
 
     return (
         <div className="min-h-screen bg-[var(--saas-bg)] pb-16">
-            {/* Header */}
-            <div className="bg-white border-b border-[var(--saas-border-light)] sticky top-0 z-20 shadow-sm">
-                <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-14 flex items-center justify-between">
-                    <Link
-                        href="/"
-                        className="inline-flex items-center text-sm font-semibold text-[var(--saas-text-secondary)] hover:text-[var(--saas-accent)] transition-colors"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Explore
-                    </Link>
-
-                    <div className="text-sm font-bold text-[var(--saas-text-primary)]">
-                        Spin Tonight
-                    </div>
-
-                    <div className="w-24"></div> {/* Spacer */}
-                </div>
-            </div>
+            <Navbar />
 
             <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-16">
                 {state.isAnimating || (state.isLoading && !state.movie) ? (
@@ -253,15 +236,6 @@ export default function RandomMoviePage() {
                                             </div>
                                         </div>
                                     )}
-
-                                    <div className="pt-4">
-                                        <WatchProviders
-                                            movieId={state.movie.id}
-                                            watchProviders={state.movie.watchProviders}
-                                            movieTitle={state.movie.title}
-                                            className="p-0 border-none shadow-none bg-transparent"
-                                        />
-                                    </div>
                                 </div>
                             </div>
                         </div>

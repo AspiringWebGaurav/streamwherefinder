@@ -21,14 +21,11 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
     const trackRef = useRef<HTMLDivElement>(null);
     const [isHovered, setIsHovered] = useState(false);
 
-    // Duplicate movies for seamless infinite scrolling
     const doubledMovies = [...movies, ...movies];
 
-    // ── Auto-scroll Effect ────────────────────────────────────────────────────
     useEffect(() => {
         if (!autoSlideDirection || isHovered || isLoading || movies.length === 0) return;
 
-        // Ensure we don't start at 0 if scrolling backwards (right)
         if (trackRef.current && autoSlideDirection === 'right' && trackRef.current.scrollLeft <= 0) {
             trackRef.current.scrollLeft = trackRef.current.scrollWidth / 2;
         }
@@ -40,7 +37,6 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
 
                 const halfWidth = trackRef.current.scrollWidth / 2;
 
-                // Seamlessly jump to the other half when hitting a boundary
                 if (autoSlideDirection === 'left' && trackRef.current.scrollLeft >= halfWidth) {
                     trackRef.current.scrollLeft -= halfWidth;
                 } else if (autoSlideDirection === 'right' && trackRef.current.scrollLeft <= 0) {
@@ -65,18 +61,17 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
             {...inViewProps}
             className="space-y-4"
         >
-            {/* Section header */}
             <motion.div variants={fadeUp} className="flex items-center justify-between px-1">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     {badge && <span className="saas-badge">{badge}</span>}
-                    <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--saas-text-primary)] tracking-tight">
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-[var(--cinema-text-primary)] tracking-tight">
                         {title}
                     </h2>
                 </div>
                 {seeMoreHref && (
                     <Link
                         href={seeMoreHref}
-                        className="flex items-center gap-1 text-sm font-bold text-[var(--saas-accent)] hover:text-[var(--saas-accent-hover)] transition-colors group"
+                        className="flex items-center gap-1 text-sm font-bold text-[var(--cinema-accent)] hover:text-[var(--cinema-accent-hover)] transition-colors group"
                     >
                         See all
                         <ChevronRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -84,30 +79,28 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
                 )}
             </motion.div>
 
-            {/* Track Container */}
             <div className="relative group/carousel">
-                {/* Left Arrow */}
+                {/* Left Arrow - fade in on hover */}
                 <button
                     onClick={() => scroll('left')}
-                    className="absolute z-10 left-2 sm:left-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-[var(--saas-border)] text-[var(--saas-text-primary)] hover:text-[var(--saas-accent)] transition-all hover:scale-105 active:scale-95"
+                    className="carousel-arrow absolute z-10 left-0 sm:left-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-[var(--cinema-border)] text-[var(--cinema-text-primary)] hover:text-[var(--cinema-accent)] transition-all"
                     aria-label="Scroll left"
                 >
-                    <ChevronLeft className="w-6 h-6 ml-[-2px]" />
+                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
 
-                {/* Main scrollable track */}
                 <div
                     ref={trackRef}
                     onMouseEnter={() => setIsHovered(true)}
                     onMouseLeave={() => setIsHovered(false)}
                     onTouchStart={() => setIsHovered(true)}
                     onTouchEnd={() => setIsHovered(false)}
-                    className="carousel-track overflow-x-auto overflow-y-hidden scrollbar-hide py-2 flex gap-4 pr-4 snap-x snap-mandatory"
+                    className="carousel-track overflow-x-auto overflow-y-hidden scrollbar-hide py-2 flex gap-3 sm:gap-4 pr-4 snap-x snap-mandatory"
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     <AnimatePresence mode="wait">
                         {isLoading ? (
-                            <motion.div key="skeletons" className="flex gap-4 px-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                            <motion.div key="skeletons" className="flex gap-3 sm:gap-4 px-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
                                 {Array.from({ length: 7 }).map((_, i) => (
                                     <div key={i} className="snap-start shrink-0">
                                         <MovieCardSkeleton />
@@ -115,7 +108,7 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
                                 ))}
                             </motion.div>
                         ) : (
-                            <motion.div key="cards" className="flex gap-4 px-1" variants={staggerContainer} initial="hidden" animate="visible">
+                            <motion.div key="cards" className="flex gap-3 sm:gap-4 px-1" variants={staggerContainer} initial="hidden" animate="visible">
                                 {doubledMovies.map((m, i) => (
                                     <div key={`${m.id}-${i}`} className="snap-start shrink-0">
                                         <MovieCard movie={m} priority={i < 3} />
@@ -126,14 +119,18 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref, au
                     </AnimatePresence>
                 </div>
 
-                {/* Right Arrow */}
+                {/* Right Arrow - fade in on hover */}
                 <button
                     onClick={() => scroll('right')}
-                    className="absolute z-10 right-2 sm:right-4 top-1/2 -translate-y-1/2 flex items-center justify-center w-12 h-12 rounded-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] border border-[var(--saas-border)] text-[var(--saas-text-primary)] hover:text-[var(--saas-accent)] transition-all hover:scale-105 active:scale-95"
+                    className="carousel-arrow absolute z-10 right-0 sm:right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/90 backdrop-blur-md shadow-[0_4px_20px_rgba(0,0,0,0.12)] border border-[var(--cinema-border)] text-[var(--cinema-text-primary)] hover:text-[var(--cinema-accent)] transition-all"
                     aria-label="Scroll right"
                 >
-                    <ChevronRight className="w-6 h-6 mr-[-2px]" />
+                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
                 </button>
+
+                {/* Edge gradients for depth */}
+                <div className="absolute inset-y-0 left-0 w-12 bg-gradient-to-r from-[var(--cinema-bg)] to-transparent pointer-events-none z-[5]" />
+                <div className="absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[var(--cinema-bg)] to-transparent pointer-events-none z-[5]" />
             </div>
         </motion.section>
     );

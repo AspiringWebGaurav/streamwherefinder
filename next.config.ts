@@ -1,7 +1,14 @@
 import type { NextConfig } from "next";
+import withSerwistInit from "@serwist/next";
+
+const withSerwist = withSerwistInit({
+  swSrc: "app/sw.ts",
+  swDest: "public/sw.js",
+});
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {},
 
   // ── Security Headers (Production Hardening) ────────────────────────────
   async headers() {
@@ -39,4 +46,4 @@ const nextConfig: NextConfig = {
   // No rewrites needed — the app has its own /api routes now.
 };
 
-export default nextConfig;
+export default withSerwist(nextConfig);

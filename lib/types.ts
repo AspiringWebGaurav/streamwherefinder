@@ -15,20 +15,9 @@ export interface Movie extends PopularMovie {
     runtime?: number;
     genres: string[];
     trailerKey?: string;
-    watchProviders?: {
-        link?: string;
-        streaming?: WatchProvider[];
-        rent?: WatchProvider[];
-        buy?: WatchProvider[];
-    };
 }
 
-export interface WatchProvider {
-    display_priority?: number;
-    logo_path: string;
-    provider_id?: number;
-    provider_name: string;
-}
+
 
 export interface SearchApiResponse {
     movies: PopularMovie[];

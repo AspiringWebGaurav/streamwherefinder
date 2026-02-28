@@ -1,22 +1,28 @@
 import { Variants } from 'framer-motion';
 
 /**
- * Enterprise Polish: Subtle, professional animations.
- * Removed bouncy springs and aggressive scales.
- * Focus is on crisp, smooth opacity fades and micro-translations.
+ * Cinematic Motion Architecture
+ * Physics-based feel with ease-out curves.
+ * GPU-accelerated transforms only. No layout shift.
+ * Consistent 150–350ms durations.
  */
 
-// Basic subtle fade-up for content blocks
+// ── Cinematic Easing Curves ──────────────────────────────────────────────────
+const EASE_CINEMATIC = [0.25, 0.1, 0.25, 1] as const;
+const EASE_OUT = [0.0, 0.0, 0.2, 1] as const;
+const EASE_DECEL = [0.0, 0.0, 0.05, 1] as const;
+
+// ── Fade Up: Content blocks entry ────────────────────────────────────────────
 export const fadeUp: Variants = {
-    hidden: { opacity: 0, y: 12 },
+    hidden: { opacity: 0, y: 16 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: [0.25, 0.1, 0.25, 1] },
+        transition: { duration: 0.45, ease: EASE_OUT },
     },
 };
 
-// Subtle fade-in, mostly for background elements or overlays
+// ── Fade In: Overlays, backgrounds ───────────────────────────────────────────
 export const fadeIn: Variants = {
     hidden: { opacity: 0 },
     visible: {
@@ -25,17 +31,28 @@ export const fadeIn: Variants = {
     },
 };
 
-// Extremely subtle scale-up for cards on mount, no spring
+// ── Cinematic Scale: Card mount animation ────────────────────────────────────
 export const subtleScale: Variants = {
-    hidden: { scale: 0.98, opacity: 0 },
+    hidden: { scale: 0.95, opacity: 0 },
     visible: {
         scale: 1,
         opacity: 1,
-        transition: { duration: 0.3, ease: [0.25, 0.1, 0.25, 1] },
+        transition: { duration: 0.4, ease: EASE_CINEMATIC },
     },
 };
 
-// Slide down for dropdowns or alerts
+// ── Cinematic Card Reveal: staggered with slight vertical slide ──────────────
+export const cardReveal: Variants = {
+    hidden: { opacity: 0, y: 20, scale: 0.97 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        scale: 1,
+        transition: { duration: 0.5, ease: EASE_DECEL },
+    },
+};
+
+// ── Slide Down: Dropdowns, alerts ────────────────────────────────────────────
 export const slideDown: Variants = {
     hidden: { opacity: 0, y: -8 },
     visible: {
@@ -50,14 +67,14 @@ export const slideDown: Variants = {
     },
 };
 
-// Stagger for lists/grids, faster and tighter
+// ── Stagger Container: Lists, grids ─────────────────────────────────────────
 export const staggerContainer: Variants = {
     hidden: { opacity: 0 },
     visible: {
         opacity: 1,
         transition: {
-            staggerChildren: 0.05,
-            delayChildren: 0.05,
+            staggerChildren: 0.06,
+            delayChildren: 0.08,
         },
     },
     exit: {
@@ -66,30 +83,56 @@ export const staggerContainer: Variants = {
     },
 };
 
-// Unified framer-motion props for scroll-triggered elements
-export const inViewProps = {
-    initial: 'hidden',
-    whileInView: 'visible',
-    viewport: { once: true, margin: '-40px' }, // Trigger slightly before it comes into view
+// ── Cinematic Stagger: Slower, more dramatic ─────────────────────────────────
+export const cinematicStagger: Variants = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.15,
+        },
+    },
 };
 
-// Clean page transition, no layout shift
+// ── In-view trigger props ────────────────────────────────────────────────────
+export const inViewProps = {
+    initial: 'hidden' as const,
+    whileInView: 'visible' as const,
+    viewport: { once: true, margin: '-60px' },
+};
+
+// ── Page Transition: Clean route transitions ─────────────────────────────────
 export const pageTransition: Variants = {
-    hidden: { opacity: 0, y: 10 },
+    hidden: { opacity: 0, y: 12 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.4, ease: 'easeOut' }
+        transition: { duration: 0.45, ease: EASE_OUT },
     },
     exit: {
         opacity: 0,
-        transition: { duration: 0.2, ease: 'easeIn' }
+        transition: { duration: 0.2, ease: 'easeIn' },
     },
 };
 
-// Used for interactions instead of whileHover prop directly (if manual control needed)
-// Replace springHover with this subtle shift
+// ── Hover transition config ──────────────────────────────────────────────────
 export const subtleHoverTransition = {
-    duration: 0.2,
-    ease: [0.25, 0.1, 0.25, 1] as const, // standard crisp curve
+    duration: 0.25,
+    ease: EASE_CINEMATIC,
+};
+
+// ── Cinematic hover for cards ────────────────────────────────────────────────
+export const cinematicHover = {
+    y: -6,
+    transition: {
+        duration: 0.3,
+        ease: EASE_OUT,
+    },
+};
+
+// ── Scale on tap ─────────────────────────────────────────────────────────────
+export const tapScale = {
+    scale: 0.97,
+    transition: { duration: 0.1 },
 };
