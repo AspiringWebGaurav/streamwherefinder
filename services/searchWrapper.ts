@@ -1,19 +1,36 @@
 import Fuse from "fuse.js";
 import { PopularMovie, SearchApiResponse } from "@/lib/types";
 
-// ─── Query Normalisation ─────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// StreamWhere Enterprise Search Engine v2
+// Multi-layer ranking · Franchise detection · Regional intelligence
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// ─── Query Normalisation (SAFE — preserves meaningful duplicate chars) ────────
 
 /**
- * Normalises a raw query:
- * - Trim + lowercase
- * - Collapse duplicate consecutive characters (Krrish → Krish, Avvtar → Avtar)
- * - Remove non-alphanumeric except spaces
+ * Light normalisation for display/comparison only.
+ * Does NOT collapse duplicate characters (preserves "Dhoom", "Krrish", etc.)
+ */
+export function normalizeForComparison(raw: string): string {
+    return raw
+        .trim()
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, " ")
+        .trim();
+}
+
+/**
+ * Legacy normalizeQuery kept for backward-compat but fixed:
+ * Only collapses 3+ consecutive identical chars (e.g. "Dhooooom" → "Dhoom")
+ * Never collapses doubles like "oo", "rr", "ss" which are real word patterns.
  */
 export function normalizeQuery(raw: string): string {
     return raw
         .trim()
         .toLowerCase()
-        .replace(/(.)\1+/g, "$1") // collapse duplicate chars
+        .replace(/(.)\1{2,}/g, "$1$1") // 3+ same char → 2 (safe)
         .replace(/[^a-z0-9\s]/g, " ")
         .replace(/\s+/g, " ")
         .trim();
@@ -40,23 +57,19 @@ function levenshtein(a: string, b: string): number {
 
 // ─── "Did you mean?" ─────────────────────────────────────────────────────────
 
-/**
- * Returns the closest title match if edit distance ≤ threshold.
- * Uses normalised query vs normalised titles.
- */
 export function getDidYouMean(
     raw: string,
     titles: { title: string; slug: string }[],
     threshold = 3
 ): { title: string; slug: string } | null {
-    const q = normalizeQuery(raw);
+    const q = normalizeForComparison(raw);
     if (q.length < 3) return null;
 
     let best: { title: string; slug: string } | null = null;
     let bestDist = Infinity;
 
     for (const t of titles) {
-        const norm = normalizeQuery(t.title);
+        const norm = normalizeForComparison(t.title);
         const dist = levenshtein(q, norm);
         if (dist < bestDist && dist <= threshold) {
             bestDist = dist;
@@ -64,20 +77,138 @@ export function getDidYouMean(
         }
     }
 
-    // Only suggest if the query is NOT already close (avoid suggesting same word)
-    if (best && normalizeQuery(raw) !== normalizeQuery(best.title)) {
+    if (best && normalizeForComparison(raw) !== normalizeForComparison(best.title)) {
         return best;
     }
     return null;
 }
 
-// ─── Live Client-Side Search (calls native /api/search) ────────────────
+// ═══════════════════════════════════════════════════════════════════════════════
+// ENTERPRISE RANKING ENGINE
+// ═══════════════════════════════════════════════════════════════════════════════
+
+// Indian language codes that indicate Bollywood/regional Indian cinema
+const INDIAN_LANGUAGES = new Set(["hi", "ta", "te", "ml", "kn", "bn", "mr", "pa", "gu"]);
+
+/**
+ * Compute a multi-layer relevance score for each movie result.
+ *
+ * Layers:
+ *   A – Exact title match (highest priority)
+ *   B – Normalized containment match
+ *   C – Franchise boost (sequel detection)
+ *   D – Regional weighting (Indian cinema boost)
+ *   E – Popularity + vote weight composite
+ */
+function computeRelevanceScore(movie: PopularMovie, rawQuery: string): number {
+    const queryLower = rawQuery.trim().toLowerCase();
+    const queryNorm = normalizeForComparison(rawQuery);
+    const titleLower = movie.title.toLowerCase();
+    const titleNorm = normalizeForComparison(movie.title);
+
+    let score = 0;
+
+    // ── Layer A: Exact Match Boost ────────────────────────────────────────
+    if (titleLower === queryLower || titleNorm === queryNorm) {
+        score += 100; // Exact match = highest priority
+    }
+
+    // ── Layer B: Containment & Starts-With ────────────────────────────────
+    if (titleNorm.startsWith(queryNorm)) {
+        score += 40; // Title starts with query
+    } else if (titleNorm.includes(queryNorm)) {
+        score += 20; // Title contains query
+    }
+
+    // Penalise if the title doesn't contain the query at all
+    if (!titleNorm.includes(queryNorm)) {
+        // Check token-level containment
+        const queryTokens = queryNorm.split(" ");
+        const titleTokens = titleNorm.split(" ");
+        let tokenHits = 0;
+        for (const qt of queryTokens) {
+            if (titleTokens.some(tt => tt.startsWith(qt) || tt === qt)) {
+                tokenHits++;
+            }
+        }
+        if (tokenHits === 0) {
+            score -= 30; // No token match at all — likely irrelevant
+        } else {
+            score += tokenHits * 5;
+        }
+    }
+
+    // ── Layer C: Franchise Boost ──────────────────────────────────────────
+    // If query is a franchise base name (e.g. "Dhoom"), boost sequels
+    const franchisePattern = new RegExp(
+        `^${queryNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*\\d+)?$`
+    );
+    if (franchisePattern.test(titleNorm)) {
+        score += 60; // Strong franchise match (e.g. "dhoom", "dhoom 2", "dhoom 3")
+    }
+
+    // ── Layer D: Regional Weighting (India) ──────────────────────────────
+    const lang = movie.originalLanguage || "";
+    if (INDIAN_LANGUAGES.has(lang)) {
+        score += 15; // Boost Indian cinema
+    }
+
+    // ── Layer E: Popularity + Vote Weight ────────────────────────────────
+    const popularity = movie.popularity || 0;
+    const voteCount = movie.voteCount || 0;
+
+    // Logarithmic popularity scaling (prevents runaway scores)
+    score += Math.min(20, Math.log10(Math.max(1, popularity)) * 5);
+
+    // Vote count credibility boost
+    if (voteCount >= 500) score += 10;
+    else if (voteCount >= 100) score += 5;
+    else if (voteCount >= 10) score += 2;
+
+    // ── Penalty: Obscure content filter ──────────────────────────────────
+    if (voteCount < 5 && popularity < 1) {
+        score -= 20; // Severely penalise obscure entries
+    }
+
+    // Release year recency bonus (small)
+    const year = parseInt(movie.releaseDate?.split("-")[0] || "0");
+    if (year >= 2020) score += 3;
+    else if (year >= 2000) score += 1;
+
+    return score;
+}
+
+/**
+ * Rank and filter search results using the enterprise scoring engine.
+ */
+function rankResults(movies: PopularMovie[], rawQuery: string, limit: number): PopularMovie[] {
+    // Score each movie
+    const scored = movies.map(movie => ({
+        movie,
+        score: computeRelevanceScore(movie, rawQuery),
+    }));
+
+    // Sort by score descending, then by popularity as tiebreaker
+    scored.sort((a, b) => {
+        if (b.score !== a.score) return b.score - a.score;
+        return (b.movie.popularity || 0) - (a.movie.popularity || 0);
+    });
+
+    return scored.slice(0, limit).map(s => s.movie);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// LIVE SEARCH (calls /api/search)
+// ═══════════════════════════════════════════════════════════════════════════════
 
 let activeController: AbortController | null = null;
 
 /**
- * Debounce-safe search wrapper.
- * Cancels any in-flight request before firing a new one.
+ * Enterprise search wrapper with:
+ * - Parallel raw + normalized queries for maximum coverage
+ * - Multi-layer ranking engine
+ * - Franchise detection & grouping
+ * - Regional intelligence
  */
 export async function searchMovies(
     query: string,
@@ -90,9 +221,9 @@ export async function searchMovies(
         query,
     };
 
-    if (!query || query.length < 2) return empty;
+    if (!query || query.trim().length < 2) return empty;
 
-    // Cancel previous request
+    // Cancel previous in-flight request
     if (activeController) {
         activeController.abort();
     }
@@ -103,24 +234,22 @@ export async function searchMovies(
     const normalized = normalizeQuery(trimmed);
 
     try {
-        // Always search with the normalized query for better fuzzy matching
-        const primaryUrl = new URL("/api/search", window.location.origin);
-        primaryUrl.searchParams.set("q", normalized);
-        primaryUrl.searchParams.set("limit", limit.toString());
-
-        // If normalization changed the query, also search with the raw query
-        // and merge results (deduped) for maximum coverage
-        const hasVariant = normalized !== trimmed.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+        // ── Parallel fetch: raw query + normalized variant ────────────────
+        const rawUrl = new URL("/api/search", window.location.origin);
+        rawUrl.searchParams.set("q", trimmed);
+        rawUrl.searchParams.set("limit", "20"); // Overfetch for ranking
 
         const fetches: Promise<Response>[] = [
-            fetch(primaryUrl.toString(), { signal }),
+            fetch(rawUrl.toString(), { signal }),
         ];
 
-        if (hasVariant) {
-            const secondaryUrl = new URL("/api/search", window.location.origin);
-            secondaryUrl.searchParams.set("q", trimmed);
-            secondaryUrl.searchParams.set("limit", limit.toString());
-            fetches.push(fetch(secondaryUrl.toString(), { signal }));
+        // Only send a second query if normalization actually changed something
+        const normalizedClean = trimmed.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+        if (normalized !== normalizedClean) {
+            const normUrl = new URL("/api/search", window.location.origin);
+            normUrl.searchParams.set("q", normalized);
+            normUrl.searchParams.set("limit", "20");
+            fetches.push(fetch(normUrl.toString(), { signal }));
         }
 
         const responses = await Promise.allSettled(fetches);
@@ -139,11 +268,11 @@ export async function searchMovies(
             }
         }
 
-        // Sort: higher rated and more popular movies first
-        allMovies.sort((a, b) => (b.rating * 10 + b.id) - (a.rating * 10 + a.id));
+        // ── Apply enterprise ranking engine ──────────────────────────────
+        const ranked = rankResults(allMovies, trimmed, limit);
 
         return {
-            movies: allMovies.slice(0, limit),
+            movies: ranked,
             isClientSide: false,
             totalResults: allMovies.length,
             query: trimmed,
@@ -159,7 +288,7 @@ export async function searchMovies(
     }
 }
 
-// ─── Fuzzy Suggestion Engine (client-side Fuse.js over cached results) ───────
+// ─── Fuzzy Suggestion Engine (Fuse.js) ───────────────────────────────────────
 
 let fuseInstance: Fuse<PopularMovie> | null = null;
 
@@ -181,11 +310,11 @@ export function fuseSearch(query: string, limit = 5): PopularMovie[] {
         .map((r) => r.item);
 }
 
-// ─── Similarity score (0-1) between two strings ──────────────────────────────
+// ─── Similarity score ────────────────────────────────────────────────────────
 
 export function similarityScore(a: string, b: string): number {
-    const na = normalizeQuery(a);
-    const nb = normalizeQuery(b);
+    const na = normalizeForComparison(a);
+    const nb = normalizeForComparison(b);
     if (!na || !nb) return 0;
     const maxLen = Math.max(na.length, nb.length);
     return 1 - levenshtein(na, nb) / maxLen;

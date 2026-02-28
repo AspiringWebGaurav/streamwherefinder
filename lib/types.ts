@@ -7,6 +7,9 @@ export interface PopularMovie {
     posterPath: string | null;
     releaseDate: string;
     rating: number;
+    popularity?: number;
+    voteCount?: number;
+    originalLanguage?: string;
 }
 
 export interface Movie extends PopularMovie {

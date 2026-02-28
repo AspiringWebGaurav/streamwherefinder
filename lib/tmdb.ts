@@ -16,6 +16,8 @@ export interface TMDbMovie {
     release_date: string;
     vote_average: number;
     vote_count: number;
+    popularity: number;
+    original_language: string;
     genre_ids?: number[];
     genres?: { id: number; name: string }[];
     runtime?: number;
@@ -37,6 +39,9 @@ export interface PopularMovie {
     posterPath: string | null;
     releaseDate: string;
     rating: number;
+    popularity?: number;
+    voteCount?: number;
+    originalLanguage?: string;
 }
 
 export interface Movie extends PopularMovie {
@@ -153,6 +158,9 @@ class TMDbClient {
             posterPath: this.getPosterUrl(raw.poster_path),
             releaseDate: raw.release_date,
             rating: Math.round(raw.vote_average * 10) / 10,
+            popularity: raw.popularity,
+            voteCount: raw.vote_count,
+            originalLanguage: raw.original_language,
         };
     }
 
@@ -168,6 +176,9 @@ class TMDbClient {
             rating: Math.round(raw.vote_average * 10) / 10,
             runtime: raw.runtime,
             genres: raw.genres ? raw.genres.map((g) => g.name) : [],
+            popularity: raw.popularity,
+            voteCount: raw.vote_count,
+            originalLanguage: raw.original_language,
         };
 
         if (raw.videos?.results) {

@@ -261,22 +261,13 @@ export function SearchPageClient({ initialQuery }: SearchPageClientProps) {
 
     return (
         <div className="min-h-[100dvh] bg-[var(--cinema-bg)] pb-16">
-            <div className="bg-white/95 backdrop-blur-xl border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex flex-col sm:flex-row items-center gap-4">
-                    <Link
-                        href="/"
-                        className="hidden sm:flex items-center text-sm font-bold text-slate-500 hover:text-slate-900 transition-colors pr-5 border-r border-slate-200 h-8"
-                    >
-                        <ArrowLeft className="w-4 h-4 mr-1.5" />
-                        StrmWhr
-                    </Link>
-                    <div className="w-full max-w-2xl flex-1 relative z-50">
-                        <EnterpriseSearchBar placeholder="Search globally..." />
-                    </div>
-                </div>
-            </div>
+            <Navbar />
 
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+                <div className="w-full max-w-2xl mb-8 relative z-50">
+                    <EnterpriseSearchBar placeholder="Search globally..." />
+                </div>
+
                 <Suspense fallback={
                     <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4 pt-6">
                         {Array.from({ length: 14 }).map((_, i) => (
