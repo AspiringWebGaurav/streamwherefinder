@@ -9,6 +9,7 @@ const withSerwist = withSerwistInit({
 
 const nextConfig: NextConfig = {
   reactCompiler: true,
+  turbopack: {},
 
   // ── Security Headers (Production Hardening) ────────────────────────────
   async headers() {
