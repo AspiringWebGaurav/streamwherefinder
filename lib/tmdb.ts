@@ -22,6 +22,23 @@ export interface TMDbMovie {
     genres?: { id: number; name: string }[];
     runtime?: number;
     videos?: { results: { key: string; type: string; site: string }[] };
+    'watch/providers'?: {
+        results: {
+            IN?: {
+                link?: string;
+                flatrate?: WatchProvider[];
+                rent?: WatchProvider[];
+                buy?: WatchProvider[];
+            };
+        };
+    };
+}
+
+export interface WatchProvider {
+    logo_path: string;
+    provider_id: number;
+    provider_name: string;
+    display_priority: number;
 }
 
 interface TMDbPagedResponse {
@@ -50,6 +67,12 @@ export interface Movie extends PopularMovie {
     runtime?: number;
     genres: string[];
     trailerKey?: string;
+    watchProviders?: {
+        link?: string;
+        streaming?: WatchProvider[];
+        rent?: WatchProvider[];
+        buy?: WatchProvider[];
+    };
 }
 
 /* ─── Client ───────────────────────────────────────────────────────────────── */
@@ -103,7 +126,7 @@ class TMDbClient {
 
     async getMovieDetails(movieId: number): Promise<TMDbMovie> {
         return this.fetchWithAuth(`/movie/${movieId}`, {
-            append_to_response: 'videos,similar',
+            append_to_response: 'videos,similar,watch/providers',
         });
     }
 
@@ -184,6 +207,16 @@ class TMDbClient {
         if (raw.videos?.results) {
             const trailer = raw.videos.results.find((v) => v.type === 'Trailer' && v.site === 'YouTube');
             if (trailer) movie.trailerKey = trailer.key;
+        }
+
+        if ('watch/providers' in raw && raw['watch/providers']?.results?.IN) {
+            const providers = raw['watch/providers'].results.IN;
+            movie.watchProviders = {
+                link: providers.link,
+                streaming: providers.flatrate,
+                rent: providers.rent,
+                buy: providers.buy,
+            };
         }
 
         return movie;

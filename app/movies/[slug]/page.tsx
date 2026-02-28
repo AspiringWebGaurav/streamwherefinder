@@ -4,6 +4,7 @@ import { Suspense } from 'react';
 import { Star, Calendar, Clock, Play, ArrowLeft } from 'lucide-react';
 import { tmdbClient } from '@/lib/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
+import { WatchProviders } from '@/components/WatchProviders';
 import { Navbar } from '@/components/Navbar';
 import {
     formatRuntime,
@@ -116,11 +117,11 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 lg:py-12">
                 {/* Movie Details - Enterprise Layout */}
-                <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-6 lg:p-10 mb-8 lg:mb-12">
-                    <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
+                <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-5 lg:p-8 mb-6 lg:mb-10 max-w-6xl mx-auto">
+                    <div className="flex flex-col lg:flex-row gap-6 lg:gap-10">
                         {/* Poster */}
-                        <div className="w-full lg:w-[320px] flex-shrink-0 mx-auto">
-                            <div className="relative aspect-[2/3] bg-[var(--saas-bg)] rounded-xl overflow-hidden shadow-sm border border-[var(--saas-border-light)]">
+                        <div className="w-full lg:w-[320px] flex-shrink-0 mx-auto lg:mx-0">
+                            <div className="relative w-full aspect-[2/3] bg-[var(--saas-bg)] rounded-xl overflow-hidden shadow-sm border border-[var(--saas-border-light)] transform transition-transform duration-300 hover:scale-[1.02]">
                                 {movie.posterPath ? (
                                     <Image
                                         src={movie.posterPath}
@@ -129,6 +130,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                                         className="object-cover"
                                         priority
                                         sizes="(max-width: 1024px) 100vw, 320px"
+                                        quality={90}
                                     />
                                 ) : (
                                     <div className="flex items-center justify-center h-full text-[var(--saas-text-muted)]">
@@ -142,7 +144,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                         </div>
 
                         {/* Movie Information */}
-                        <div className="flex-1 space-y-8 flex flex-col justify-center">
+                        <div className="flex-1 space-y-5 lg:space-y-6 flex flex-col justify-start">
                             {/* Title and Metadata */}
                             <div>
                                 <h1 className="text-3xl lg:text-5xl font-extrabold text-[var(--saas-text-primary)] mb-4 tracking-tight">
@@ -191,49 +193,61 @@ export default async function MoviePage({ params }: MoviePageProps) {
                             {/* Synopsis */}
                             {movie.overview && (
                                 <div className="pt-2">
-                                    <h3 className="text-lg font-bold text-[var(--saas-text-primary)] mb-3 border-b border-[var(--saas-border)] pb-2 inline-block">Synopsis</h3>
-                                    <p className="text-[var(--saas-text-secondary)] leading-relaxed text-[15px] max-w-3xl">
+                                    <h3 className="text-sm font-bold text-[var(--saas-text-primary)] mb-2 uppercase tracking-wide">Synopsis</h3>
+                                    <p className="text-[var(--saas-text-secondary)] leading-relaxed text-[15px] max-w-3xl line-clamp-3 hover:line-clamp-none transition-all duration-300 cursor-ns-resize">
                                         {movie.overview}
                                     </p>
                                 </div>
                             )}
 
-                            {/* Trailer Placeholder for Enterprise Layout */}
+                            {/* Where to Watch embedded directly inside the details column */}
+                            <div className="pt-2 lg:pt-4">
+                                <WatchProviders
+                                    watchProviders={movie.watchProviders}
+                                    movieTitle={movie.title}
+                                    movieId={movie.id}
+                                    releaseDate={movie.releaseDate}
+                                    className="p-0 border-none shadow-none bg-transparent"
+                                />
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Trailer Section */}
+                {/* Trailer Section (Moved below availability) */}
                 {movie.trailerKey && (
                     <div className="mb-8 lg:mb-12">
-                        <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-6 lg:p-8 max-w-5xl mx-auto">
-                            <h3 className="text-xl font-bold text-[var(--saas-text-primary)] mb-6 flex items-center">
-                                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mr-3">
+                        <div className="bg-white rounded-2xl shadow-sm border border-[var(--saas-border-light)] p-5 lg:p-6 max-w-4xl mx-auto flex flex-col items-center">
+                            <h3 className="text-lg font-bold text-[var(--saas-text-primary)] mb-4 flex items-center w-full justify-start">
+                                <div className="w-8 h-8 rounded-full bg-red-50 flex items-center justify-center mr-3 shadow-sm border border-red-100">
                                     <Play className="w-4 h-4 text-red-500 ml-0.5" />
                                 </div>
                                 Official Trailer
                             </h3>
-                            <Suspense fallback={
-                                <div className="w-full aspect-video bg-[var(--saas-bg)] rounded-xl flex items-center justify-center border border-[var(--saas-border-light)]">
-                                    <div className="flex flex-col items-center">
-                                        <div className="w-12 h-12 rounded-full border-2 border-[var(--saas-accent)] border-t-transparent animate-spin mb-3"></div>
-                                        <span className="text-sm font-semibold text-[var(--saas-text-muted)]">Loading Player...</span>
+                            <div className="w-full max-w-3xl">
+                                <Suspense fallback={
+                                    <div className="w-full aspect-video bg-[var(--saas-bg)] rounded-xl flex items-center justify-center border border-[var(--saas-border-light)] shadow-inner">
+                                        <div className="flex flex-col items-center">
+                                            <div className="w-8 h-8 rounded-full border-2 border-[var(--saas-accent)] border-t-transparent animate-spin mb-3"></div>
+                                            <span className="text-xs font-semibold text-[var(--saas-text-muted)] tracking-wide">Loading Player...</span>
+                                        </div>
                                     </div>
-                                </div>
-                            }>
-                                <TrailerEmbed trailerKey={movie.trailerKey} title={movie.title} />
-                            </Suspense>
+                                }>
+                                    <TrailerEmbed trailerKey={movie.trailerKey} title={movie.title} />
+                                </Suspense>
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {/* Similar Movies */}
                 {similarMovies.length > 0 && (
-                    <div className="mt-12 pt-8 border-t border-[var(--saas-border-light)]">
+                    <div className="mt-8 pt-4 border-t border-[var(--saas-border-light)]/50">
                         <MovieCarousel
                             title="Similar Movies"
                             movies={similarMovies}
                             badge="Recommended"
+                            autoSlideDirection="left"
                         />
                     </div>
                 )}

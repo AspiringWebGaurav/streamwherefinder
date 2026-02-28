@@ -41,6 +41,9 @@ export function normalizeQuery(raw: string): string {
 function levenshtein(a: string, b: string): number {
     const m = a.length;
     const n = b.length;
+    if (m === 0) return n;
+    if (n === 0) return m;
+
     const dp: number[][] = Array.from({ length: m + 1 }, (_, i) =>
         Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
     );
@@ -95,7 +98,7 @@ const INDIAN_LANGUAGES = new Set(["hi", "ta", "te", "ml", "kn", "bn", "mr", "pa"
  *
  * Layers:
  *   A – Exact title match (highest priority)
- *   B – Normalized containment match
+ *   B – Normalized containment match & Fuzzy Matches
  *   C – Franchise boost (sequel detection)
  *   D – Regional weighting (Indian cinema boost)
  *   E – Popularity + vote weight composite
@@ -103,77 +106,114 @@ const INDIAN_LANGUAGES = new Set(["hi", "ta", "te", "ml", "kn", "bn", "mr", "pa"
 function computeRelevanceScore(movie: PopularMovie, rawQuery: string): number {
     const queryLower = rawQuery.trim().toLowerCase();
     const queryNorm = normalizeForComparison(rawQuery);
+    // Also test against the collapsed query for massive typo coverage
+    const queryCollapsed = normalizeQuery(rawQuery);
+
     const titleLower = movie.title.toLowerCase();
     const titleNorm = normalizeForComparison(movie.title);
 
     let score = 0;
 
     // ── Layer A: Exact Match Boost ────────────────────────────────────────
-    if (titleLower === queryLower || titleNorm === queryNorm) {
-        score += 100; // Exact match = highest priority
+    if (titleLower === queryLower || titleNorm === queryNorm || titleNorm === queryCollapsed) {
+        score += 150; // Exact match = highest priority
     }
 
-    // ── Layer B: Containment & Starts-With ────────────────────────────────
-    if (titleNorm.startsWith(queryNorm)) {
-        score += 40; // Title starts with query
-    } else if (titleNorm.includes(queryNorm)) {
-        score += 20; // Title contains query
+    // ── Layer B: Containment, Starts-With, & Fuzzy ────────────────────────
+    const queryTokens = queryNorm.split(" ");
+    const collapsedTokens = queryCollapsed.split(" ");
+    const titleTokens = titleNorm.split(" ");
+
+    // Prefix / Contained directly
+    if (titleNorm.startsWith(queryNorm) || titleNorm.startsWith(queryCollapsed)) {
+        score += 60; // Title starts with query
+    } else if (titleNorm.includes(queryNorm) || titleNorm.includes(queryCollapsed)) {
+        score += 30; // Title contains query
     }
 
-    // Penalise if the title doesn't contain the query at all
-    if (!titleNorm.includes(queryNorm)) {
-        // Check token-level containment
-        const queryTokens = queryNorm.split(" ");
-        const titleTokens = titleNorm.split(" ");
-        let tokenHits = 0;
-        for (const qt of queryTokens) {
-            if (titleTokens.some(tt => tt.startsWith(qt) || tt === qt)) {
-                tokenHits++;
+    let maxFuzzyScore = 0;
+    let tokenHits = 0;
+
+    // Evaluate token by token
+    for (const qt of queryTokens) {
+        let bestTokenScore = 0;
+        let isHit = false;
+
+        for (const tt of titleTokens) {
+            if (tt === qt) {
+                bestTokenScore = Math.max(bestTokenScore, 20);
+                isHit = true;
+            } else if (tt.startsWith(qt)) {
+                bestTokenScore = Math.max(bestTokenScore, 15);
+                isHit = true;
+            } else {
+                // Fuzzy matching
+                const dist = levenshtein(qt, tt);
+                if (dist === 1 && Math.max(qt.length, tt.length) >= 4) {
+                    bestTokenScore = Math.max(bestTokenScore, 10);
+                    isHit = true;
+                } else if (dist === 2 && Math.max(qt.length, tt.length) >= 6) {
+                    bestTokenScore = Math.max(bestTokenScore, 5);
+                    isHit = true;
+                }
             }
         }
-        if (tokenHits === 0) {
-            score -= 30; // No token match at all — likely irrelevant
-        } else {
-            score += tokenHits * 5;
-        }
+
+        if (isHit) tokenHits++;
+        maxFuzzyScore += bestTokenScore;
+    }
+
+    if (tokenHits === 0) {
+        score -= 40; // No token or fuzzy match at all
+    } else {
+        score += maxFuzzyScore;
     }
 
     // ── Layer C: Franchise Boost ──────────────────────────────────────────
-    // If query is a franchise base name (e.g. "Dhoom"), boost sequels
-    const franchisePattern = new RegExp(
-        `^${queryNorm.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(\\s*\\d+)?$`
-    );
-    if (franchisePattern.test(titleNorm)) {
-        score += 60; // Strong franchise match (e.g. "dhoom", "dhoom 2", "dhoom 3")
+    // If query is a franchise base name (e.g. "Dhoom", "Avenger"), boost sequels
+    const escapeRegExp = (str: string) => str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    // Test base norm and collapsed norm
+    const patterns = [queryNorm, queryCollapsed, queryNorm.replace(/s$/, ''), queryCollapsed.replace(/s$/, '')]; // Basic singularizer
+
+    for (const pat of patterns) {
+        if (!pat) continue;
+        const franchisePattern = new RegExp(`^${escapeRegExp(pat)}(\\s*\\d+|\\s*:.*)?$`);
+        if (franchisePattern.test(titleNorm)) {
+            score += 40;
+            break; // Stop after applying franchise boost once
+        }
     }
 
     // ── Layer D: Regional Weighting (India) ──────────────────────────────
     const lang = movie.originalLanguage || "";
     if (INDIAN_LANGUAGES.has(lang)) {
-        score += 15; // Boost Indian cinema
+        score += 15; // Boost Indian cinema globally a bit due to typical usage
     }
 
     // ── Layer E: Popularity + Vote Weight ────────────────────────────────
     const popularity = movie.popularity || 0;
     const voteCount = movie.voteCount || 0;
 
-    // Logarithmic popularity scaling (prevents runaway scores)
-    score += Math.min(20, Math.log10(Math.max(1, popularity)) * 5);
+    // Logarithmic popularity scaling
+    score += Math.min(25, Math.log10(Math.max(1, popularity)) * 6);
 
     // Vote count credibility boost
-    if (voteCount >= 500) score += 10;
+    if (voteCount >= 10000) score += 20;
+    else if (voteCount >= 1000) score += 15;
+    else if (voteCount >= 500) score += 10;
     else if (voteCount >= 100) score += 5;
     else if (voteCount >= 10) score += 2;
 
     // ── Penalty: Obscure content filter ──────────────────────────────────
-    if (voteCount < 5 && popularity < 1) {
-        score -= 20; // Severely penalise obscure entries
+    if (voteCount < 5 && popularity < 2) {
+        score -= 25; // Severely penalise obscure entries
     }
 
     // Release year recency bonus (small)
     const year = parseInt(movie.releaseDate?.split("-")[0] || "0");
-    if (year >= 2020) score += 3;
-    else if (year >= 2000) score += 1;
+    if (year >= 2020) score += 5;
+    else if (year >= 2000) score += 2;
 
     return score;
 }
@@ -232,6 +272,7 @@ export async function searchMovies(
 
     const trimmed = query.trim();
     const normalized = normalizeQuery(trimmed);
+    const tsBefore = performance.now();
 
     try {
         // ── Parallel fetch: raw query + normalized variant ────────────────
@@ -243,9 +284,10 @@ export async function searchMovies(
             fetch(rawUrl.toString(), { signal }),
         ];
 
-        // Only send a second query if normalization actually changed something
+        // Only send a second query if normalization actually changed something 
+        // AND isn't just an entirely non-alphanumeric string.
         const normalizedClean = trimmed.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
-        if (normalized !== normalizedClean) {
+        if (normalized !== normalizedClean && normalizedClean.length > 1) {
             const normUrl = new URL("/api/search", window.location.origin);
             normUrl.searchParams.set("q", normalized);
             normUrl.searchParams.set("limit", "20");
@@ -270,6 +312,11 @@ export async function searchMovies(
 
         // ── Apply enterprise ranking engine ──────────────────────────────
         const ranked = rankResults(allMovies, trimmed, limit);
+
+        const latency = performance.now() - tsBefore;
+        if (process.env.NODE_ENV === 'development') {
+            console.log(`[Search Intelligence] Query: "${trimmed}" | Latency: ${latency.toFixed(2)}ms | Total Deduplicated Pool: ${allMovies.length} | Limit: ${limit}`);
+        }
 
         return {
             movies: ranked,

@@ -14,7 +14,27 @@ interface SearchPageClientProps {
     initialPage: number;
 }
 
-function NoResults({ query }: { query: string }) {
+function NoResults({ query, isFallback = false }: { query: string, isFallback?: boolean }) {
+    if (isFallback) {
+        return (
+            <div className="text-center py-20 px-4 bg-white rounded-3xl border border-rose-200 shadow-sm mt-8">
+                <div className="w-24 h-24 mx-auto mb-6 bg-rose-50 border border-rose-200 rounded-full flex items-center justify-center">
+                    <AlertCircle className="w-10 h-10 text-rose-400" />
+                </div>
+                <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
+                    Search Gateway <span className="text-rose-600">Timeout</span>
+                </h2>
+                <p className="text-slate-600 mb-10 max-w-md mx-auto text-lg leading-relaxed">
+                    The streaming search engine is currently responding too slowly. Please try again in a few moments.
+                </p>
+                <Link href="/" className="inline-flex items-center justify-center h-12 px-8 font-bold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl transition-colors shadow-sm cursor-pointer">
+                    <ArrowLeft className="w-5 h-5 mr-2" />
+                    Back to Home
+                </Link>
+            </div>
+        );
+    }
+
     return (
         <div className="text-center py-20 px-4 bg-white rounded-3xl border border-slate-200 shadow-sm mt-8">
             <div className="w-24 h-24 mx-auto mb-6 bg-slate-50 border border-slate-200 rounded-full flex items-center justify-center">
@@ -142,6 +162,7 @@ function SearchResults({ query }: { query: string }) {
     const [didYouMean, setDidYouMean] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
     const [loadingMore, setLoadingMore] = useState(false);
+    const [isFallback, setIsFallback] = useState(false);
 
     const fetchPage = useCallback(async (pageNum: number) => {
         try {
@@ -153,13 +174,20 @@ function SearchResults({ query }: { query: string }) {
                 data = await searchMovies(query, 20);
             } else {
                 const res = await fetch(`/api/search?q=${encodeURIComponent(query)}&page=${pageNum}&limit=20`);
-                if (!res.ok) throw new Error('Failed to fetch next page');
-                data = await res.json();
+                if (!res.ok) {
+                    data = { movies: [], totalResults: 0, totalPages: 1, fallbackTriggered: true };
+                } else {
+                    data = await res.json();
+                }
             }
+
             setMovies(prev => pageNum === 1 ? data.movies : [...prev, ...data.movies]);
             setTotalResults(data.totalResults || data.movies.length || 0);
             setTotalPages(data.totalPages || 1);
-            if (pageNum === 1) setDidYouMean(data.didYouMean || null);
+            if (pageNum === 1) {
+                setDidYouMean(data.didYouMean || null);
+                setIsFallback(data.fallbackTriggered || false);
+            }
             setPage(pageNum);
 
         } catch (error) {
@@ -168,6 +196,7 @@ function SearchResults({ query }: { query: string }) {
                 setMovies([]);
                 setTotalResults(0);
                 setTotalPages(1);
+                setIsFallback(true);
             }
         } finally {
             setLoading(false);
@@ -200,7 +229,7 @@ function SearchResults({ query }: { query: string }) {
     }
 
     if (!movies || movies.length === 0) {
-        return <NoResults query={query} />;
+        return <NoResults query={query} isFallback={isFallback} />;
     }
 
     return (
@@ -235,29 +264,6 @@ function SearchResults({ query }: { query: string }) {
 }
 
 export function SearchPageClient({ initialQuery }: SearchPageClientProps) {
-    if (!initialQuery) {
-        return (
-            <div className="min-h-screen flex flex-col bg-[var(--cinema-bg)]">
-                <Navbar />
-                <div className="flex-1 flex flex-col items-center justify-center p-4">
-                    <div className="w-full max-w-2xl text-center space-y-8 bg-white p-8 sm:p-14 rounded-3xl shadow-lg border border-slate-200 transform-gpu hover:scale-[1.01] transition-transform duration-500">
-                        <div className="w-20 h-20 sm:w-28 sm:h-28 mx-auto bg-blue-50 rounded-full flex items-center justify-center border border-blue-100">
-                            <Search className="w-10 h-10 sm:w-12 sm:h-12 text-[var(--cinema-accent)]" />
-                        </div>
-                        <div>
-                            <h1 className="text-3xl sm:text-4xl font-extrabold text-slate-900 mb-4 tracking-tight">Global Search</h1>
-                            <p className="text-slate-600 text-lg sm:text-xl max-w-md mx-auto leading-relaxed">
-                                Search millions of movies and find exactly where to stream them instantly.
-                            </p>
-                        </div>
-                        <div className="max-w-xl mx-auto pt-6 relative z-50">
-                            <EnterpriseSearchBar placeholder="Try an actor, director, or title..." autoFocus />
-                        </div>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="min-h-[100dvh] bg-[var(--cinema-bg)] pb-16">

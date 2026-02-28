@@ -6,13 +6,14 @@ import { Search, X, Sparkles, AlertCircle, Film, ArrowRight } from 'lucide-react
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { fadeIn, slideDown, staggerContainer, fadeUp } from '@/lib/motion';
+import { fadeIn, slideDown, staggerContainer, fadeUp, fadeInOutBreathing } from '@/lib/motion';
 import { searchMovies, getDidYouMean, normalizeQuery } from '@/services/searchWrapper';
 import { PopularMovie } from '@/lib/types';
 import { saveSearch, getSearchHistory, SearchHistoryItem } from '@/lib/searchHistory';
 import { useAuth } from '@/components/FirebaseProvider';
 import { Clock, History, User } from 'lucide-react';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useMotionInterval } from '@/hooks/useMotionInterval';
 
 const INDIAN_BOOST_KEYWORDS = [
     'animal', 'sairat', 'mirzapur', 'sacred games', 'dunki', '12th fail',
@@ -106,13 +107,13 @@ export function EnterpriseSearchBar({
 
     // ── Animated Placeholder Logic ────────────────────────────────────────────
     const [placeholderIdx, setPlaceholderIdx] = useState(0);
-    useEffect(() => {
-        if (!animatedPlaceholders || animatedPlaceholders.length === 0) return;
-        const interval = setInterval(() => {
+    const hasPlaceholders = animatedPlaceholders && animatedPlaceholders.length > 0;
+
+    useMotionInterval(() => {
+        if (hasPlaceholders) {
             setPlaceholderIdx((prev) => (prev + 1) % animatedPlaceholders.length);
-        }, 3000);
-        return () => clearInterval(interval);
-    }, [animatedPlaceholders]);
+        }
+    }, hasPlaceholders ? 2700 : null);
 
     // ── Search Effect ─────────────────────────────────────────────────────────
     useEffect(() => {
@@ -144,13 +145,20 @@ export function EnterpriseSearchBar({
                 const res = await searchMovies(query, 6);
                 let sortedMovies = res.movies;
 
-                if (isIndia) {
+                if (isIndia && query.length < 5) {
+                    // Only apply a gentle client-side boost for very short / vague queries
+                    // The server (searchWrapper) already handles detailed relevance and regional boosts.
                     sortedMovies = [...res.movies].sort((a, b) => {
                         const aTitle = a.title.toLowerCase();
                         const bTitle = b.title.toLowerCase();
                         const aBoost = INDIAN_BOOST_KEYWORDS.some(k => aTitle.includes(k)) ? 1 : 0;
                         const bBoost = INDIAN_BOOST_KEYWORDS.some(k => bTitle.includes(k)) ? 1 : 0;
-                        return bBoost - aBoost;
+
+                        // We only override the default sort if there's a clear winner in the boost bucket
+                        // AND their original popularity/rating is comparable, otherwise trust the server.
+                        if (aBoost > bBoost && (b.popularity || 0) < 500) return -1;
+                        if (bBoost > aBoost && (a.popularity || 0) < 500) return 1;
+                        return 0; // retain original order
                     });
                 }
 
@@ -272,10 +280,10 @@ export function EnterpriseSearchBar({
                         <AnimatePresence mode="wait">
                             <motion.span
                                 key={placeholderIdx}
-                                initial={{ opacity: 0, y: 5 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -5 }}
-                                transition={{ duration: 0.3, ease: 'easeInOut' }}
+                                variants={fadeInOutBreathing}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
                                 className="text-[15px] sm:text-base font-medium text-[var(--saas-text-muted)] truncate block w-full"
                             >
                                 {animatedPlaceholders[placeholderIdx]}
@@ -339,10 +347,10 @@ export function EnterpriseSearchBar({
                     <motion.div
                         ref={dropdownRef}
                         key="dropdown"
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -10 }}
-                        transition={{ duration: 0.15, ease: 'easeOut' }}
+                        variants={slideDown}
+                        initial="hidden"
+                        animate="visible"
+                        exit="exit"
                         className={cn(
                             "w-full mt-3 bg-white/95 backdrop-blur-xl rounded-2xl border border-[var(--saas-border)] shadow-2xl shadow-[var(--saas-accent)]/10 overflow-hidden",
                             isInline ? "relative z-30" : "absolute z-50 max-h-[60vh] overflow-y-auto scrollbar-thin scrollbar-thumb-[var(--saas-border)] scrollbar-track-transparent"

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { SearchPageClient } from './SearchPageClient';
 
 interface SearchPageProps {
@@ -29,6 +30,10 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
     const resolvedSearchParams = await searchParams;
     const query = resolvedSearchParams.q?.trim() || '';
     const page = parseInt(resolvedSearchParams.page || '1', 10);
+
+    if (!query) {
+        redirect('/');
+    }
 
     return (
         <SearchPageClient initialQuery={query} initialPage={page} />

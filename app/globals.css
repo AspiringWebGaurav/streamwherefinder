@@ -401,3 +401,13 @@ body {
 .carousel-arrow:active {
   transform: translateY(-50%) scale(0.95);
 }
+
+/* ─── Swiper Continuous Linear Autoplay Override ─────────────────────────── */
+.swiper-linear .swiper-wrapper {
+  transition-timing-function: linear !important;
+}
+
+/* ─── Swiper Manual Slide Ease ───────────────────────────────────────────── */
+.swiper-standard-ease .swiper-wrapper {
+  transition-timing-function: var(--cinema-ease-out) !important;
+}

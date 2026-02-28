@@ -9,6 +9,7 @@ import { useAuth } from '@/components/FirebaseProvider';
 import { getSearchHistory } from '@/lib/searchHistory';
 import { ProfilePicture } from '@/components/ProfilePicture';
 import { useLanguage } from '@/components/LanguageProvider';
+import { AnimatedSignInButton } from '@/components/AnimatedSignInButton';
 
 export function Navbar() {
     const { user, logout } = useAuth();
@@ -166,10 +167,7 @@ export function Navbar() {
                                         </div>
                                     </Link>
                                 )}
-                                <Link href="/login" className="btn-primary flex items-center gap-2 px-5">
-                                    <User className="w-4 h-4" />
-                                    Sign In
-                                </Link>
+                                <AnimatedSignInButton searchHistoryCount={searchHistoryCount} />
                             </div>
                         )}
                     </div>

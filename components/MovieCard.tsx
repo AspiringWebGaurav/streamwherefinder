@@ -22,10 +22,10 @@ export function MovieCard({ movie, className, priority = false }: Props) {
             variants={cardReveal}
             whileHover={cinematicHover}
             className={cn(
-                'group relative w-40 sm:w-44 flex flex-col rounded-xl overflow-hidden',
+                'group relative z-0 w-40 sm:w-44 flex flex-col rounded-xl overflow-hidden',
                 'bg-white border border-[var(--cinema-border)]',
-                'shadow-[var(--cinema-shadow-sm)] transition-shadow duration-300',
-                'hover:shadow-[var(--cinema-shadow-md)] hover:border-[var(--cinema-border-hover)]',
+                'shadow-[var(--cinema-shadow-sm)] transition-all duration-200',
+                'hover:shadow-xl hover:shadow-black/5 hover:border-[var(--cinema-border-hover)] hover:z-10',
                 className
             )}
         >
@@ -34,19 +34,20 @@ export function MovieCard({ movie, className, priority = false }: Props) {
                 className="flex flex-col h-full focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--cinema-accent)] rounded-xl"
             >
                 {/* Poster Area */}
-                <div className="relative aspect-[2/3] w-full overflow-hidden bg-[var(--cinema-bg)] border-b border-[var(--cinema-border)]">
+                <div className="relative aspect-[2/3] w-full overflow-hidden bg-[var(--cinema-bg)] border-b border-[var(--cinema-border)] flex items-center justify-center">
                     {movie.posterPath ? (
                         <Image
                             src={movie.posterPath}
-                            alt={movie.title}
+                            alt={movie.title || 'Movie Poster'}
                             fill
                             sizes="(max-width: 640px) 160px, 176px"
                             className="object-cover card-poster-zoom"
                             priority={priority}
                         />
                     ) : (
-                        <div className="w-full h-full flex items-center justify-center text-slate-300">
-                            <Eye className="w-8 h-8 opacity-20" />
+                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-300">
+                            <Eye className="w-8 h-8 opacity-20 mb-2" />
+                            <span className="text-[10px] uppercase font-bold text-slate-400 text-center px-2">No Image</span>
                         </div>
                     )}
 
@@ -56,7 +57,7 @@ export function MovieCard({ movie, className, priority = false }: Props) {
                     {/* Rating Badge - Top Right on hover */}
                     <div className="absolute top-2 right-2 flex items-center gap-1 px-2 py-0.5 rounded-full bg-black/50 backdrop-blur-md text-[10px] sm:text-[11px] font-bold text-white/90 opacity-0 group-hover:opacity-100 transition-opacity duration-300 transform-gpu">
                         <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
-                        <span>{movie.rating.toFixed(1)}</span>
+                        <span>{(movie.rating || 0).toFixed(1)}</span>
                     </div>
 
                     {/* Year reveal at bottom of poster on hover */}
@@ -72,19 +73,23 @@ export function MovieCard({ movie, className, priority = false }: Props) {
                 {/* Card Content */}
                 <div className="px-3 pt-2.5 pb-3 flex flex-col flex-1 bg-white">
                     <div className="flex items-center justify-between mb-1">
-                        {year && (
+                        {year ? (
                             <span className="text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-[var(--cinema-bg)] text-[var(--cinema-text-secondary)]">
                                 {year}
+                            </span>
+                        ) : (
+                            <span className="text-[10px] sm:text-xs font-semibold px-1.5 py-0.5 rounded bg-[var(--cinema-bg)] text-transparent select-none">
+                                TBA
                             </span>
                         )}
                         <div className="flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-[var(--cinema-text-primary)]">
                             <Star className="w-3 h-3 text-amber-500 fill-amber-500" />
-                            <span>{movie.rating.toFixed(1)}</span>
+                            <span>{(movie.rating || 0).toFixed(1)}</span>
                         </div>
                     </div>
 
-                    <h3 className="text-sm font-bold text-[var(--cinema-text-primary)] leading-snug line-clamp-2 group-hover:text-[var(--cinema-accent)] transition-colors duration-200">
-                        {movie.title}
+                    <h3 className="text-sm font-bold text-[var(--cinema-text-primary)] leading-snug line-clamp-2 group-hover:text-[var(--cinema-accent)] transition-colors duration-200" title={movie.title || 'Unknown Title'}>
+                        {movie.title || 'Unknown Title'}
                     </h3>
                 </div>
             </Link>

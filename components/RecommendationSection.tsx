@@ -6,6 +6,7 @@ import { Heart, Clapperboard, Flame } from 'lucide-react';
 import { ScoredMovie, Movie } from '@/lib/types';
 import { buildRecommendations } from '@/services/recommendationEngine';
 import { MovieCard } from '@/components/MovieCard';
+import { MovieCarousel } from '@/components/MovieCarousel';
 import { staggerContainer, fadeUp, inViewProps } from '@/lib/motion';
 
 interface Props {
@@ -21,27 +22,18 @@ interface SectionProps {
 
 function RecoSection({ icon, title, movies }: SectionProps) {
     if (!movies.length) return null;
-    return (
-        <motion.div
-            variants={staggerContainer}
-            {...inViewProps}
-            className="space-y-4"
-        >
-            <motion.div variants={fadeUp} className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded bg-[var(--saas-accent-light)] text-[var(--saas-accent)] flex items-center justify-center">
-                    {icon}
-                </div>
-                <h3 className="text-lg sm:text-xl font-extrabold text-[var(--saas-text-primary)]">
-                    {title}
-                </h3>
-            </motion.div>
 
-            <motion.div variants={staggerContainer} className="flex gap-4 overflow-x-auto pb-2 carousel-track">
-                {movies.slice(0, 8).map((m) => (
-                    <MovieCard key={m.id} movie={m} />
-                ))}
-            </motion.div>
-        </motion.div>
+    // We map ScoredMovie to pass as PopularMovie since the interfaces are highly structurally compatible
+    // and MovieCarousel treats it agnostically.
+    return (
+        <div className="pt-2">
+            <MovieCarousel
+                title={title}
+                movies={movies as any}
+            // Optional: We can pass the icon as a badge or just use the title 
+            // in the MovieCarousel natively. We'll rely on MovieCarousel's standard styling.
+            />
+        </div>
     );
 }
 

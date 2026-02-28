@@ -2,7 +2,8 @@ import { Suspense } from 'react';
 import { notFound } from 'next/navigation';
 import { ArrowLeft, TrendingUp, Star, Calendar, Award } from 'lucide-react';
 import { tmdbClient } from '@/lib/tmdb';
-import { MovieCard, MovieCardSkeleton } from '@/components/MovieCard';
+import { MovieCardSkeleton } from '@/components/MovieCard';
+import { MovieCarousel } from '@/components/MovieCarousel';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
@@ -77,55 +78,6 @@ function CollectionLoading() {
     );
 }
 
-function Pagination({ currentPage, totalPages, slug }: { currentPage: number; totalPages: number; slug: string }) {
-    if (totalPages <= 1) return null;
-
-    const showPages = 5;
-    const startPage = Math.max(1, currentPage - Math.floor(showPages / 2));
-    const endPage = Math.min(totalPages, startPage + showPages - 1);
-
-    return (
-        <div className="flex justify-center items-center flex-wrap gap-2 mt-12">
-            {currentPage > 1 && (
-                <Link
-                    href={`/collections/${slug}?page=${currentPage - 1}`}
-                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-slate-600 bg-white border border-[var(--cinema-border)] rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
-                >
-                    Previous
-                </Link>
-            )}
-
-            <div className="flex items-center gap-1.5">
-                {Array.from({ length: endPage - startPage + 1 }, (_, i) => {
-                    const pageNum = startPage + i;
-                    return (
-                        <Link
-                            key={pageNum}
-                            href={`/collections/${slug}?page=${pageNum}`}
-                            className={cn(
-                                'flex items-center justify-center w-10 h-10 text-sm font-semibold rounded-lg transition-all shadow-sm',
-                                pageNum === currentPage
-                                    ? 'bg-[var(--cinema-accent)] text-white border border-[var(--cinema-accent)] shadow-[0_2px_12px_rgba(37,99,235,0.2)]'
-                                    : 'bg-white text-slate-600 border border-[var(--cinema-border)] hover:bg-slate-50 hover:text-slate-900'
-                            )}
-                        >
-                            {pageNum}
-                        </Link>
-                    );
-                })}
-            </div>
-
-            {currentPage < totalPages && (
-                <Link
-                    href={`/collections/${slug}?page=${currentPage + 1}`}
-                    className="flex items-center justify-center h-10 px-4 text-sm font-semibold text-slate-600 bg-white border border-[var(--cinema-border)] rounded-lg hover:bg-slate-50 hover:text-slate-900 transition-colors shadow-sm"
-                >
-                    Next
-                </Link>
-            )}
-        </div>
-    );
-}
 
 async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: number }) {
     const collection = COLLECTIONS[slug];
@@ -151,14 +103,9 @@ async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: n
         }
 
         return (
-            <>
-                <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-7 gap-4">
-                    {movies.map((movie, index) => (
-                        <MovieCard key={movie.id} movie={movie} priority={index < 14} />
-                    ))}
-                </div>
-                <Pagination currentPage={response.page} totalPages={Math.min(response.total_pages, 500)} slug={slug} />
-            </>
+            <div className="pt-4">
+                <MovieCarousel movies={movies} />
+            </div>
         );
 
     } catch (error) {

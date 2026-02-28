@@ -189,7 +189,6 @@ export function HomeClient({ trending, popular, upcoming }: Props) {
                     </div>
 
                     <div className="flex items-center justify-center sm:justify-end gap-5 font-medium text-slate-500">
-                        <Link href="/search" className="hover:text-[var(--cinema-accent)] transition-colors">Search</Link>
                         <Link href="/about" className="hover:text-[var(--cinema-accent)] transition-colors">About</Link>
                         <Link href="/privacy" className="hover:text-[var(--cinema-accent)] transition-colors hidden sm:block">Privacy</Link>
                         <Link href="/terms" className="hover:text-[var(--cinema-accent)] transition-colors hidden sm:block">Terms</Link>
