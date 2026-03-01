@@ -10,6 +10,7 @@ import { getSearchHistory } from '@/lib/searchHistory';
 import { ProfilePicture } from '@/components/ProfilePicture';
 import { useLanguage } from '@/components/LanguageProvider';
 import { AnimatedSignInButton } from '@/components/AnimatedSignInButton';
+import { SignInTooltip } from '@/components/SignInTooltip';
 
 export function Navbar() {
     const { user, logout } = useAuth();
@@ -156,7 +157,7 @@ export function Navbar() {
                                 </AnimatePresence>
                             </div>
                         ) : (
-                            <div className="flex items-center">
+                            <div className="flex items-center relative">
                                 {searchHistoryCount > 0 && (
                                     <Link href="/profile" className="flex items-center gap-2 group mr-3">
                                         <div className="w-9 h-9 rounded-full bg-[var(--cinema-bg)] border border-[var(--cinema-border)] flex items-center justify-center group-hover:border-[var(--cinema-accent)] transition-colors relative">
@@ -168,6 +169,7 @@ export function Navbar() {
                                     </Link>
                                 )}
                                 <AnimatedSignInButton searchHistoryCount={searchHistoryCount} />
+                                <SignInTooltip searchCount={searchHistoryCount} />
                             </div>
                         )}
                     </div>
