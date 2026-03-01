@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import Image from 'next/image';
+import { SafeImage } from '@/components/SafeImage';
 import { Suspense } from 'react';
 import { Star, Calendar, Clock, Play } from 'lucide-react';
 import { tmdbClient } from '@/lib/tmdb';
@@ -120,24 +120,21 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     {/* Poster */}
                     <div className="w-full sm:max-w-[280px] lg:w-[320px] flex-shrink-0 mx-auto lg:mx-0">
                         <div className="relative w-full aspect-[2/3] bg-[var(--saas-bg)] rounded-xl overflow-hidden shadow-sm border border-[var(--saas-border-light)] transform transition-transform duration-300 hover:scale-[1.02]">
-                            {movie.posterPath ? (
-                                <Image
-                                    src={movie.posterPath}
-                                    alt={`${movie.title} poster`}
-                                    fill
-                                    className="object-cover"
-                                    priority
-                                    sizes="(max-width: 1024px) 100vw, 320px"
-                                    quality={100}
-                                />
-                            ) : (
-                                <div className="flex items-center justify-center h-full text-[var(--saas-text-muted)]">
+                            <SafeImage
+                                src={movie.posterPath}
+                                alt={`${movie.title} poster`}
+                                fill
+                                className="object-cover"
+                                priority
+                                sizes="(max-width: 1024px) 100vw, 320px"
+                                fallbackClassName="text-[var(--saas-text-muted)] border-none"
+                                fallback={
                                     <div className="text-center p-4">
                                         <div className="text-lg font-medium">No Image</div>
                                         <div className="text-sm mt-2 font-semibold">{movie.title}</div>
                                     </div>
-                                </div>
-                            )}
+                                }
+                            />
                         </div>
                     </div>
 

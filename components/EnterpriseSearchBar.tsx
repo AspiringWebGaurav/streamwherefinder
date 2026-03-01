@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, X, Sparkles, AlertCircle, Film, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
-import Image from 'next/image';
+import { SafeImage } from '@/components/SafeImage';
 import { cn } from '@/lib/utils';
 import { fadeIn, slideDown, fadeInOutBreathing } from '@/lib/motion';
 import { searchMovies, getDidYouMean, normalizeQuery } from '@/services/searchWrapper';
@@ -55,6 +55,8 @@ export function EnterpriseSearchBar({
     const [showDropdown, setShowDropdown] = useState(false);
     const [didYouMean, setDidYouMean] = useState<{ title: string; slug: string } | null>(null);
     const [selectedIdx, setSelectedIdx] = useState(-1);
+    const [previewMovie, setPreviewMovie] = useState<PopularMovie | null>(null);
+    const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     const { language, isIndia } = useLanguage();
 
@@ -188,6 +190,7 @@ export function EnterpriseSearchBar({
             ) return;
             setShowDropdown(false);
             setSelectedIdx(-1);
+            setPreviewMovie(null);
         };
         document.addEventListener('mousedown', handler);
         return () => document.removeEventListener('mousedown', handler);
@@ -248,6 +251,7 @@ export function EnterpriseSearchBar({
             setSelectedIdx((p) => Math.max(p - 1, -1));
         } else if (e.key === 'Escape') {
             setShowDropdown(false);
+            setPreviewMovie(null);
             inputRef.current?.blur();
         }
     };
@@ -380,51 +384,77 @@ export function EnterpriseSearchBar({
                                 </div>
                             ) : results.length > 0 ? (
                                 <div className="py-2">
-                                    {results.map((movie, idx) => (
-                                        <Link
-                                            key={movie.id}
-                                            href={`/movies/${movie.slug}`}
-                                            className={cn(
-                                                'flex items-center gap-4 px-4 py-3 transition-colors duration-200',
-                                                selectedIdx === idx ? 'bg-[var(--saas-accent)]/5 shadow-inner' : 'hover:bg-[var(--saas-bg)]'
-                                            )}
-                                            onClick={() => {
-                                                saveSearch(user, query.trim()).catch(console.error);
-                                                setShowDropdown(false);
-                                            }}
-                                        >
-                                            <div className="w-10 h-14 rounded-lg flex-shrink-0 bg-[var(--saas-border-light)] border border-[var(--saas-border)] overflow-hidden relative shadow-sm">
-                                                {movie.posterPath ? (
-                                                    <Image
+                                    {results.map((movie, idx) => {
+                                        const isPrimary = idx === 0 && results.length > 1;
+
+                                        return (
+                                            <Link
+                                                key={movie.id}
+                                                href={`/movies/${movie.slug}`}
+                                                className={cn(
+                                                    'flex items-center gap-4 px-4 transition-colors duration-200 relative',
+                                                    isPrimary ? 'py-4 from-[var(--saas-accent)]/5 to-transparent bg-gradient-to-r hover:from-[var(--saas-accent)]/10' : 'py-3 hover:bg-[var(--saas-bg)]',
+                                                    selectedIdx === idx ? 'bg-[var(--saas-accent)]/5 shadow-inner' : ''
+                                                )}
+                                                onClick={() => {
+                                                    saveSearch(user, query.trim()).catch(console.error);
+                                                    setShowDropdown(false);
+                                                    setPreviewMovie(null);
+                                                }}
+                                                onMouseEnter={() => {
+                                                    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                                                    hoverTimeoutRef.current = setTimeout(() => {
+                                                        setPreviewMovie(movie);
+                                                    }, 150);
+                                                }}
+                                                onMouseLeave={() => {
+                                                    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current);
+                                                    hoverTimeoutRef.current = setTimeout(() => {
+                                                        setPreviewMovie(null);
+                                                    }, 150);
+                                                }}
+                                            >
+                                                <div className={cn(
+                                                    "rounded-lg flex-shrink-0 bg-[var(--saas-border-light)] border border-[var(--saas-border)] overflow-hidden relative shadow-sm transition-all duration-300",
+                                                    isPrimary ? "w-14 h-20 shadow-md" : "w-10 h-14"
+                                                )}>
+                                                    <SafeImage
                                                         src={movie.posterPath}
                                                         alt={movie.title}
                                                         fill
-                                                        sizes="40px"
+                                                        sizes={isPrimary ? "56px" : "40px"}
                                                         className="object-cover"
                                                         unoptimized
+                                                        fallbackClassName="bg-gray-50"
+                                                        fallback={<Film className="w-4 h-4 text-[var(--saas-text-muted)]" />}
                                                     />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center bg-gray-50">
-                                                        <Film className="w-4 h-4 text-[var(--saas-text-muted)]" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <div className="flex-1 min-w-0">
-                                                <p
-                                                    className="text-[15px] font-bold text-[var(--saas-text-primary)] truncate"
-                                                    dangerouslySetInnerHTML={{ __html: highlightMatch(movie.title, query) }}
-                                                />
-                                                <div className="flex items-center gap-2 mt-1.5">
-                                                    <span className="bg-[var(--saas-border-light)] text-[var(--saas-text-secondary)] px-1.5 py-0.5 rounded text-[10px] uppercase font-bold tracking-wider">
-                                                        {movie.releaseDate?.slice(0, 4) || 'TBA'}
-                                                    </span>
-                                                    <span className="flex items-center gap-1 text-amber-500 text-[11px] font-bold">
-                                                        <Sparkles className="w-3 h-3" /> {movie.rating.toFixed(1)}
-                                                    </span>
                                                 </div>
-                                            </div>
-                                        </Link>
-                                    ))}
+                                                <div className="flex-1 min-w-0 flex flex-col justify-center">
+                                                    <p
+                                                        className={cn(
+                                                            "font-bold text-[var(--saas-text-primary)] truncate transition-all duration-300",
+                                                            isPrimary ? "text-[17px] sm:text-[18px] mb-0.5 tracking-tight" : "text-[15px]"
+                                                        )}
+                                                        dangerouslySetInnerHTML={{ __html: highlightMatch(movie.title, query) }}
+                                                    />
+                                                    <div className="flex items-center gap-2 mt-1">
+                                                        <span className={cn(
+                                                            "bg-[var(--saas-border-light)] text-[var(--saas-text-secondary)] rounded uppercase font-bold tracking-wider",
+                                                            isPrimary ? "px-2 py-0.5 text-[11px]" : "px-1.5 py-0.5 text-[10px]"
+                                                        )}>
+                                                            {movie.releaseDate?.slice(0, 4) || 'TBA'}
+                                                        </span>
+                                                        <span className={cn(
+                                                            "flex items-center gap-1 text-amber-500 font-bold",
+                                                            isPrimary ? "text-[12px]" : "text-[11px]"
+                                                        )}>
+                                                            <Sparkles className="w-3 h-3" /> {movie.rating.toFixed(1)}
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            </Link>
+                                        );
+                                    })}
                                 </div>
                             ) : (
                                 <div className="px-4 py-8 text-center bg-gray-50/50">
@@ -483,6 +513,45 @@ export function EnterpriseSearchBar({
                                 </button>
                             </div>
                         )}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Desktop-Only Floating Poster Preview */}
+            <AnimatePresence>
+                {showDropdown && previewMovie && (
+                    <motion.div
+                        key="desktop-hover-preview"
+                        initial={{ opacity: 0, scale: 0.96, x: -10 }}
+                        animate={{ opacity: 1, scale: 1, x: 0 }}
+                        exit={{ opacity: 0, scale: 0.98, x: -5 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="hidden lg:block absolute top-[110%] mt-2 left-[102%] w-[220px] 
+                                   aspect-[2/3] z-50 rounded-2xl overflow-hidden border border-[var(--saas-border)] 
+                                   shadow-2xl shadow-black/20 bg-[var(--saas-bg)] pointer-events-none"
+                    >
+                        <SafeImage
+                            src={previewMovie.posterPath}
+                            alt={previewMovie.title}
+                            fill
+                            sizes="220px"
+                            className="object-cover"
+                            unoptimized
+                            fallbackClassName="bg-gray-50"
+                            fallback={<Film className="w-10 h-10 text-[var(--saas-text-muted)] opacity-50" />}
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                        <div className="absolute bottom-0 left-0 right-0 p-4">
+                            <p className="text-white font-bold text-sm tracking-tight line-clamp-2 drop-shadow-md">
+                                {previewMovie.title}
+                            </p>
+                            <p className="text-white/80 text-[11px] font-semibold mt-0.5 flex items-center gap-2">
+                                <span>{previewMovie.releaseDate?.slice(0, 4) || 'TBA'}</span>
+                                <span className="flex items-center gap-1 text-amber-400">
+                                    <Sparkles className="w-3 h-3" /> {previewMovie.rating.toFixed(1)}
+                                </span>
+                            </p>
+                        </div>
                     </motion.div>
                 )}
             </AnimatePresence>

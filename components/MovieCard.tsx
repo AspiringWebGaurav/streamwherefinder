@@ -2,8 +2,8 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import Image from 'next/image';
 import { Star, Eye } from 'lucide-react';
+import { SafeImage } from '@/components/SafeImage';
 import { PopularMovie } from '@/lib/types';
 import { cardReveal, cinematicHover } from '@/lib/motion';
 import { cn } from '@/lib/utils';
@@ -35,21 +35,21 @@ export function MovieCard({ movie, className, priority = false }: Props) {
             >
                 {/* Poster Area */}
                 <div className="relative aspect-[2/3] w-full overflow-hidden bg-[var(--cinema-bg)] border-b border-[var(--cinema-border)] flex items-center justify-center">
-                    {movie.posterPath ? (
-                        <Image
-                            src={movie.posterPath}
-                            alt={movie.title || 'Movie Poster'}
-                            fill
-                            sizes="(max-width: 640px) 160px, 176px"
-                            className="object-cover card-poster-zoom"
-                            priority={priority}
-                        />
-                    ) : (
-                        <div className="w-full h-full flex flex-col items-center justify-center bg-slate-100 text-slate-300">
-                            <Eye className="w-8 h-8 opacity-20 mb-2" />
-                            <span className="text-[10px] uppercase font-bold text-slate-400 text-center px-2">No Image</span>
-                        </div>
-                    )}
+                    <SafeImage
+                        src={movie.posterPath}
+                        alt={movie.title || 'Movie Poster'}
+                        fill
+                        sizes="(max-width: 640px) 160px, 176px"
+                        className="object-cover card-poster-zoom"
+                        priority={priority}
+                        fallbackClassName="bg-slate-100 text-slate-300"
+                        fallback={
+                            <div className="flex flex-col items-center justify-center">
+                                <Eye className="w-8 h-8 opacity-20 mb-2" />
+                                <span className="text-[10px] uppercase font-bold text-slate-400 text-center px-2">No Image</span>
+                            </div>
+                        }
+                    />
 
                     {/* Cinematic Gradient Overlay on Hover */}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
