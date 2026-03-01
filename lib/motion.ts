@@ -54,19 +54,20 @@ export const fadeInSlow: Variants = {
     }
 };
 
-// ── Breathing Fade (Apple/Stripe 280ms) ──────────────────────────────────────
-const BREATHE_IN = [0.4, 0.0, 0.2, 1] as const; // Soft ease-in-out emergence
-const BREATHE_OUT = [0.4, 0.0, 0.2, 1] as const; // Soft ease-in-out dissolve
+// ── Breathing Fade (Apple/Stripe 450ms) ──────────────────────────────────────
+const PREMIUM_EASE = [0.4, 0.0, 0.2, 1] as const;
 
 export const fadeInOutBreathing: Variants = {
-    hidden: { opacity: 0 },
+    hidden: { opacity: 0, y: 3 },
     visible: {
         opacity: 1,
-        transition: { duration: 0.28, ease: BREATHE_IN },
+        y: 0,
+        transition: { duration: 0.450, ease: PREMIUM_EASE },
     },
     exit: {
         opacity: 0,
-        transition: { duration: 0.28, ease: BREATHE_OUT },
+        y: -3,
+        transition: { duration: 0.320, ease: PREMIUM_EASE },
     }
 };
 
@@ -92,16 +93,16 @@ export const cardReveal: Variants = {
 
 // ── Slide Down: Dropdowns, robust to no-layout-shift ───────────────────────
 export const slideDown: Variants = {
-    hidden: { opacity: 0, y: -4 }, // Very subtle slide
+    hidden: { opacity: 0, y: -4 },
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: MOTION_TIMING.duration, ease: EASE_OUT },
+        transition: { duration: 0.320, ease: PREMIUM_EASE },
     },
     exit: {
         opacity: 0,
         y: -4,
-        transition: { duration: MOTION_TIMING.durationFast, ease: 'easeIn' },
+        transition: { duration: 0.200, ease: PREMIUM_EASE },
     },
 };
 

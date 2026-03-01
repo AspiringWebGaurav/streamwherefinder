@@ -2,19 +2,17 @@
 
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, ChevronLeft } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import { PopularMovie } from '@/lib/types';
 import { MovieCard, MovieCardSkeleton } from '@/components/MovieCard';
 import { fadeUp, staggerContainer, inViewProps } from '@/lib/motion';
 
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Autoplay, FreeMode, Navigation } from 'swiper/modules';
-import type { Swiper as SwiperType } from 'swiper';
+import { Autoplay, FreeMode } from 'swiper/modules';
 import 'swiper/css';
 import 'swiper/css/autoplay';
 import 'swiper/css/free-mode';
-import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
 interface Props {
@@ -27,31 +25,6 @@ interface Props {
 }
 
 export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref }: Props) {
-    const [swiperRef, setSwiperRef] = useState<SwiperType | null>(null);
-    const [isManualSliding, setIsManualSliding] = useState(false);
-
-    const handleSlide = (direction: 'prev' | 'next') => {
-        if (!swiperRef) return;
-
-        setIsManualSliding(true);
-        swiperRef.autoplay.stop();
-
-        // Temporarily change speed for the manual slide feel
-        swiperRef.params.speed = 500;
-
-        if (direction === 'prev') swiperRef.slidePrev();
-        else swiperRef.slideNext();
-
-        // Restore cinematic speed after slide animation completes
-        setTimeout(() => {
-            if (swiperRef && !swiperRef.destroyed) {
-                swiperRef.params.speed = 8000;
-                swiperRef.autoplay.start();
-                setIsManualSliding(false);
-            }
-        }, 550); // Slightly longer than transition speed to ensure clean handoff
-    };
-
     // Duplicate movies array to ensure seamless infinite looping without gaps
     const doubledMovies = [...movies, ...movies, ...movies];
 
@@ -84,26 +57,6 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref }: 
             )}
 
             <div className="relative group/carousel cursor-grab active:cursor-grabbing">
-                {/* Manual Navigation Arrows - Fixed Glass UI */}
-                <button
-                    onClick={() => handleSlide('prev')}
-                    className="absolute z-20 left-1 sm:left-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-xl shadow-sm border border-white/30 text-white/90 hover:bg-white/40 hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 pointer-events-auto mix-blend-luminosity"
-                    aria-label="Scroll left"
-                >
-                    <ChevronLeft className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
-
-                <button
-                    onClick={() => handleSlide('next')}
-                    className="absolute z-20 right-1 sm:right-2 top-1/2 -translate-y-1/2 flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 backdrop-blur-xl shadow-sm border border-white/30 text-white/90 hover:bg-white/40 hover:text-white hover:scale-110 active:scale-95 transition-all duration-300 pointer-events-auto mix-blend-luminosity"
-                    aria-label="Scroll right"
-                >
-                    <ChevronRight className="w-5 h-5 sm:w-6 sm:h-6" />
-                </button>
-
-                {/* Edge gradients for cinema-style fade masking */}
-                <div className="absolute inset-y-0 left-0 w-12 sm:w-16 bg-gradient-to-r from-[var(--cinema-bg)] to-transparent pointer-events-none z-10" />
-                <div className="absolute inset-y-0 right-0 w-12 sm:w-16 bg-gradient-to-l from-[var(--cinema-bg)] to-transparent pointer-events-none z-10" />
 
                 <AnimatePresence mode="wait">
                     {isLoading ? (
@@ -117,8 +70,7 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref }: 
                     ) : (
                         <motion.div key="cards" variants={staggerContainer} initial="hidden" animate="visible" className="relative z-0">
                             <Swiper
-                                onSwiper={setSwiperRef}
-                                modules={[Autoplay, FreeMode, Navigation]}
+                                modules={[Autoplay, FreeMode]}
                                 loop={true}
                                 freeMode={true}
                                 speed={8000} // Calibrated continuous fluid glide speed (cinematic)
@@ -136,7 +88,7 @@ export function MovieCarousel({ title, badge, movies, isLoading, seeMoreHref }: 
                                     1024: { slidesPerView: 5.5, spaceBetween: 16 },
                                     1280: { slidesPerView: 6.5, spaceBetween: 16 }
                                 }}
-                                className={`!py-2 !px-1 ${isManualSliding ? 'swiper-standard-ease' : 'swiper-linear'}`}
+                                className="!py-2 !px-1 swiper-linear"
                             >
                                 {doubledMovies.map((m, i) => (
                                     <SwiperSlide key={`${m.id}-${i}`} className="!h-auto flex">

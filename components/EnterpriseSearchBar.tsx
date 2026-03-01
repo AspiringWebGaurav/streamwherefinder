@@ -30,19 +30,22 @@ interface Props {
     externalQuery?: string;
     className?: string;
     isInline?: boolean;
+    onQueryChange?: (query: string) => void;
+    onSearchSubmit?: () => void;
 }
 
 const EMPTY_DATASET: { title: string; slug: string }[] = [];
 
 export function EnterpriseSearchBar({
     placeholder = 'Search movies, genres...',
-    autoFocus = false,
     onSearch,
     titleDataset = EMPTY_DATASET,
     animatedPlaceholders,
     externalQuery,
     className,
     isInline = false,
+    onQueryChange,
+    onSearchSubmit,
 }: Props) {
     const { user } = useAuth();
     const [query, setQuery] = useState('');
@@ -213,6 +216,8 @@ export function EnterpriseSearchBar({
         // Save history in the background asynchronously
         saveSearch(user, query.trim()).catch(console.error);
 
+        if (onSearchSubmit) onSearchSubmit();
+
         if (onSearch) {
             onSearch(query.trim());
         } else {
@@ -224,6 +229,7 @@ export function EnterpriseSearchBar({
         if (e.key === 'Enter') {
             if (query.length >= 2 && selectedIdx >= 0 && results[selectedIdx]) {
                 saveSearch(user, query.trim()).catch(console.error);
+                if (onSearchSubmit) onSearchSubmit();
                 window.location.href = `/movies/${results[selectedIdx].slug}`;
             } else {
                 handleSearch();
@@ -264,11 +270,11 @@ export function EnterpriseSearchBar({
                         setQuery(e.target.value);
                         setSelectedIdx(-1);
                         setShowDropdown(true);
+                        if (onQueryChange) onQueryChange(e.target.value);
                     }}
                     onKeyDown={handleKeyDown}
                     onClick={() => setShowDropdown(true)}
                     placeholder={!animatedPlaceholders || animatedPlaceholders.length === 0 ? t.placeholder : ''}
-                    autoFocus={autoFocus}
                     className="w-full h-14 sm:h-16 pl-14 pr-32 bg-transparent text-[15px] sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all relative z-10"
                     aria-label="Search movies"
                     aria-autocomplete="list"

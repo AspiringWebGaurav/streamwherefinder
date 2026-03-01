@@ -301,6 +301,48 @@ body {
   border: 1px solid rgba(22, 163, 74, 0.15);
 }
 
+/* ─── Search Idle Glow (Atmospheric Engine) ───────────────────────── */
+.search-glow-wrapper {
+  /* Heavy easing for a calm, non-reactive feel, accommodating rare swells */
+  transition: all 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+
+  /* Subtly increased spread and glow if --ig-swell is 1, otherwise normal */
+  box-shadow:
+    0 4px calc(var(--ig-spread, 20px) + (var(--ig-swell, 0) * 10px)) rgba(37, 99, 235, calc(var(--ig-opacity, 0.05) * var(--ig-clarity, 1))),
+    0 0 0 1px rgba(37, 99, 235, calc((var(--ig-opacity, 0.05) * 0.5) + (var(--ig-swell, 0) * 0.02)));
+}
+
+.search-glow-wrapper:has(input:placeholder-shown):not(:focus-within) {
+  /* Very slow, continuous atmospheric drift. No rhythmic peak. */
+  animation: atmosphericDrift 80s cubic-bezier(0.3, 0, 0.7, 1) infinite alternate;
+}
+
+@keyframes atmosphericDrift {
+  0% {
+    box-shadow:
+      0 2px 8px rgba(0, 0, 0, 0.04),
+      0 0 0 1px rgba(37, 99, 235, 0.01);
+  }
+
+  28% {
+    box-shadow:
+      0 12px 32px rgba(calc(37 + (var(--ig-warmth, 0) * 50)), 99, 235, calc(var(--ig-opacity, 0.12) * var(--ig-clarity, 1))),
+      0 0 0 1px rgba(37, 99, 235, calc(var(--ig-opacity, 0.12) * 0.4));
+  }
+
+  65% {
+    box-shadow:
+      0 8px 24px rgba(37, 99, calc(235 - (var(--ig-warmth, 0) * 30)), calc(var(--ig-opacity, 0.08) * var(--ig-clarity, 1))),
+      0 0 0 1px rgba(37, 99, 235, calc(var(--ig-opacity, 0.08) * 0.3));
+  }
+
+  100% {
+    box-shadow:
+      0 18px 54px rgba(calc(37 + (var(--ig-warmth, 0) * 100)), 99, calc(235 - (var(--ig-warmth, 0) * 50)), calc(var(--ig-opacity, 0.16) * var(--ig-clarity, 1))),
+      0 0 0 1px rgba(37, 99, 235, calc(var(--ig-opacity, 0.16) * 0.6));
+  }
+}
+
 /* ─── Skeleton Loader ────────────────────────────────────────────────────── */
 .skeleton {
   background: linear-gradient(90deg,

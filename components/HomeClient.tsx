@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Film, Github, User } from 'lucide-react';
 import Link from 'next/link';
@@ -8,6 +8,7 @@ import { PopularMovie } from '@/lib/types';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { fadeUp, staggerContainer } from '@/lib/motion';
 import { useLanguage } from '@/components/LanguageProvider';
+import { useIntelligentGlow } from '@/hooks/useIntelligentGlow';
 
 interface Props {
     trending: PopularMovie[];
@@ -18,6 +19,39 @@ interface Props {
 export function HomeClient({ trending, popular, upcoming }: Props) {
     const [trendingQuery, setTrendingQuery] = useState('');
     const { language, isIndia } = useLanguage();
+
+    const {
+        glowStyles,
+        trackSearch,
+        trackTypeDelete,
+        trackScrollPastHero,
+        triggerScrollBackNudge
+    } = useIntelligentGlow();
+
+    const prevQueryLength = useRef(0);
+    const hasScrolledPast = useRef(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            if (window.scrollY > 400 && !hasScrolledPast.current) {
+                hasScrolledPast.current = true;
+                trackScrollPastHero();
+            } else if (window.scrollY < 100 && hasScrolledPast.current) {
+                hasScrolledPast.current = false;
+                triggerScrollBackNudge();
+            }
+        };
+
+        window.addEventListener('scroll', handleScroll, { passive: true });
+        return () => window.removeEventListener('scroll', handleScroll);
+    }, [trackScrollPastHero, triggerScrollBackNudge]);
+
+    const handleQueryChange = (q: string) => {
+        if (q.length < prevQueryLength.current && q.length === 0) {
+            trackTypeDelete();
+        }
+        prevQueryLength.current = q.length;
+    };
 
     const allTitles = [...trending, ...popular].map((m) => ({
         title: m.title,
@@ -123,13 +157,17 @@ export function HomeClient({ trending, popular, upcoming }: Props) {
 
                         {/* Search */}
                         <motion.div variants={fadeUp} className="pt-6 sm:pt-8 max-w-2xl mx-auto w-full relative z-[60]">
-                            <div className="p-1.5 sm:p-2 bg-white rounded-2xl sm:rounded-[24px] shadow-sm hover:shadow-md border border-slate-200 focus-within:shadow-[0_8px_30px_rgba(37,99,235,0.12)] transition-all duration-300 transform-gpu focus-within:scale-[1.01] relative z-[60]">
+                            <div
+                                className="search-glow-wrapper p-1.5 sm:p-2 bg-white rounded-2xl sm:rounded-[24px] shadow-sm hover:shadow-md border border-slate-200 focus-within:shadow-[0_8px_30px_rgba(37,99,235,0.12)] transition-all transform-gpu focus-within:scale-[1.01] relative z-[60]"
+                                style={{ ...glowStyles, transitionDuration: '400ms' }}
+                            >
                                 <EnterpriseSearchBar
-                                    autoFocus
                                     titleDataset={allTitles}
                                     animatedPlaceholders={currentPlaceholders}
                                     externalQuery={trendingQuery}
                                     isInline={true}
+                                    onQueryChange={handleQueryChange}
+                                    onSearchSubmit={trackSearch}
                                 />
                             </div>
 
