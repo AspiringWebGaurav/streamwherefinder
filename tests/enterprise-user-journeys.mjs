@@ -143,7 +143,7 @@ test.describe('Movie Detail Flows', () => {
     });
 
     test('14. Invalid movie slug returns 404', async ({ page }) => {
-        const response = await page.goto(`${BASE}/movies/nonexistent-movie-99999999`);
+        await page.goto(`${BASE}/movies/nonexistent-movie-99999999`);
         // Should get a 404 response, or a not found page
         await expect(page.locator('body')).toBeVisible();
     });
@@ -284,6 +284,7 @@ test.describe('Stress & Stability Flows', () => {
     });
 
     test('30. Console error detection on home page', async ({ page }) => {
+        /** @type {string[]} */
         const errors = [];
         page.on('pageerror', (err) => errors.push(err.message));
         await page.goto(BASE);
@@ -300,6 +301,7 @@ test.describe('Stress & Stability Flows', () => {
     });
 
     test('31. Console error detection on movie detail', async ({ page }) => {
+        /** @type {string[]} */
         const errors = [];
         page.on('pageerror', (err) => errors.push(err.message));
         await page.goto(`${BASE}/movies/inception-27205`);
@@ -315,6 +317,7 @@ test.describe('Stress & Stability Flows', () => {
     });
 
     test('32. No failed network requests on home page', async ({ page }) => {
+        /** @type {string[]} */
         const failedRequests = [];
         page.on('response', (res) => {
             if (res.status() >= 500 && res.url().includes('/api/')) {
@@ -362,7 +365,7 @@ test.describe('Security & Meta Validation', () => {
         await page.waitForLoadState('domcontentloaded');
         const jsonLd = await page.locator('script[type="application/ld+json"]').textContent();
         expect(jsonLd).toBeTruthy();
-        const data = JSON.parse(jsonLd);
+        const data = JSON.parse(jsonLd || '{}');
         expect(data['@type']).toBe('Movie');
     });
 });

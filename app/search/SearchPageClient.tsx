@@ -41,10 +41,10 @@ function NoResults({ query, isFallback = false }: { query: string, isFallback?: 
                 <Search className="w-10 h-10 text-slate-400" />
             </div>
             <h2 className="text-3xl font-extrabold text-slate-900 mb-4 tracking-tight">
-                No results for <span className="text-[var(--cinema-accent)]">"{query}"</span>
+                No results for <span className="text-[var(--cinema-accent)]">&quot;{query}&quot;</span>
             </h2>
             <p className="text-slate-600 mb-10 max-w-md mx-auto text-lg leading-relaxed">
-                We couldn't find any exact matches. Try checking your spelling or using broader keywords.
+                We couldn&apos;t find any exact matches. Try checking your spelling or using broader keywords.
             </p>
             <div className="max-w-xl mx-auto mb-10 transform-gpu hover:scale-[1.02] transition-transform duration-300">
                 <EnterpriseSearchBar placeholder="Try a different search..." autoFocus />
@@ -237,7 +237,7 @@ function SearchResults({ query }: { query: string }) {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
-                        Results for "{query}"
+                        Results for &quot;{query}&quot;
                     </h1>
                     <p className="text-sm font-semibold text-slate-500 mt-1.5 flex items-center gap-2">
                         <span>{totalResults.toLocaleString()} verified streams</span>

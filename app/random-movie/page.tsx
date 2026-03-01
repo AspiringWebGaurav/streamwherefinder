@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Shuffle, RefreshCw, ArrowLeft, Sparkles, Loader2 } from 'lucide-react';
+import { Shuffle, RefreshCw, Sparkles, Loader2 } from 'lucide-react';
 import { MovieCard } from '@/components/MovieCard';
 import { tmdbClient } from '@/lib/tmdb';
 import { Movie } from '@/lib/types';

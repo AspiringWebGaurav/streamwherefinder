@@ -6,7 +6,7 @@ import { Search, X, Sparkles, AlertCircle, Film, ArrowRight } from 'lucide-react
 import Link from 'next/link';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
-import { fadeIn, slideDown, staggerContainer, fadeUp, fadeInOutBreathing } from '@/lib/motion';
+import { fadeIn, slideDown, fadeInOutBreathing } from '@/lib/motion';
 import { searchMovies, getDidYouMean, normalizeQuery } from '@/services/searchWrapper';
 import { PopularMovie } from '@/lib/types';
 import { saveSearch, getSearchHistory, SearchHistoryItem } from '@/lib/searchHistory';
@@ -176,6 +176,7 @@ export function EnterpriseSearchBar({
         }, 250);
 
         return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, titleDataset]);
 
     // ── Outside Click ─────────────────────────────────────────────────────────
@@ -223,6 +224,7 @@ export function EnterpriseSearchBar({
         } else {
             window.location.href = `/search?q=${encodeURIComponent(query.trim())}`;
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [query, onSearch, user]);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {

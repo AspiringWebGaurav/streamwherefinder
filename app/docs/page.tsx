@@ -1,4 +1,4 @@
-import { BookOpen, Code, Database, Globe, Key, FileJson, ArrowRight } from 'lucide-react';
+import { BookOpen, Code, Key, FileJson, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 
@@ -78,7 +78,7 @@ export default function DocsPage() {
                                             <tr>
                                                 <td className="py-3"><code className="text-[var(--saas-accent)]">q</code> <span className="text-red-500 text-xs">*</span></td>
                                                 <td className="py-3 font-mono text-xs">string</td>
-                                                <td className="py-3 text-[var(--saas-text-secondary)]">The search query (e.g., "Inxeption"). Minimum 2 characters.</td>
+                                                <td className="py-3 text-[var(--saas-text-secondary)]">The search query (e.g., &quot;Inxeption&quot;). Minimum 2 characters.</td>
                                             </tr>
                                             <tr>
                                                 <td className="py-3"><code className="text-[var(--saas-text-primary)]">limit</code></td>

@@ -49,7 +49,7 @@ export default function AboutPage() {
                             </div>
                             <h2 className="text-xl font-bold text-slate-900 mb-3 group-hover:text-orange-600 transition-colors">The Motivation</h2>
                             <p className="text-sm text-slate-600 leading-relaxed">
-                                Finding exactly where a movie is streaming shouldn't require jumping through five different apps. This application was built to prototype an aesthetic, deeply responsive, and lightning-fast search experience for movie discoverability.
+                                Finding exactly where a movie is streaming shouldn&apos;t require jumping through five different apps. This application was built to prototype an aesthetic, deeply responsive, and lightning-fast search experience for movie discoverability.
                             </p>
                         </div>
                     </div>

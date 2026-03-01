@@ -2,8 +2,7 @@
 
 import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Play, ArrowLeft, Loader2, ShieldCheck, Zap } from 'lucide-react';
-import Link from 'next/link';
+import { Loader2, ShieldCheck, Zap } from 'lucide-react';
 import { useAuth } from '@/components/FirebaseProvider';
 import { Navbar } from '@/components/Navbar';
 
@@ -29,9 +28,10 @@ function LoginContent() {
         try {
             await signInWithGoogle();
             router.push(returnUrl);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error('Sign-in error:', err);
-            setError(err.message || 'Failed to sign in. Please try again.');
+            const message = err instanceof Error ? err.message : 'Failed to sign in. Please try again.';
+            setError(message);
             setIsLoading(false);
         }
     };

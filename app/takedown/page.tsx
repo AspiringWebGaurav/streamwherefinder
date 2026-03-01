@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { ArrowLeft, Shield, CheckCircle, AlertCircle, Send } from 'lucide-react';
+import { Shield, CheckCircle, AlertCircle, Send } from 'lucide-react';
 import Link from 'next/link';
 import { Navbar } from '@/components/Navbar';
 
@@ -61,7 +61,7 @@ export default function TakedownPage() {
         try {
             await new Promise(resolve => setTimeout(resolve, 1500));
             setIsSubmitted(true);
-        } catch (err) {
+        } catch {
             setError('Failed to submit takedown request. Please try again or contact us directly.');
         } finally {
             setIsSubmitting(false);
@@ -92,8 +92,8 @@ export default function TakedownPage() {
                         <div className="bg-[var(--saas-bg)] border border-[var(--saas-border)] rounded-xl p-4 mb-8 text-left">
                             <p className="text-[var(--saas-text-primary)] text-sm font-semibold mb-1">What happens next?</p>
                             <p className="text-[var(--saas-text-secondary)] text-sm">
-                                We'll acknowledge receipt within 6 hours and provide a final resolution within 72 hours.
-                                You'll receive updates at: <span className="font-semibold text-[var(--saas-text-primary)]">{formData.email}</span>
+                                We&apos;ll acknowledge receipt within 6 hours and provide a final resolution within 72 hours.
+                                You&apos;ll receive updates at: <span className="font-semibold text-[var(--saas-text-primary)]">{formData.email}</span>
                             </p>
                         </div>
 

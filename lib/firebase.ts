@@ -25,7 +25,7 @@ let app;
 if (isFirebaseConfigured && getApps().length === 0) {
     try {
         app = initializeApp(firebaseConfig);
-    } catch (error) {
+    } catch {
         app = null;
     }
 } else if (isFirebaseConfigured) {

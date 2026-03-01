@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ArrowLeft, History, Trash2, Search, Calendar, User, AlertTriangle, LogOut } from 'lucide-react';
+import { History, Trash2, Search, Calendar, AlertTriangle, LogOut } from 'lucide-react';
 import Link from 'next/link';
 import { useAuth } from '@/components/FirebaseProvider';
 import {
@@ -86,7 +86,7 @@ export default function ProfilePage() {
 
             try {
                 localStorage.removeItem('captcha_verified');
-            } catch (e) { }
+            } catch { }
 
             await logout();
             window.location.href = '/';
@@ -224,7 +224,7 @@ export default function ProfilePage() {
                         </div>
                     ) : (
                         <div className="space-y-3">
-                            {searchHistory.map((item, index) => (
+                            {searchHistory.map((item) => (
                                 <div
                                     key={user ? item.id : `${item.query}-${item.timestamp.getTime()}`}
                                     className="flex items-center justify-between p-4 bg-[var(--saas-bg)] border border-[var(--saas-border)] rounded-xl hover:border-[var(--saas-border-light)] hover:shadow-sm transition-all group"

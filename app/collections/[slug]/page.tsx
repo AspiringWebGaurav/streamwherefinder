@@ -8,7 +8,6 @@ import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
 import type { Metadata } from 'next';
-import { cn } from '@/lib/utils';
 
 interface CollectionPageProps {
     params: Promise<{
@@ -25,7 +24,7 @@ const COLLECTIONS = {
         description: 'The hottest movies trending right now in India',
         icon: TrendingUp,
         color: 'bg-rose-50 text-rose-600 border-rose-100',
-        fetchData: (page: number) => tmdbClient.getTrendingMovies('week').then(r => ({ ...r, page: 1, total_pages: 1 })),
+        fetchData: () => tmdbClient.getTrendingMovies('week').then(r => ({ ...r, page: 1, total_pages: 1 })),
     },
     'popular': {
         title: 'Popular Movies',
@@ -46,7 +45,7 @@ const COLLECTIONS = {
         description: 'Highest rated movies from 2024 that you cannot miss',
         icon: Award,
         color: 'bg-purple-50 text-purple-600 border-purple-100',
-        fetchData: (page: number) => tmdbClient.getBestOfLastYear().then(r => ({ ...r, page: 1, total_pages: 1 })),
+        fetchData: () => tmdbClient.getBestOfLastYear().then(r => ({ ...r, page: 1, total_pages: 1 })),
     },
 } as const;
 
@@ -81,41 +80,18 @@ function CollectionLoading() {
 
 async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: number }) {
     const collection = COLLECTIONS[slug];
+    let response;
 
     try {
-        const response = await collection.fetchData(page);
-        const movies = response.results.map(movie => tmdbClient.transformPopularMovie(movie));
-
-        if (movies.length === 0) {
-            return (
-                <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--cinema-border)] shadow-sm">
-                    <div className="w-20 h-20 mx-auto mb-6 bg-slate-50 border border-[var(--cinema-border)] rounded-full flex items-center justify-center">
-                        <collection.icon className="w-8 h-8 text-slate-400" />
-                    </div>
-                    <h2 className="text-2xl font-bold text-slate-900 mb-3">No movies found</h2>
-                    <p className="text-slate-600 mb-8">We couldn't find any movies for this collection right now.</p>
-                    <Link href="/" className="btn-secondary inline-flex px-6 h-11">
-                        <ArrowLeft className="w-4 h-4 mr-2" />
-                        Back to Explore
-                    </Link>
-                </div>
-            );
-        }
-
-        return (
-            <div className="pt-4">
-                <MovieCarousel movies={movies} />
-            </div>
-        );
-
-    } catch (error) {
+        response = await collection.fetchData(page);
+    } catch {
         return (
             <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--cinema-border)] shadow-sm">
                 <div className="w-20 h-20 mx-auto mb-6 bg-red-50 border border-red-100 rounded-full flex items-center justify-center">
                     <collection.icon className="w-8 h-8 text-red-500" />
                 </div>
                 <h2 className="text-2xl font-bold text-slate-900 mb-3">Failed to load movies</h2>
-                <p className="text-slate-600 mb-8">We're having trouble loading this collection. Please try again later.</p>
+                <p className="text-slate-600 mb-8">We&apos;re having trouble loading this collection. Please try again later.</p>
                 <Link href="/" className="btn-secondary inline-flex px-6 h-11">
                     <ArrowLeft className="w-4 h-4 mr-2" />
                     Back to Explore
@@ -123,6 +99,30 @@ async function CollectionContent({ slug, page }: { slug: CollectionSlug; page: n
             </div>
         );
     }
+
+    const movies = response.results.map(movie => tmdbClient.transformPopularMovie(movie));
+
+    if (movies.length === 0) {
+        return (
+            <div className="text-center py-16 px-4 bg-white rounded-2xl border border-[var(--cinema-border)] shadow-sm">
+                <div className="w-20 h-20 mx-auto mb-6 bg-slate-50 border border-[var(--cinema-border)] rounded-full flex items-center justify-center">
+                    <collection.icon className="w-8 h-8 text-slate-400" />
+                </div>
+                <h2 className="text-2xl font-bold text-slate-900 mb-3">No movies found</h2>
+                <p className="text-slate-600 mb-8">We couldn&apos;t find any movies for this collection right now.</p>
+                <Link href="/" className="btn-secondary inline-flex px-6 h-11">
+                    <ArrowLeft className="w-4 h-4 mr-2" />
+                    Back to Explore
+                </Link>
+            </div>
+        );
+    }
+
+    return (
+        <div className="pt-4">
+            <MovieCarousel movies={movies} />
+        </div>
+    );
 }
 
 export default async function CollectionPage({ params, searchParams }: CollectionPageProps) {

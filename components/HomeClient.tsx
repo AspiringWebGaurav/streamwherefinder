@@ -13,10 +13,9 @@ import { useIntelligentGlow } from '@/hooks/useIntelligentGlow';
 interface Props {
     trending: PopularMovie[];
     popular: PopularMovie[];
-    upcoming: PopularMovie[];
 }
 
-export function HomeClient({ trending, popular, upcoming }: Props) {
+export function HomeClient({ trending, popular }: Props) {
     const [trendingQuery, setTrendingQuery] = useState('');
     const { language, isIndia } = useLanguage();
 

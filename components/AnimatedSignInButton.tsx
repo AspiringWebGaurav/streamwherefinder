@@ -47,7 +47,7 @@ export function AnimatedSignInButton({ searchHistoryCount }: Props) {
         } else {
             // Pick a secondary phrase safely avoiding the last 10 terms
             let candidate = '';
-            let pool = (cycleTick < 10 && bag.priority.length > 0) ? bag.priority : bag.fallback;
+            const pool = (cycleTick < 10 && bag.priority.length > 0) ? bag.priority : bag.fallback;
 
             for (let i = 0; i < 20; i++) { // Max 20 attempts to find un-used phrase
                 const test = pool[Math.floor(Math.random() * pool.length)];

@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Film, Search, Menu, X, ChevronRight, User, LogOut, History, ChevronDown } from 'lucide-react';
+import { Film, Menu, X, ChevronRight, User, LogOut, History, ChevronDown } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { fadeIn } from '@/lib/motion';
 import { useAuth } from '@/components/FirebaseProvider';

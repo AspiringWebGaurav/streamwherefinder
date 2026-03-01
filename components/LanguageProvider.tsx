@@ -27,7 +27,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             if (timeZone === 'Asia/Calcutta' || timeZone === 'Asia/Kolkata') {
                 queueMicrotask(() => setIsIndia(true));
             }
-        } catch (e) {
+        } catch {
             // fallback quietly
         }
     }, []);

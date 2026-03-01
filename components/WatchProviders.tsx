@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { ExternalLink, Play, Flag, ShieldCheck, Clock, Calendar, Globe, Film, Info, Search } from 'lucide-react';
+import { ExternalLink, Play, Flag, ShieldCheck, Clock, Info, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { WatchProvider } from '@/lib/tmdb';
 import { trackOutboundClick } from '@/lib/analytics';
@@ -15,7 +15,6 @@ interface WatchProvidersProps {
         buy?: WatchProvider[];
     };
     movieTitle: string;
-    movieId: number;
     releaseDate?: string;
     className?: string;
     isLoading?: boolean;
@@ -64,7 +63,7 @@ export function WatchProviderSkeleton() {
                 </div>
                 <div className="h-6 w-24 bg-[var(--saas-border-light)] animate-pulse rounded-full hidden sm:block"></div>
             </div>
-            
+
             <div className="flex flex-wrap gap-3">
                 {[1, 2, 3, 4].map((i) => (
                     <div key={i} className="flex items-center gap-3 p-2 pr-4 border border-[var(--saas-border-light)] rounded-xl min-w-[160px] bg-white w-full sm:w-auto">
@@ -154,11 +153,12 @@ function ProviderButton({
     );
 }
 
-export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDate, className, isLoading }: WatchProvidersProps) {
+export function WatchProviders({ watchProviders, movieTitle, releaseDate, className, isLoading }: WatchProvidersProps) {
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        const t = setTimeout(() => setMounted(true), 0);
+        return () => clearTimeout(t);
     }, []);
 
     if (!mounted || isLoading) {
@@ -173,6 +173,7 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDat
 
     const handleReportIncorrect = (provider: string) => {
         console.log(`Report: ${provider} link incorrect for ${movieTitle}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         trackOutboundClick(`${provider}_REPORT`, movieTitle, 'flag' as any);
     };
 
@@ -230,10 +231,10 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDat
 
                 <div className="space-y-4">
                     <p className="text-[14px] text-[var(--saas-text-secondary)] font-medium leading-relaxed max-w-2xl">
-                        {isUpcoming 
-                            ? "Streaming availability will appear after the theatrical release window." 
-                            : isRecentRelease 
-                                ? "Streaming availability typically follows the theatrical window." 
+                        {isUpcoming
+                            ? "Streaming availability will appear after the theatrical release window."
+                            : isRecentRelease
+                                ? "Streaming availability typically follows the theatrical window."
                                 : "This title is not currently available on major streaming platforms in your region."}
                     </p>
 
@@ -247,7 +248,7 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDat
                     )}
 
                     {!isUpcoming && !isRecentRelease && (
-                         <div className="flex items-center gap-2 mt-2">
+                        <div className="flex items-center gap-2 mt-2">
                             <div className="w-1.5 h-1.5 rounded-full bg-[var(--saas-border)]"></div>
                             <p className="text-[12px] text-[var(--saas-text-muted)] font-medium">
                                 Based on standard availability patterns, this may be region-restricted or awaiting digital licensing.
@@ -256,15 +257,15 @@ export function WatchProviders({ watchProviders, movieTitle, movieId, releaseDat
                     )}
 
                     <div className="pt-5 mt-5 border-t border-[var(--saas-border-light)]/50 flex flex-wrap gap-3">
-                         <Button
+                        <Button
                             variant="outline"
                             size="sm"
                             className="bg-white border-[var(--saas-border-light)] text-[var(--saas-text-secondary)] hover:text-[var(--saas-text-primary)] hover:bg-[var(--saas-bg)] font-bold shadow-sm h-9 rounded-xl px-4"
                             onClick={() => window.open(`https://www.justwatch.com/in/search?q=${encodeURIComponent(movieTitle)}`, '_blank')}
-                         >
+                        >
                             <Search className="w-4 h-4 mr-2" />
                             Check JustWatch for global availability
-                         </Button>
+                        </Button>
                     </div>
                 </div>
             </div>

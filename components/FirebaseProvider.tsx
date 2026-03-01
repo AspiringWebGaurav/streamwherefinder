@@ -71,6 +71,7 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 }
             };
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [user]);
 
     useEffect(() => {

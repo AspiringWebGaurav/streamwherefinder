@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import { Suspense } from 'react';
-import { Star, Calendar, Clock, Play, ArrowLeft } from 'lucide-react';
+import { Star, Calendar, Clock, Play } from 'lucide-react';
 import { tmdbClient } from '@/lib/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { WatchProviders } from '@/components/WatchProviders';
@@ -10,12 +10,10 @@ import {
     formatRuntime,
     formatReleaseDate,
     formatRating,
-    truncateText,
     getYouTubeEmbedUrl,
     generateMetaDescription,
     generatePageTitle
 } from '@/lib/utils';
-import Link from 'next/link';
 import type { Metadata } from 'next';
 
 interface MoviePageProps {
@@ -109,6 +107,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
 
     const { movie, raw } = data;
     const year = formatReleaseDate(movie.releaseDate);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const similarMovies = (raw as any).similar?.results?.slice(0, 10).map((m: any) => tmdbClient.transformPopularMovie(m)) || [];
 
     return (
@@ -204,7 +203,6 @@ export default async function MoviePage({ params }: MoviePageProps) {
                             <WatchProviders
                                 watchProviders={movie.watchProviders}
                                 movieTitle={movie.title}
-                                movieId={movie.id}
                                 releaseDate={movie.releaseDate}
                             />
                         </div>

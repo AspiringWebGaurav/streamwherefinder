@@ -1,13 +1,12 @@
-import { fetchTrending, fetchPopular, fetchUpcoming } from '@/lib/api';
+import { fetchTrending, fetchPopular } from '@/lib/api';
 import { HomeClient } from '@/components/HomeClient';
 import { Navbar } from '@/components/Navbar';
 
 // Server component — parallel data fetch with no waterfall
 export default async function HomePage() {
-  const [trending, popular, upcoming] = await Promise.all([
+  const [trending, popular] = await Promise.all([
     fetchTrending(),
     fetchPopular(),
-    fetchUpcoming(),
   ]);
 
   return (
@@ -16,7 +15,6 @@ export default async function HomePage() {
       <HomeClient
         trending={trending}
         popular={popular}
-        upcoming={upcoming}
       />
     </div>
   );

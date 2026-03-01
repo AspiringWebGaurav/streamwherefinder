@@ -80,7 +80,7 @@ export function useIntelligentGlow() {
             }
 
             return parsed as GlowProfile;
-        } catch (e) {
+        } catch {
             return { ...DEFAULT_PROFILE, lastVisitTimestamp: Date.now() };
         }
     }, []);
@@ -93,7 +93,7 @@ export function useIntelligentGlow() {
         const profile = safeLoad();
 
         // Soft Decay: Neutralize weight by 15% each visit
-        let newWeight = profile.behavioralWeight * 0.85;
+        const newWeight = profile.behavioralWeight * 0.85;
 
         // Apply context-aware nudges based on previous session's state
         let nextWarmth = '0';
@@ -124,12 +124,14 @@ export function useIntelligentGlow() {
             opacityBase = Math.max(0.08, 0.15 - (profile.searchCount * 0.005));
         }
 
-        setStyles(prev => ({
-            ...prev,
-            '--ig-opacity': opacityBase.toFixed(3),
-            '--ig-clarity': clarityBase.toFixed(3),
-            '--ig-warmth': nextWarmth,
-        }));
+        setTimeout(() => {
+            setStyles(prev => ({
+                ...prev,
+                '--ig-opacity': opacityBase.toFixed(3),
+                '--ig-clarity': clarityBase.toFixed(3),
+                '--ig-warmth': nextWarmth,
+            }));
+        }, 0);
 
     }, [safeLoad, safeSave]);
 

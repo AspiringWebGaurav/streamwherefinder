@@ -29,8 +29,9 @@ export async function saveSearchToFirestore(user: User, query: string): Promise<
 
         await addDoc(collection(db, SEARCH_HISTORY_COLLECTION), docData);
         await cleanupOldSearches(user.uid);
-    } catch (error: any) {
-        console.error('Search history save failed:', { errorCode: error?.code, userId: user.uid });
+    } catch (error) {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        console.error('Search history save failed:', { errorCode: (error as any)?.code, userId: user.uid });
         throw error;
     }
 }
@@ -166,12 +167,12 @@ export async function saveSearch(user: User | null, query: string): Promise<void
         } else {
             saveSearchToLocalStorage(trimmedQuery);
         }
-    } catch (error: any) {
+    } catch (error) {
         console.error('Search history save failed:', error);
         if (user) {
             try {
                 saveSearchToLocalStorage(trimmedQuery);
-            } catch (e) { }
+            } catch { }
         }
     }
 }

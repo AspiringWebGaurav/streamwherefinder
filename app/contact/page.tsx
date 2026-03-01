@@ -1,4 +1,4 @@
-import { ArrowLeft, Mail, MessageCircle, Bug, Shield, AlertTriangle } from 'lucide-react';
+import { Mail, MessageCircle, Bug, Shield, AlertTriangle } from 'lucide-react';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { Navbar } from '@/components/Navbar';
 import Link from 'next/link';
@@ -24,7 +24,7 @@ export default function ContactPage() {
                         Contact Us
                     </h1>
                     <p className="text-lg text-[var(--saas-text-secondary)] max-w-2xl mx-auto">
-                        We'd love to hear from you. Get in touch for support, feedback, or any questions about StreamWhere.
+                        We&apos;d love to hear from you. Get in touch for support, feedback, or any questions about StreamWhere.
                     </p>
                 </div>
 
@@ -117,7 +117,7 @@ export default function ContactPage() {
 
                     <div className="text-center">
                         <p className="text-[var(--saas-text-secondary)] mb-8 font-medium">
-                            Can't find what you're looking for? Try searching for a movie.
+                            Can&apos;t find what you&apos;re looking for? Try searching for a movie.
                         </p>
 
                         <div className="max-w-xl mx-auto mb-8 relative z-50">

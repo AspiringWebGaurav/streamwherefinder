@@ -121,7 +121,6 @@ function computeRelevanceScore(movie: PopularMovie, rawQuery: string): number {
 
     // ── Layer B: Containment, Starts-With, & Fuzzy ────────────────────────
     const queryTokens = queryNorm.split(" ");
-    const collapsedTokens = queryCollapsed.split(" ");
     const titleTokens = titleNorm.split(" ");
 
     // Prefix / Contained directly
