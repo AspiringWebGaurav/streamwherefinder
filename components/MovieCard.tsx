@@ -42,6 +42,7 @@ export function MovieCard({ movie, className, priority = false }: Props) {
                         sizes="(max-width: 640px) 160px, 176px"
                         className="object-cover card-poster-zoom"
                         priority={priority}
+                        unoptimized
                         fallbackClassName="bg-slate-100 text-slate-300"
                         fallback={
                             <div className="flex flex-col items-center justify-center">

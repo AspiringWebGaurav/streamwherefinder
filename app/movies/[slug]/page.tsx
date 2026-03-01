@@ -126,6 +126,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                                 fill
                                 className="object-cover"
                                 priority
+                                unoptimized
                                 sizes="(max-width: 1024px) 100vw, 320px"
                                 fallbackClassName="text-[var(--saas-text-muted)] border-none"
                                 fallback={
