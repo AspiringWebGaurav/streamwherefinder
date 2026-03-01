@@ -6,6 +6,7 @@ import { searchMovies } from '@/services/searchWrapper';
 import { MovieCard, MovieCardSkeleton } from '@/components/MovieCard';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import Link from 'next/link';
 import { PopularMovie } from '@/lib/types';
 
@@ -266,7 +267,7 @@ function SearchResults({ query }: { query: string }) {
 export function SearchPageClient({ initialQuery }: SearchPageClientProps) {
 
     return (
-        <div className="min-h-[100dvh] bg-[var(--cinema-bg)] pb-16">
+        <div className="min-h-[100dvh] bg-[var(--cinema-bg)] flex flex-col">
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
@@ -284,6 +285,8 @@ export function SearchPageClient({ initialQuery }: SearchPageClientProps) {
                     <SearchResults query={initialQuery} />
                 </Suspense>
             </div>
+
+            <Footer />
         </div>
     );
 }

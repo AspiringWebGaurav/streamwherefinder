@@ -6,6 +6,7 @@ import { tmdbClient } from '@/lib/tmdb';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { WatchProviders } from '@/components/WatchProviders';
 import { Navbar } from '@/components/Navbar';
+import { Footer } from '@/components/Footer';
 import {
     formatRuntime,
     formatReleaseDate,
@@ -276,6 +277,7 @@ export default async function MoviePage({ params }: MoviePageProps) {
                     })
                 }}
             />
+            <Footer />
         </main>
     );
 }
