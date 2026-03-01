@@ -281,7 +281,7 @@ export function EnterpriseSearchBar({
                     onKeyDown={handleKeyDown}
                     onClick={() => setShowDropdown(true)}
                     placeholder={!animatedPlaceholders || animatedPlaceholders.length === 0 ? t.placeholder : ''}
-                    className="w-full h-14 sm:h-16 pl-14 pr-32 bg-transparent text-[15px] sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all relative z-10"
+                    className="w-full h-14 sm:h-16 pl-14 pr-32 bg-transparent text-[16px] sm:text-lg font-medium text-slate-900 placeholder:text-slate-400 outline-none transition-all relative z-10 touch-manipulation"
                     aria-label="Search movies"
                     aria-autocomplete="list"
                 />
@@ -296,7 +296,7 @@ export function EnterpriseSearchBar({
                                 initial="hidden"
                                 animate="visible"
                                 exit="exit"
-                                className="text-[15px] sm:text-base font-medium text-[var(--saas-text-muted)] truncate block w-full"
+                                className="text-[16px] sm:text-base font-medium text-[var(--saas-text-muted)] truncate block w-full"
                             >
                                 {animatedPlaceholders[placeholderIdx]}
                             </motion.span>
@@ -392,8 +392,8 @@ export function EnterpriseSearchBar({
                                                 key={movie.id}
                                                 href={`/movies/${movie.slug}`}
                                                 className={cn(
-                                                    'flex items-center gap-4 px-4 transition-colors duration-200 relative',
-                                                    isPrimary ? 'py-4 from-[var(--saas-accent)]/5 to-transparent bg-gradient-to-r hover:from-[var(--saas-accent)]/10' : 'py-3 hover:bg-[var(--saas-bg)]',
+                                                    'flex items-center gap-4 px-4 transition-colors duration-200 relative touch-manipulation',
+                                                    isPrimary ? 'py-4 from-[var(--saas-accent)]/5 to-transparent bg-gradient-to-r lg:hover:from-[var(--saas-accent)]/10 active:from-[var(--saas-accent)]/15' : 'py-3 max-md:py-3.5 lg:hover:bg-[var(--saas-bg)] active:bg-[var(--saas-bg)]',
                                                     selectedIdx === idx ? 'bg-[var(--saas-accent)]/5 shadow-inner' : ''
                                                 )}
                                                 onClick={() => {
@@ -481,7 +481,7 @@ export function EnterpriseSearchBar({
                                                 setQuery(item.query);
                                                 handleSearch();
                                             }}
-                                            className="w-full text-left px-4 py-3 hover:bg-[var(--saas-bg)] flex items-center gap-3 transition-colors"
+                                            className="w-full text-left px-4 py-3 max-md:py-3.5 lg:hover:bg-[var(--saas-bg)] active:bg-[var(--saas-bg)] flex items-center gap-3 transition-colors touch-manipulation"
                                         >
                                             <Clock className="w-4 h-4 text-[var(--saas-text-muted)]" />
                                             <span className="text-sm font-semibold text-[var(--saas-text-primary)]">{item.query}</span>

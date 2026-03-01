@@ -6,7 +6,6 @@ import { MovieCardSkeleton } from '@/components/MovieCard';
 import { MovieCarousel } from '@/components/MovieCarousel';
 import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { Navbar } from '@/components/Navbar';
-import { Footer } from '@/components/Footer';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
@@ -167,8 +166,6 @@ export default async function CollectionPage({ params, searchParams }: Collectio
                     <CollectionContent slug={slug as CollectionSlug} page={page} />
                 </Suspense>
             </main>
-
-            <Footer />
         </div>
     );
 }

@@ -103,6 +103,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
@@ -452,4 +453,9 @@ body {
 /* ─── Swiper Manual Slide Ease ───────────────────────────────────────────── */
 .swiper-standard-ease .swiper-wrapper {
   transition-timing-function: var(--cinema-ease-out) !important;
+}
+
+/* ─── Touch Optimizations ────────────────────────────────────────────────── */
+.touch-manipulation {
+  touch-action: manipulation;
 }

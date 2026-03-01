@@ -173,7 +173,7 @@ export function Navbar() {
                     </div>
 
                     <button
-                        className="md:hidden p-2.5 -mr-2 text-[var(--cinema-text-primary)] flex items-center justify-center rounded-md hover:bg-[var(--cinema-bg)] transition-colors active:scale-95"
+                        className="md:hidden p-3 -mr-3 text-[var(--cinema-text-primary)] flex items-center justify-center rounded-md hover:bg-[var(--cinema-bg)] transition-colors active:scale-95 touch-manipulation"
                         onClick={() => setMobileOpen(true)}
                         aria-label="Open menu"
                     >
@@ -203,7 +203,7 @@ export function Navbar() {
                                 <span className="font-bold text-lg text-[var(--cinema-text-primary)]">Menu</span>
                                 <button
                                     onClick={() => setMobileOpen(false)}
-                                    className="p-2.5 -mr-2 text-[var(--cinema-text-secondary)] hover:bg-[var(--cinema-bg)] rounded-md transition-colors active:scale-95"
+                                    className="p-3 -mr-3 text-[var(--cinema-text-secondary)] hover:bg-[var(--cinema-bg)] rounded-md transition-colors active:scale-95 touch-manipulation"
                                 >
                                     <X className="w-6 h-6" />
                                 </button>
@@ -214,19 +214,19 @@ export function Navbar() {
                                     <div className="flex items-center justify-center p-2 mb-4 bg-[var(--cinema-bg)] border border-[var(--cinema-border)] rounded-full text-sm font-semibold">
                                         <button
                                             onClick={() => setLanguage('en')}
-                                            className={`flex-1 py-2 rounded-full transition-all duration-200 active:scale-95 ${language === 'en' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
+                                            className={`flex-1 py-2.5 rounded-full transition-all duration-200 active:scale-95 touch-manipulation ${language === 'en' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
                                         >
                                             EN
                                         </button>
                                         <button
                                             onClick={() => setLanguage('hi')}
-                                            className={`flex-1 py-2 rounded-full transition-all duration-200 active:scale-95 ${language === 'hi' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
+                                            className={`flex-1 py-2.5 rounded-full transition-all duration-200 active:scale-95 touch-manipulation ${language === 'hi' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
                                         >
                                             हिंदी
                                         </button>
                                         <button
                                             onClick={() => setLanguage('mr')}
-                                            className={`flex-1 py-2 rounded-full transition-all duration-200 active:scale-95 ${language === 'mr' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
+                                            className={`flex-1 py-2.5 rounded-full transition-all duration-200 active:scale-95 touch-manipulation ${language === 'mr' ? 'bg-[var(--cinema-accent)] text-white shadow-sm' : 'text-[var(--cinema-text-muted)] hover:text-[var(--cinema-text-primary)]'}`}
                                         >
                                             मराठी
                                         </button>
@@ -327,7 +327,7 @@ function MobileNavLink({ href, children, onClick }: { href: string; children: Re
         <Link
             href={href}
             onClick={onClick}
-            className="flex items-center justify-between py-3.5 px-3 text-[var(--cinema-text-primary)] font-medium active:bg-[var(--cinema-bg)] rounded-xl transition-all active:scale-[0.98]"
+            className="flex items-center justify-between py-3.5 px-3 text-[var(--cinema-text-primary)] font-medium active:bg-[var(--cinema-bg)] rounded-lg transition-all active:scale-[0.98] touch-manipulation"
         >
             {children}
             <ChevronRight className="w-5 h-5 text-[var(--cinema-text-muted)]" />

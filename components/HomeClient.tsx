@@ -9,7 +9,6 @@ import { EnterpriseSearchBar } from '@/components/EnterpriseSearchBar';
 import { fadeUp, staggerContainer } from '@/lib/motion';
 import { useLanguage } from '@/components/LanguageProvider';
 import { useIntelligentGlow } from '@/hooks/useIntelligentGlow';
-import { Footer } from '@/components/Footer';
 
 interface Props {
     trending: PopularMovie[];
@@ -180,7 +179,7 @@ export function HomeClient({ trending, popular }: Props) {
                                     <button
                                         key={tag}
                                         onClick={() => setTrendingQuery(tag)}
-                                        className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm active:scale-95 rounded-full transition-all duration-300"
+                                        className="px-4 py-2 text-xs sm:text-sm font-semibold text-slate-600 bg-white border border-slate-200 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 hover:shadow-sm active:scale-95 active:bg-blue-50 rounded-full transition-all duration-300 touch-manipulation"
                                     >
                                         {tag}
                                     </button>
@@ -193,7 +192,46 @@ export function HomeClient({ trending, popular }: Props) {
                 </div>
             </main>
 
-            <Footer />
-        </div>
+            {/* Footer */}
+            <footer className="w-full bg-transparent py-5 sm:py-6 border-t border-slate-200/50 shrink-0" >
+                <div className="w-full px-4 sm:px-6 lg:px-8 grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-4 items-center text-xs sm:text-sm text-[var(--cinema-text-muted)]">
+                    <div className="flex items-center justify-center sm:justify-start gap-2 font-medium text-[var(--cinema-text-secondary)]">
+                        <span className="w-5 h-5 rounded bg-[var(--cinema-accent)] flex items-center justify-center text-white">
+                            <Film className="w-3 h-3" />
+                        </span>
+                        StreamWhere
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6">
+                        <a
+                            href="https://gauravpatil.online"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative flex items-center justify-center p-1"
+                            aria-label="Portfolio"
+                        >
+                            <div className="absolute inset-0 bg-[var(--cinema-accent)] opacity-0 group-hover:opacity-40 blur-md transition-opacity duration-300 rounded-full" />
+                            <User className="w-4 h-4 text-[var(--cinema-text-muted)] group-hover:text-[var(--cinema-accent)] transition-colors duration-300 relative z-10" />
+                        </a>
+                        <a
+                            href="https://github.com/AspiringWebGaurav"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="group relative flex items-center justify-center p-1"
+                            aria-label="GitHub"
+                        >
+                            <div className="absolute inset-0 bg-[#333] opacity-0 group-hover:opacity-30 blur-md transition-opacity duration-300 rounded-full" />
+                            <Github className="w-4 h-4 text-[var(--cinema-text-muted)] group-hover:text-[var(--cinema-text-primary)] transition-colors duration-300 relative z-10" />
+                        </a>
+                    </div>
+
+                    <div className="flex items-center justify-center sm:justify-end gap-5 font-medium text-slate-500">
+                        <Link href="/about" className="hover:text-[var(--cinema-accent)] transition-colors">About</Link>
+                        <Link href="/privacy" className="hover:text-[var(--cinema-accent)] transition-colors hidden sm:block">Privacy</Link>
+                        <Link href="/terms" className="hover:text-[var(--cinema-accent)] transition-colors hidden sm:block">Terms</Link>
+                    </div>
+                </div>
+            </footer >
+        </div >
     );
 }
