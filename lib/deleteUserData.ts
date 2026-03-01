@@ -45,19 +45,28 @@ export async function deleteAllUserData(userId: string): Promise<DeleteUserDataR
         const app = getServerApp();
         const db = getFirestore(app);
 
-        // Delete all searchHistory from Firestore
+        // Delete new single-document history (userHistory/{uid})
+        try {
+            await deleteDoc(doc(db, 'userHistory', userId));
+            result.deletedItems.searchHistory += 1;
+        } catch {
+            // Document may not exist — non-fatal
+        }
+
+        // Also clean up any legacy per-search documents (searchHistory collection)
         const searchHistoryQuery = query(
             collection(db, 'searchHistory'),
             where('userId', '==', userId)
         );
 
         const querySnapshot = await getDocs(searchHistoryQuery);
-        const deletePromises = querySnapshot.docs.map(docSnapshot =>
-            deleteDoc(doc(db, 'searchHistory', docSnapshot.id))
-        );
-
-        await Promise.all(deletePromises);
-        result.deletedItems.searchHistory = querySnapshot.docs.length;
+        if (querySnapshot.docs.length > 0) {
+            const deletePromises = querySnapshot.docs.map(docSnapshot =>
+                deleteDoc(doc(db, 'searchHistory', docSnapshot.id))
+            );
+            await Promise.all(deletePromises);
+            result.deletedItems.searchHistory += querySnapshot.docs.length;
+        }
 
         console.log(`Successfully deleted all data for user ${userId}:`, result.deletedItems);
         return result;

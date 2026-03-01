@@ -6,8 +6,8 @@ import Link from 'next/link';
 import { useAuth } from '@/components/FirebaseProvider';
 import {
     getSearchHistory,
-    deleteSearchFromFirestore,
-    clearUserSearchHistory,
+    deleteSearchItem,
+    clearAllHistory,
     clearLocalSearchHistory,
     SearchHistoryItem
 } from '@/lib/searchHistory';
@@ -42,11 +42,9 @@ export default function ProfilePage() {
 
     const handleDeleteSearch = async (item: SearchHistoryItem) => {
         try {
-            if (user && item.id) {
-                await deleteSearchFromFirestore(item.id);
-            }
+            await deleteSearchItem(user, item.query, item.timestamp);
             setSearchHistory(prev => prev.filter(h =>
-                user ? h.id !== item.id : h.query !== item.query || h.timestamp.getTime() !== item.timestamp.getTime()
+                !(h.query === item.query && h.timestamp.getTime() === item.timestamp.getTime())
             ));
         } catch (error) {
             console.error('Error deleting search:', error);
@@ -56,11 +54,7 @@ export default function ProfilePage() {
     const handleClearAllHistory = async () => {
         setIsClearing(true);
         try {
-            if (user) {
-                await clearUserSearchHistory(user.uid);
-            } else {
-                clearLocalSearchHistory();
-            }
+            await clearAllHistory(user);
             setSearchHistory([]);
         } catch (error) {
             console.error('Error clearing search history:', error);

@@ -3,6 +3,7 @@
 import React, { createContext, useContext, useEffect, useState, useRef } from 'react';
 import { User, signInWithPopup, signOut, onAuthStateChanged } from 'firebase/auth';
 import { auth, googleProvider, isFirebaseEnabled } from '@/lib/firebase';
+import { syncHistoryOnLogin, flushPendingSync } from '@/lib/searchHistory';
 
 interface AuthContextType {
     user: User | null;
@@ -26,6 +27,8 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
                 clearTimeout(inactivityTimer.current);
                 inactivityTimer.current = null;
             }
+            // Flush any pending debounced history sync before signing out
+            await flushPendingSync(user);
             await signOut(auth);
         } catch (error) {
             console.error('Error signing out:', error);
@@ -80,11 +83,16 @@ export function FirebaseProvider({ children }: { children: React.ReactNode }) {
             return;
         }
 
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setUser(user);
+        const unsubscribe = onAuthStateChanged(auth, (newUser) => {
+            setUser(newUser);
             setLoading(false);
 
-            if (!user && inactivityTimer.current) {
+            if (newUser) {
+                // One-time history merge on login
+                syncHistoryOnLogin(newUser).catch(err =>
+                    console.error('History sync on login failed:', err)
+                );
+            } else if (inactivityTimer.current) {
                 clearTimeout(inactivityTimer.current);
                 inactivityTimer.current = null;
             }
